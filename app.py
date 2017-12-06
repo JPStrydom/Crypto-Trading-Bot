@@ -1,7 +1,11 @@
 from bittrex import Bittrex
+from logger import get_logger
 import json
 import time
 import smtplib
+import pydash as py_
+
+logger = get_logger()
 
 # Creating an instance of the Bittrex class with our secrets.json file
 with open('secrets.json') as secrets_file:

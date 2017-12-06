@@ -2,14 +2,13 @@
    See https://bittrex.com/Home/Api
 """
 
+from logger import get_logger
 import time
 import hmac
 import hashlib
 import requests
-import logging
 
-logging.basicConfig(filename='error.log', level=logging.WARNING,
-                    format='%(asctime)s - %(levelname)s: %(message)s', datefmt='%Y/%m/%d %I:%M:%S %p')
+logger = get_logger()
 
 try:
     from urllib import urlencode
@@ -88,7 +87,7 @@ class Bittrex(object):
                 self.api_key = ast.literal_eval(self.api_key) if type(self.api_key) == str else self.api_key
                 self.api_secret = ast.literal_eval(self.api_secret) if type(self.api_secret) == str else self.api_secret
             except Exception:
-                logging.exception(Exception)
+                logger.exception(Exception)
                 pass
             self.api_key = cipher.decrypt(self.api_key).decode()
             self.api_secret = cipher.decrypt(self.api_secret).decode()
@@ -151,7 +150,7 @@ class Bittrex(object):
                                        ).json()
         if not historical_data['success']:
             if historical_data['message'] == 'INVALID_MARKET':
-                logging.warning('The {} market is currently not available on Bittrex'.format(market))
+                logger.warning('The {} market is currently not available on Bittrex'.format(market))
             return []
         return historical_data['result'][-period:]
 
