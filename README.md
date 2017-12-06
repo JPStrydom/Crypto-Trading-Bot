@@ -14,13 +14,15 @@ Features:
 * Email alerts for various signals
 * Well documented script
 * Automated Technical Analysis that's implemented from scratch for simplicity and ease of use
-* Logging to track invalid/outdated coin pairs
+* Logging to track and document errors on the Bittrex API
 
 You can build on top of this tool and implement algorithm trading and some machine learning models to experiment with predictive analysis.
 
 Coming Soon:
 * Bollinger Band
 * Web Client
+* Simulated Trading Analysis
+* Back-Testing
 
 
 Shoutouts:
