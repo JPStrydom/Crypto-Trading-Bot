@@ -271,22 +271,25 @@ def send_RSI_email(rsi, coin_pair, current_price, recipient_name):
     main_market, coin = coin_pair.split('-')
 
     subject = 'Crypto Bot: Low RSI on {} Market'.format(coin_pair)
-    message = "Howdy {},\n\nI've detected a low RSI of {} on the {} market. The current market price is {} {} per {}\n\n" \
-              "Here's a Bittrex URL: {}\n\nRegards,\nCrypto Bot".format(recipient_name, round(rsi, 2), coin_pair,
-                                                                        current_price, main_market, coin,
-                                                                        generate_URL(coin_pair))
+    message = "Howdy {},\n\nI've detected a low RSI of {} on the {} market. The current market price is {:.8f} {} per {}" \
+              "\n\nHere's a Bittrex URL: {}\n\nRegards,\nCrypto Bot".format(recipient_name, round(rsi, 2), coin_pair,
+                                                                            current_price, main_market, coin,
+                                                                            generate_URL(coin_pair))
     send_email(subject, message)
 
 
 if __name__ == '__main__':
     def get_signal():
-        for i in btc_coin_pairs:
-            rsi = calculate_RSI(coin_pair=i, period=14, unit='thirtyMin')
+        for coin_pair in btc_coin_pairs:
+            rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit='thirtyMin')
             if rsi is not None and rsi <= 20:
-                print('{}: \tRSI: {} \tURL: {}'.format(i, round(rsi, 2), generate_URL(i)))
+                current_price = get_current_price(coin_pair)
+                main_market, coin = coin_pair.split('-')
+                print('{}: \tRSI: {} \tPrice: {:.8f} {}/{} \tURL: {}'.format(coin_pair, round(rsi, 2), current_price,
+                                                                         main_market, coin,
+                                                                         generate_URL(coin_pair)))
                 if rsi <= 15:
-                    current_price = get_current_price(i)
-                    send_RSI_email(rsi, i, current_price, 'JP')
+                    send_RSI_email(rsi, coin_pair, current_price, 'JP')
         time.sleep(300)
 
 
