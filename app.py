@@ -13,218 +13,57 @@ with open('secrets.json') as secrets_file:
     secrets_file.close()
     my_bittrex = Bittrex(secrets['bittrex']['bittrex_key'], secrets['bittrex']['bittrex_secret'])
 
-btc_coin_pairs = [
-    'BTC-LTC',
-    'BTC-DOGE',
-    'BTC-VTC',
-    'BTC-PPC',
-    'BTC-FTC',
-    'BTC-RDD',
-    'BTC-NXT',
-    'BTC-DASH',
-    'BTC-POT',
-    'BTC-BLK',
-    'BTC-EMC2',
-    'BTC-XMY',
-    'BTC-AUR',
-    'BTC-EFL',
-    'BTC-GLD',
-    'BTC-SLR',
-    'BTC-PTC',
-    'BTC-GRS',
-    'BTC-NLG',
-    'BTC-RBY',
-    'BTC-XWC',
-    'BTC-MONA',
-    'BTC-THC',
-    'BTC-ENRG',
-    'BTC-ERC',
-    'BTC-VRC',
-    'BTC-CURE',
-    'BTC-XMR',
-    'BTC-CLOAK',
-    'BTC-START',
-    'BTC-KORE',
-    'BTC-XDN',
-    'BTC-TRUST',
-    'BTC-NAV',
-    'BTC-XST',
-    'BTC-BTCD',
-    'BTC-VIA',
-    'BTC-PINK',
-    'BTC-IOC',
-    'BTC-CANN',
-    'BTC-SYS',
-    'BTC-NEOS',
-    'BTC-DGB',
-    'BTC-BURST',
-    'BTC-EXCL',
-    'BTC-SWIFT',
-    'BTC-DOPE',
-    'BTC-BLOCK',
-    'BTC-ABY',
-    'BTC-BYC',
-    'BTC-XMG',
-    'BTC-BLITZ',
-    'BTC-BAY',
-    'BTC-FAIR',
-    'BTC-SPR',
-    'BTC-VTR',
-    'BTC-XRP',
-    'BTC-GAME',
-    'BTC-COVAL',
-    'BTC-NXS',
-    'BTC-XCP',
-    'BTC-BITB',
-    'BTC-GEO',
-    'BTC-FLDC',
-    'BTC-GRC',
-    'BTC-FLO',
-    'BTC-NBT',
-    'BTC-MUE',
-    'BTC-XEM',
-    'BTC-CLAM',
-    'BTC-DMD',
-    'BTC-GAM',
-    'BTC-SPHR',
-    'BTC-OK',
-    'BTC-SNRG',
-    'BTC-PKB',
-    'BTC-CPC',
-    'BTC-AEON',
-    'BTC-ETH',
-    'BTC-GCR',
-    'BTC-TX',
-    'BTC-BCY',
-    'BTC-EXP',
-    'BTC-INFX',
-    'BTC-OMNI',
-    'BTC-AMP',
-    'BTC-AGRS',
-    'BTC-XLM',
-    'BTC-CLUB',
-    'BTC-VOX',
-    'BTC-EMC',
-    'BTC-FCT',
-    'BTC-MAID',
-    'BTC-EGC',
-    'BTC-SLS',
-    'BTC-RADS',
-    'BTC-DCR',
-    'BTC-SAFEX',
-    'BTC-BSD',
-    'BTC-XVG',
-    'BTC-PIVX',
-    'BTC-XVC',
-    'BTC-MEME',
-    'BTC-STEEM',
-    'BTC-2GIVE',
-    'BTC-LSK',
-    'BTC-PDC',
-    'BTC-BRK',
-    'BTC-DGD',
-    'BTC-WAVES',
-    'BTC-RISE',
-    'BTC-LBC',
-    'BTC-SBD',
-    'BTC-BRX',
-    'BTC-ETC',
-    'BTC-STRAT',
-    'BTC-UNB',
-    'BTC-SYNX',
-    'BTC-TRIG',
-    'BTC-EBST',
-    'BTC-VRM',
-    'BTC-SEQ',
-    'BTC-XAUR',
-    'BTC-SNGLS',
-    'BTC-REP',
-    'BTC-SHIFT',
-    'BTC-ARDR',
-    'BTC-XZC',
-    'BTC-NEO',
-    'BTC-ZEC',
-    'BTC-ZCL',
-    'BTC-IOP',
-    'BTC-GOLOS',
-    'BTC-UBQ',
-    'BTC-KMD',
-    'BTC-GBG',
-    'BTC-SIB',
-    'BTC-ION',
-    'BTC-LMC',
-    'BTC-QWARK',
-    'BTC-CRW',
-    'BTC-SWT',
-    'BTC-TIME',
-    'BTC-MLN',
-    'BTC-ARK',
-    'BTC-DYN',
-    'BTC-TKS',
-    'BTC-MUSIC',
-    'BTC-DTB',
-    'BTC-INCNT',
-    'BTC-GBYTE',
-    'BTC-GNT',
-    'BTC-NXC',
-    'BTC-EDG',
-    'BTC-LGD',
-    'BTC-TRST',
-    'BTC-WINGS',
-    'BTC-RLC',
-    'BTC-GNO',
-    'BTC-GUP',
-    'BTC-LUN',
-    'BTC-APX',
-    'BTC-TKN',
-    'BTC-HMQ',
-    'BTC-ANT',
-    'BTC-SC',
-    'BTC-BAT',
-    'BTC-ZEN',
-    'BTC-1ST',
-    'BTC-QRL',
-    'BTC-CRB',
-    'BTC-PTOY',
-    'BTC-MYST',
-    'BTC-CFI',
-    'BTC-BNT',
-    'BTC-NMR',
-    'BTC-SNT',
-    'BTC-DCT',
-    'BTC-XEL',
-    'BTC-MCO',
-    'BTC-ADT',
-    'BTC-FUN',
-    'BTC-PAY',
-    'BTC-MTL',
-    'BTC-STORJ',
-    'BTC-ADX',
-    'BTC-OMG',
-    'BTC-CVC',
-    'BTC-PART',
-    'BTC-QTUM',
-    'BTC-BCC',
-    'BTC-DNT',
-    'BTC-ADA',
-    'BTC-MANA',
-    'BTC-SALT',
-    'BTC-TIX',
-    'BTC-RCN',
-    'BTC-VIB',
-    'BTC-MER',
-    'BTC-POWR',
-    'BTC-BTG',
-    'BTC-ENG'
-]
+
+def get_markets(main_market_filter=None):
+    """
+    Gets all the Bittrex markets and filters them based on the main market filter
+
+    :param main_market_filter: Main market to filter on (ex: BTC, ETH, USDT)
+    :type main_market_filter: str
+
+    :return: All Bittrex markets (with filter applied, if any)
+    :rtype : list
+    """
+
+    markets = my_bittrex.get_markets()
+    if not markets['success']:
+        logger.error('Failed to fetch Bittrex markets')
+        exit()
+
+    markets = markets['result']
+    if main_market_filter is not None:
+        market_check = main_market_filter + '-'
+        markets = py_.filter_(markets, lambda market: market_check in market['MarketName'])
+    markets = py_.map_(markets, lambda market: market['MarketName'])
+    return markets
+
+
+def get_current_price(coin_pair):
+    """
+    Gets current market price for a coin pair
+
+    :param coin_pair: Coin pair market to check (ex: BTC-ETH, BTC-FCT)
+    :type coin_pair: str
+
+    :return: Coin pair's current market price
+    :rtype : float
+    """
+
+    coin_summary = my_bittrex.get_market_summary(coin_pair)
+    if not coin_summary['success']:
+        logger.error('Failed to fetch Bittrex market summary for the {} market'.format(coin_pair))
+        return None
+    return coin_summary['result'][0]['Last']
 
 
 def get_closing_prices(coin_pair, period, unit):
     """
     Returns closing prices within a specified time frame for a coin pair
+
     :type coin_pair: str
     :type period: int
     :type unit: str
+
     :return: Array of closing prices
     """
 
@@ -261,6 +100,7 @@ def calculate_RSI(coin_pair, period, unit):
     If the returned value is above 70, it's overbought (SELL IT!)
     If the returned value is below 30, it's oversold (BUY IT!)
     """
+
     closing_prices = get_closing_prices(coin_pair, period * 3, unit)
     count = 0
     change = []
@@ -322,6 +162,7 @@ def calculate_conversion_line(coin_pair, unit):
     Calculates (9 period high + 9 period low) / 2
     Also known as the "Tenkan-sen" line
     """
+
     closing_prices = get_closing_prices(coin_pair, 9, unit)
     period_high = max(closing_prices)
     period_low = min(closing_prices)
@@ -344,6 +185,7 @@ def calculate_leading_span_B(coin_pair, unit):
     Calculates (52 period high + 52 period low) / 2
     Also known as the "Senkou Span B" line
     """
+
     closing_prices = get_closing_prices(coin_pair, 52, unit)
     period_high = max(closing_prices)
     period_low = min(closing_prices)
@@ -354,6 +196,7 @@ def find_breakout(coin_pair, period, unit):
     """
     Finds breakout based on how close the High was to Closing and Low to Opening
     """
+
     hit = 0
     historical_data = my_bittrex.get_historical_data(coin_pair, period, unit)
     for i in historical_data:
@@ -370,10 +213,24 @@ def generate_URL(btc_coin_pair):
     """
     Generates the URL string for the coin pairs Bittrex page
     """
+
     return 'https://bittrex.com/Market/Index?MarketName={}'.format(btc_coin_pair)
 
 
 def send_email(subject, message):
+    """
+    Used to send an email from the account specified in the secrets.json file to the entire
+    address list specified in the secrets.json file
+
+    :param subject: Email subject
+    :type subject: str
+    :param message: Email content
+    :type message: str
+
+    :return: Errors received from the smtp server (if any)
+    :rtype : dict
+    """
+
     from_address = secrets['gmail']['username']
     to_address_list = secrets['gmail']['address_list']
     login = secrets['gmail']['username']
@@ -393,10 +250,31 @@ def send_email(subject, message):
     return errors
 
 
-def send_RSI_email(rsi, coin_pair, recipient_name):
+def send_RSI_email(rsi, coin_pair, current_price, recipient_name):
+    """
+    Used to send a low RSI specific email from the account specified in the secrets.json file to the entire
+    address list specified in the secrets.json file
+
+    :param rsi: Low RSI
+    :type rsi: float
+    :param coin_pair: Coin pair the low RSI occurred on (ex: BTC-ETH)
+    :type coin_pair: str
+    :param current_price: Coin pair's current price
+    :type current_price: float
+    :param recipient_name: Name of the email's recipient (ex: John)
+    :type recipient_name: str
+
+    :return: Errors received from the smtp server (if any)
+    :rtype : dict
+    """
+
+    main_market, coin = coin_pair.split('-')
+
     subject = 'Crypto Bot: Low RSI on {} Market'.format(coin_pair)
-    message = "Howdy {},\n\nI've detected a low RSI of {} on the {} market.\n\nHere's a Bittrex URL: {}\n\nRegards," \
-              '\nCrypto Bot'.format(recipient_name, round(rsi, 2), coin_pair, generate_URL(coin_pair))
+    message = "Howdy {},\n\nI've detected a low RSI of {} on the {} market. The current market price is {} {} per {}\n\n" \
+              "Here's a Bittrex URL: {}\n\nRegards,\nCrypto Bot".format(recipient_name, round(rsi, 2), coin_pair,
+                                                                        current_price, main_market, coin,
+                                                                        generate_URL(coin_pair))
     send_email(subject, message)
 
 
@@ -407,8 +285,11 @@ if __name__ == '__main__':
             if rsi is not None and rsi <= 20:
                 print('{}: \tRSI: {} \tURL: {}'.format(i, round(rsi, 2), generate_URL(i)))
                 if rsi <= 15:
-                    send_RSI_email(rsi, i, 'JP')
+                    current_price = get_current_price(i)
+                    send_RSI_email(rsi, i, current_price, 'JP')
         time.sleep(300)
 
+
+    btc_coin_pairs = get_markets('BTC')
     while True:
         get_signal()
