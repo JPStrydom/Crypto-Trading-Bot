@@ -5,6 +5,7 @@
 import time
 import hmac
 import hashlib
+import requests
 import logging
 
 logging.basicConfig(filename='error.log', level=logging.WARNING,
@@ -16,7 +17,6 @@ try:
 except ImportError:
     from urllib.parse import urlencode
     from urllib.parse import urljoin
-import requests
 
 try:
     from Crypto.Cipher import AES
@@ -98,10 +98,12 @@ class Bittrex(object):
     def api_query(self, method, options=None):
         """
         Queries Bittrex with given method and options
+
         :param method: Query method for getting info
         :type method: str
         :param options: Extra options for query
         :type options: dict
+
         :return: JSON response from Bittrex
         :rtype : dict
         """
@@ -130,12 +132,14 @@ class Bittrex(object):
     def get_historical_data(self, market, period, unit):
         """
         Queries the historical data in the form of a list
+
         :param market: String literal for the market (ex: BTC-LTC)
         :type market: str
         :param period: Number of periods to query
         :type period: int
         :param unit: Ticker interval (one of: 'oneMin', 'fiveMin', 'thirtyMin', 'hour', 'week', 'day', and 'month')
         :type unit: str
+
         :return: List adapted from Bittrex JSON response
         :rtype : list
         """
@@ -156,6 +160,7 @@ def get_markets(self):
     """
     Used to get the open and available trading markets
     at Bittrex along with other meta data.
+
     :return: Available market info in JSON
     :rtype : dict
     """
@@ -166,6 +171,7 @@ def get_currencies(self):
     """
     Used to get all supported currencies at Bittrex
     along with other meta data.
+
     :return: Supported currencies info in JSON
     :rtype : dict
     """
@@ -174,9 +180,11 @@ def get_currencies(self):
 
 def get_ticker(self, market):
     """
-    Used to get the current tick values for a market.
+    Used to get the current tick values for a market
+
     :param market: String literal for the market (ex: BTC-LTC)
     :type market: str
+
     :return: Current values for given market in JSON
     :rtype : dict
     """
@@ -186,6 +194,7 @@ def get_ticker(self, market):
 def get_market_summaries(self):
     """
     Used to get the last 24 hour summary of all active exchanges
+
     :return: Summaries of active exchanges in JSON
     :rtype : dict
     """
@@ -215,6 +224,7 @@ def get_orderbook(self, market, depth_type, depth=20):
     :type depth_type: str
     :param depth: how deep of an order book to retrieve. Max is 100, default is 20
     :type depth: int
+
     :return: Orderbook of market in JSON
     :rtype : dict
     """
@@ -225,10 +235,12 @@ def get_market_history(self, market, count):
     """
     Used to retrieve the latest trades that have occurred for a specific market.
     /market/getmarkethistory
+
     :param market: String literal for the market (ex: BTC-LTC)
     :type market: str
     :param count: Number between 1-100 for the number of entries to return (default = 20)
     :type count: int
+
     :return: Market history in JSON
     :rtype : dict
     """
@@ -241,6 +253,7 @@ def buy_limit(self, market, quantity, rate):
     limit orders Make sure you have the proper permissions set on your
     API keys for this call to work
     /market/buylimit
+
     :param market: String literal for the market (ex: BTC-LTC)
     :type market: str
     :param quantity: The amount to purchase
@@ -248,6 +261,7 @@ def buy_limit(self, market, quantity, rate):
     :param rate: The rate at which to place the order.
         This is not needed for market orders
     :type rate: float
+
     :return:
     :rtype : dict
     """
@@ -260,6 +274,7 @@ def sell_limit(self, market, quantity, rate):
     limit orders Make sure you have the proper permissions set on your
     API keys for this call to work
     /market/selllimit
+
     :param market: String literal for the market (ex: BTC-LTC)
     :type market: str
     :param quantity: The amount to purchase
@@ -267,6 +282,7 @@ def sell_limit(self, market, quantity, rate):
     :param rate: The rate at which to place the order.
         This is not needed for market orders
     :type rate: float
+
     :return:
     :rtype : dict
     """
@@ -277,8 +293,10 @@ def cancel(self, uuid):
     """
     Used to cancel a buy or sell order
     /market/cancel
+
     :param uuid: uuid of buy or sell order
     :type uuid: str
+
     :return:
     :rtype : dict
     """
@@ -289,8 +307,10 @@ def get_open_orders(self, market=None):
     """
     Get all orders that you currently have opened. A specific market can be requested
     /market/getopenorders
+
     :param market: String literal for the market (ie. BTC-LTC)
     :type market: str
+
     :return: Open orders info in JSON
     :rtype : dict
     """
@@ -304,6 +324,7 @@ def get_balances(self):
     """
     Used to retrieve all balances from your account
     /account/getbalances
+
     :return: Balances info in JSON
     :rtype : dict
     """
@@ -314,8 +335,10 @@ def get_balance(self, currency):
     """
     Used to retrieve the balance from your account for a specific currency
     /account/getbalance
+
     :param currency: String literal for the currency (ex: LTC)
     :type currency: str
+
     :return: Balance info in JSON
     :rtype : dict
     """
@@ -326,8 +349,10 @@ def get_deposit_address(self, currency):
     """
     Used to generate or retrieve an address for a specific currency
     /account/getdepositaddress
+
     :param currency: String literal for the currency (ie. BTC)
     :type currency: str
+
     :return: Address info in JSON
     :rtype : dict
     """
@@ -338,12 +363,14 @@ def withdraw(self, currency, quantity, address):
     """
     Used to withdraw funds from your account
     /account/withdraw
+
     :param currency: String literal for the currency (ie. BTC)
     :type currency: str
     :param quantity: The quantity of coins to withdraw
     :type quantity: float
     :param address: The address where to send the funds.
     :type address: str
+
     :return:
     :rtype : dict
     """
@@ -354,8 +381,10 @@ def get_order_history(self, market=None):
     """
     Used to retrieve order trade history of account
     /account/getorderhistory
+
     :param market: optional a string literal for the market (ie. BTC-LTC). If omitted, will return for all markets
     :type market: str
+
     :return: order history in JSON
     :rtype : dict
     """
