@@ -58,9 +58,9 @@ You can build on top of this tool and implement algorithm trading and some machi
      * `bittrex_key` is your Bittrex API key you can get from [here](https://bittrex.com/Manage#sectionApi)
      * `bittrex_secret` is your Bittrex API secret key
 
-5) To use the gmail functionality, you need to setup the following:
-     * `username` is your email account's username (usually your account's email address)
-     * `password` is your email account's password
+5) To use the Gmail functionality, you need to setup the following:
+     * `username` is your gmail account's username (usually your account's email address)
+     * `password` is your gmail account's password
      * `address_list` is the list of recipients you'd like to send emails to
 
 If you don't want to use the email notifications, you can leave out the `gmail` code.
