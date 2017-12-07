@@ -250,7 +250,7 @@ def send_email(subject, message):
     return errors
 
 
-def send_RSI_email(rsi, coin_pair, current_price, recipient_name):
+def send_RSI_email(rsi, coin_pair, current_price, recipient_name='Folks'):
     """
     Used to send a low RSI specific email from the account specified in the secrets.json file to the entire
     address list specified in the secrets.json file
@@ -271,10 +271,10 @@ def send_RSI_email(rsi, coin_pair, current_price, recipient_name):
     main_market, coin = coin_pair.split('-')
 
     subject = 'Crypto Bot: Low RSI on {} Market'.format(coin_pair)
-    message = "Howdy {},\n\nI've detected a low RSI of {} on the {} market. The current market price is {:.8f} {} per {}" \
-              "\n\nHere's a Bittrex URL: {}\n\nRegards,\nCrypto Bot".format(recipient_name, round(rsi, 2), coin_pair,
-                                                                            current_price, main_market, coin,
-                                                                            generate_URL(coin_pair))
+    message = "Howdy {},\n\nI've detected a low RSI of {} on the {} market. " \
+              "The current market price is {:.8f} {} per {}\n\nHere's a Bittrex URL: {}" \
+              "\n\nRegards,\nCrypto Bot".format(recipient_name, round(rsi, 2), coin_pair, current_price, main_market,
+                                                coin, generate_URL(coin_pair))
     send_email(subject, message)
 
 
@@ -285,11 +285,12 @@ if __name__ == '__main__':
             if rsi is not None and rsi <= 20:
                 current_price = get_current_price(coin_pair)
                 main_market, coin = coin_pair.split('-')
-                print('{}: \tRSI: {} \tPrice: {:.8f} {}/{} \tURL: {}'.format(coin_pair, round(rsi, 2), current_price,
-                                                                         main_market, coin,
-                                                                         generate_URL(coin_pair)))
+                print('{}: \tRSI: {} '
+                      '\tPrice: {:.8f} {}/{} '
+                      '\tURL: {}'.format(coin_pair, round(rsi, 2), current_price, main_market, coin,
+                                         generate_URL(coin_pair)))
                 if rsi <= 15:
-                    send_RSI_email(rsi, coin_pair, current_price, 'JP')
+                    send_RSI_email(rsi, coin_pair, current_price)
         time.sleep(300)
 
 
