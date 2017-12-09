@@ -1,11 +1,13 @@
-from src.bittrex import Bittrex
-from src.messenger import Messenger
-from src.logger import get_logger
 import json
 import time
 import pydash as py_
 
-logger = get_logger()
+import sys, os
+
+from src.bittrex import Bittrex
+from src.messenger import Messenger
+from src.database import Database
+from src.logger import logger
 
 # Creating an instance of the Bittrex class with our secrets.json file
 with open('database/secrets.json') as secrets_file:
@@ -13,9 +15,8 @@ with open('database/secrets.json') as secrets_file:
     secrets_file.close()
     Bittrex = Bittrex(secrets)
     Messenger = Messenger(secrets)
-
-with open('database/simulated-trades.json') as simulated_trades_file:
-    simulated_trades = json.load(simulated_trades_file)
+    Database = [Database(0), Database(1), Database(2), Database(3)]
+    number_of_strategies = 4
 
 
 def get_markets(main_market_filter=None):
@@ -78,28 +79,6 @@ def get_closing_prices(coin_pair, period, unit):
     return closing_prices
 
 
-'''
-def calculate_SMA(coin_pair, period, unit):
-    """
-    Returns the Simple Moving Average for a coin pair
-    """
-
-    total_closing = sum(get_closing_prices(coin_pair, period, unit))
-    return total_closing / period
-
-
-def calculate_EMA(coin_pair, period, unit):
-    """
-    Returns the Exponential Moving Average for a coin pair
-    """
-
-    closing_prices = get_closing_prices(coin_pair, period, unit)
-    previous_ema = calculate_SMA(coin_pair, period, unit)
-    current_ema = (closing_prices[-1] * (2 / (1 + period))) + (previous_ema * (1 - (2 / (1 + period))))
-    return current_ema
-'''
-
-
 def calculate_RSI(coin_pair, period, unit):
     """
     Calculates the Relative Strength Index for a coin_pair
@@ -151,91 +130,118 @@ def calculate_RSI(coin_pair, period, unit):
     return new_rs
 
 
-'''
-def calculate_base_line(coin_pair, unit):
-    """
-    Calculates (26 period high + 26 period low) / 2
-    Also known as the "Kijun-sen" line
-    """
-
-    closing_prices = get_closing_prices(coin_pair, 26, unit)
-    period_high = max(closing_prices)
-    period_low = min(closing_prices)
-    return (period_high + period_low) / 2
-
-
-def calculate_conversion_line(coin_pair, unit):
-    """
-    Calculates (9 period high + 9 period low) / 2
-    Also known as the "Tenkan-sen" line
-    """
-
-    closing_prices = get_closing_prices(coin_pair, 9, unit)
-    period_high = max(closing_prices)
-    period_low = min(closing_prices)
-    return (period_high + period_low) / 2
-
-
-def calculate_leading_span_A(coin_pair, unit):
-    """
-    Calculates (Conversion Line + Base Line) / 2
-    Also known as the "Senkou Span A" line
-    """
-
-    base_line = calculate_base_line(coin_pair, unit)
-    conversion_line = calculate_conversion_line(coin_pair, unit)
-    return (base_line + conversion_line) / 2
-
-
-def calculate_leading_span_B(coin_pair, unit):
-    """
-    Calculates (52 period high + 52 period low) / 2
-    Also known as the "Senkou Span B" line
-    """
-
-    closing_prices = get_closing_prices(coin_pair, 52, unit)
-    period_high = max(closing_prices)
-    period_low = min(closing_prices)
-    return (period_high + period_low) / 2
+def buy_strategy(coin_pair, strategy_index):
+    if coin_pair in Database[strategy_index].simulated_trades['trackedCoinPairs']:
+        return
+    if strategy_index == 0:
+        rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit='thirtyMin')
+        current_price = get_current_price(coin_pair)
+        if rsi is not None and rsi <= 20:
+            main_market, coin = coin_pair.split('-')
+            print('Bought -> {}: \tRSI: {} '
+                  '\tPrice: {:.8f} {}/{} '
+                  '\tURL: {}'.format(coin_pair, round(rsi, 2), current_price, main_market, coin,
+                                     Messenger.generate_bittrex_URL(coin_pair)))
+            Database[strategy_index].simulate_buy(coin_pair, rsi, current_price)
+    if strategy_index == 1:
+        rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit='thirtyMin')
+        current_price = get_current_price(coin_pair)
+        if rsi is not None and rsi <= 20:
+            main_market, coin = coin_pair.split('-')
+            print('Bought -> {}: \tRSI: {} '
+                  '\tPrice: {:.8f} {}/{} '
+                  '\tURL: {}'.format(coin_pair, round(rsi, 2), current_price, main_market, coin,
+                                     Messenger.generate_bittrex_URL(coin_pair)))
+            Database[strategy_index].simulate_buy(coin_pair, rsi, current_price)
+    if strategy_index == 2:
+        rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit='fiveMin')
+        current_price = get_current_price(coin_pair)
+        if rsi is not None and rsi <= 20:
+            main_market, coin = coin_pair.split('-')
+            print('Bought -> {}: \tRSI: {} '
+                  '\tPrice: {:.8f} {}/{} '
+                  '\tURL: {}'.format(coin_pair, round(rsi, 2), current_price, main_market, coin,
+                                     Messenger.generate_bittrex_URL(coin_pair)))
+            Database[strategy_index].simulate_buy(coin_pair, rsi, current_price)
+    if strategy_index == 3:
+        rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit='fiveMin')
+        current_price = get_current_price(coin_pair)
+        if rsi is not None and rsi <= 20:
+            main_market, coin = coin_pair.split('-')
+            print('Bought -> {}: \tRSI: {} '
+                  '\tPrice: {:.8f} {}/{} '
+                  '\tURL: {}'.format(coin_pair, round(rsi, 2), current_price, main_market, coin,
+                                     Messenger.generate_bittrex_URL(coin_pair)))
+            Database[strategy_index].simulate_buy(coin_pair, rsi, current_price)
 
 
-def find_breakout(coin_pair, period, unit):
-    """
-    Finds breakout based on how close the High was to Closing and Low to Opening
-    """
-
-    hit = 0
-    historical_data = my_bittrex.get_historical_data(coin_pair, period, unit)
-    for i in historical_data:
-        if (i['C'] == i['H']) and (i['O'] == i['L']):
-            hit += 1
-
-    if (hit / period) >= .75:
-        return 'Breaking out!'
-    else:
-        return '#Bagholding'
-'''
+def sell_strategy(coin_pair, strategy_index):
+    if strategy_index == 0:
+        rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit='thirtyMin')
+        current_price = get_current_price(coin_pair)
+        if rsi is not None and rsi >= 25:
+            main_market, coin = coin_pair.split('-')
+            print('Sold -> {}: \tRSI: {} '
+                  '\tPrice: {:.8f} {}/{} '
+                  '\tURL: {}'.format(coin_pair, round(rsi, 2), current_price, main_market, coin,
+                                     Messenger.generate_bittrex_URL(coin_pair)))
+            Database[strategy_index].simulate_sell(coin_pair, rsi, current_price)
+    if strategy_index == 1:
+        rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit='thirtyMin')
+        current_price = get_current_price(coin_pair)
+        if rsi is not None and rsi >= 25:
+            main_market, coin = coin_pair.split('-')
+            print('Sold -> {}: \tRSI: {} '
+                  '\tPrice: {:.8f} {}/{} '
+                  '\tURL: {}'.format(coin_pair, round(rsi, 2), current_price, main_market, coin,
+                                     Messenger.generate_bittrex_URL(coin_pair)))
+            Database[strategy_index].simulate_sell(coin_pair, rsi, current_price)
+    if strategy_index == 2:
+        buy_price = Database[strategy_index].find_buy_price(coin_pair)
+        current_price = get_current_price(coin_pair) * (1 - 0.0025)
+        profit_margin = (current_price-buy_price)/buy_price*100
+        if profit_margin >= 5:
+            main_market, coin = coin_pair.split('-')
+            print('Sold -> {}: \tProfit Margin: {:.2f} '
+                  '\tPrice: {:.8f} {}/{} '
+                  '\tURL: {}'.format(coin_pair, round(profit_margin, 2), current_price, main_market, coin,
+                                     Messenger.generate_bittrex_URL(coin_pair)))
+            Database[strategy_index].simulate_sell(coin_pair, rsi, current_price)
+    if strategy_index == 3:
+        buy_price = Database[strategy_index].find_buy_price(coin_pair)
+        current_price = get_current_price(coin_pair) * (1 - 0.0025)
+        profit_margin = (current_price-buy_price)/buy_price*100
+        if profit_margin:
+            main_market, coin = coin_pair.split('-')
+            print('Sold -> {}: \tProfit Margin: {:.2f} '
+                  '\tPrice: {:.8f} {}/{} '
+                  '\tURL: {}'.format(coin_pair, round(profit_margin, 2), current_price, main_market, coin,
+                                     Messenger.generate_bittrex_URL(coin_pair)))
+            Database[strategy_index].simulate_sell(coin_pair, rsi, current_price)
 
 
 if __name__ == '__main__':
-    def get_signal():
+    def analyse_buys():
         for coin_pair in btc_coin_pairs:
-            rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit='thirtyMin')
-            if rsi is not None and rsi <= 30:
-                current_price = get_current_price(coin_pair)
-                main_market, coin = coin_pair.split('-')
-                print('{}: \tRSI: {} '
-                      '\tPrice: {:.8f} {}/{} '
-                      '\tURL: {}'.format(coin_pair, round(rsi, 2), current_price, main_market, coin,
-                                         Messenger.generate_bittrex_URL(coin_pair)))
-                if rsi <= 15:
-                    Messenger.send_RSI_email(rsi, coin_pair, current_price)
+            for strategy_index in range(number_of_strategies):
+                buy_strategy(coin_pair, strategy_index)
         time.sleep(300)
 
 
-    btc_coin_pairs = get_markets('BTC')
-    while True:
-        try:
-            get_signal()
-        except Exception:
-            logger.exception(Exception)
+def analyse_sells():
+    for strategy_index in range(number_of_strategies):
+        for coin_pair in Database[strategy_index].simulated_trades['trackedCoinPairs']:
+            sell_strategy(coin_pair, strategy_index)
+    time.sleep(300)
+
+
+btc_coin_pairs = get_markets('BTC')
+while True:
+    try:
+        analyse_buys()
+        analyse_buys()
+    except Exception:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
+        logger.exception(Exception)

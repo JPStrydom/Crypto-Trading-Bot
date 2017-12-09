@@ -2,13 +2,13 @@
    See https://bittrex.com/Home/Api
 """
 
-from src.logger import get_logger
+from src.logger import logger
 import time
 import hmac
 import hashlib
 import requests
 
-logger = get_logger()
+import sys, os
 
 try:
     from urllib import urlencode
@@ -146,10 +146,16 @@ class Bittrex(object):
         """
         request_url = 'https://bittrex.com/Api/v2.0/pub/market/GetTicks?marketName={}&tickInterval={}'.format(market,
                                                                                                               unit)
-        historical_data = requests.get(request_url,
-                                       headers={"apisign": hmac.new(self.api_secret.encode(), request_url.encode(),
-                                                                    hashlib.sha512).hexdigest()}
-                                       ).json()
+
+        try:
+            historical_data = requests.get(request_url,
+                                           headers={"apisign": hmac.new(self.api_secret.encode(), request_url.encode(),
+                                                                        hashlib.sha512).hexdigest()}
+                                           ).json()
+        except json.decoder.JSONDecodeError as exception:
+            logger.exception(exception)
+            return []
+
         if not historical_data['success']:
             if historical_data['message'] == 'INVALID_MARKET':
                 logger.warning('The {} market is currently not available on Bittrex'.format(market))

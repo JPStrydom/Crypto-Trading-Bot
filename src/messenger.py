@@ -13,12 +13,13 @@ class Messenger(object):
         self.password = secrets['gmail']['password']
         self.smtp_server = 'smtp.gmail.com:587'
 
-    def generate_bittrex_URL(self, btc_coin_pair):
+    @staticmethod
+    def generate_bittrex_URL(btc_coin_pair):
         """
         Generates the URL string for the coin pairs Bittrex page
         """
 
-        return 'https://bittrex.com/Market/Index?MarketName={}'.format(self, btc_coin_pair)
+        return 'https://bittrex.com/Market/Index?MarketName={}'.format(btc_coin_pair)
 
     def send_email(self, subject, message):
         """
