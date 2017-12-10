@@ -19,6 +19,12 @@ with open('database/secrets.json') as secrets_file:
     number_of_strategies = 4
 
 
+def create_databases(number_of_strategies):
+    database_array = []
+    for strategy_index in range(number_of_strategies):
+        database_array.append(Database(strategy_index))
+
+
 def get_markets(main_market_filter=None):
     """
     Gets all the Bittrex markets and filters them based on the main market filter
@@ -59,6 +65,24 @@ def get_current_price(coin_pair):
         logger.error('Failed to fetch Bittrex market summary for the {} market'.format(coin_pair))
         return None
     return coin_summary['result'][0]['Last']
+
+
+def get_current_24hr_volume(coin_pair):
+    """
+    Gets current 24 hour market volume for a coin pair
+
+    :param coin_pair: Coin pair market to check (ex: BTC-ETH, BTC-FCT)
+    :type coin_pair: str
+
+    :return: Coin pair's current 24 hour market volume
+    :rtype : float
+    """
+
+    coin_summary = Bittrex.get_market_summary(coin_pair)
+    if not coin_summary['success']:
+        logger.error('Failed to fetch Bittrex market summary for the {} market'.format(coin_pair))
+        return None
+    return coin_summary['result'][0]['Volume']
 
 
 def get_closing_prices(coin_pair, period, unit):
@@ -133,7 +157,7 @@ def calculate_RSI(coin_pair, period, unit):
 def buy_strategy(coin_pair, strategy_index):
     if coin_pair in Database[strategy_index].simulated_trades['trackedCoinPairs']:
         return
-    print_str = 'Strategy {} Buy -> {}: \tRSI: {} \tPrice: {:.8f} {}/{} \tURL: {}'
+    print_str = 'Strategy {} Buy on {} \t-> \tRSI: {} \tPrice: {:.8f} {}/{} \tURL: {}'
     if strategy_index == 0:
         rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit='thirtyMin')
         current_price = get_current_price(coin_pair)
@@ -171,7 +195,7 @@ def buy_strategy(coin_pair, strategy_index):
 def sell_strategy(coin_pair, strategy_index):
     if coin_pair not in Database[strategy_index].simulated_trades['trackedCoinPairs']:
         return
-    print_str = 'Strategy {} Sell\t->\t{}: \t\tRSI: {} \t\tPrice: {:.8f} {}/{} \t\tURL: {}'
+    print_str = 'Strategy {} Sell on {} \t-> \tRSI: {} \tPrice: {:.8f} {}/{} \tURL: {}'
     if strategy_index == 0:
         rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit='thirtyMin')
         current_price = get_current_price(coin_pair)
