@@ -1,28 +1,26 @@
 import json
-import time
 import pydash as py_
-
-import sys, os
 
 from src.bittrex import Bittrex
 from src.messenger import Messenger
 from src.database import Database
 from src.logger import logger
 
-# Creating an instance of the Bittrex class with our secrets.json file
+
+def create_databases(num_of_strategies):
+    database_array = []
+    for strategy_index in range(num_of_strategies):
+        database_array.append(Database(strategy_index))
+    return database_array
+
+
 with open('database/secrets.json') as secrets_file:
     secrets = json.load(secrets_file)
     secrets_file.close()
     Bittrex = Bittrex(secrets)
     Messenger = Messenger(secrets)
-    Database = [Database(0), Database(1), Database(2), Database(3)]
     number_of_strategies = 4
-
-
-def create_databases(number_of_strategies):
-    database_array = []
-    for strategy_index in range(number_of_strategies):
-        database_array.append(Database(strategy_index))
+    Database_List = create_databases(number_of_strategies)
 
 
 def get_markets(main_market_filter=None):
@@ -155,7 +153,7 @@ def calculate_RSI(coin_pair, period, unit):
 
 
 def buy_strategy(coin_pair, strategy_index):
-    if coin_pair in Database[strategy_index].simulated_trades['trackedCoinPairs']:
+    if coin_pair in Database_List[strategy_index].simulated_trades['trackedCoinPairs']:
         return
     print_str = 'Strategy {} Buy on {} \t-> \tRSI: {} \tPrice: {:.8f} {}/{} \tURL: {}'
     if strategy_index == 0:
@@ -165,7 +163,7 @@ def buy_strategy(coin_pair, strategy_index):
             main_market, coin = coin_pair.split('-')
             print(print_str.format(strategy_index, coin_pair, round(rsi, 2), current_price, coin, main_market,
                                    Messenger.generate_bittrex_URL(coin_pair)))
-            Database[strategy_index].simulate_buy(coin_pair, rsi, current_price)
+            Database_List[strategy_index].simulate_buy(coin_pair, current_price, rsi)
     if strategy_index == 1:
         rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit='thirtyMin')
         current_price = get_current_price(coin_pair)
@@ -173,7 +171,7 @@ def buy_strategy(coin_pair, strategy_index):
             main_market, coin = coin_pair.split('-')
             print(print_str.format(strategy_index, coin_pair, round(rsi, 2), current_price, coin, main_market,
                                    Messenger.generate_bittrex_URL(coin_pair)))
-            Database[strategy_index].simulate_buy(coin_pair, rsi, current_price)
+            Database_List[strategy_index].simulate_buy(coin_pair, current_price, rsi)
     if strategy_index == 2:
         rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit='fiveMin')
         current_price = get_current_price(coin_pair)
@@ -181,7 +179,7 @@ def buy_strategy(coin_pair, strategy_index):
             main_market, coin = coin_pair.split('-')
             print(print_str.format(strategy_index, coin_pair, round(rsi, 2), current_price, coin, main_market,
                                    Messenger.generate_bittrex_URL(coin_pair)))
-            Database[strategy_index].simulate_buy(coin_pair, rsi, current_price)
+            Database_List[strategy_index].simulate_buy(coin_pair, current_price, rsi)
     if strategy_index == 3:
         rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit='fiveMin')
         current_price = get_current_price(coin_pair)
@@ -189,11 +187,11 @@ def buy_strategy(coin_pair, strategy_index):
             main_market, coin = coin_pair.split('-')
             print(print_str.format(strategy_index, coin_pair, round(rsi, 2), current_price, coin, main_market,
                                    Messenger.generate_bittrex_URL(coin_pair)))
-            Database[strategy_index].simulate_buy(coin_pair, rsi, current_price)
+            Database_List[strategy_index].simulate_buy(coin_pair, current_price, rsi)
 
 
 def sell_strategy(coin_pair, strategy_index):
-    if coin_pair not in Database[strategy_index].simulated_trades['trackedCoinPairs']:
+    if coin_pair not in Database_List[strategy_index].simulated_trades['trackedCoinPairs']:
         return
     print_str = 'Strategy {} Sell on {} \t-> \tRSI: {} \tPrice: {:.8f} {}/{} \tURL: {}'
     if strategy_index == 0:
@@ -203,7 +201,7 @@ def sell_strategy(coin_pair, strategy_index):
             main_market, coin = coin_pair.split('-')
             print(print_str.format(strategy_index, coin_pair, round(rsi, 2), current_price, coin, main_market,
                                    Messenger.generate_bittrex_URL(coin_pair)))
-            Database[strategy_index].simulate_sell(coin_pair, rsi, current_price)
+            Database_List[strategy_index].simulate_sell(coin_pair, current_price, rsi)
     if strategy_index == 1:
         rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit='fiveMin')
         current_price = get_current_price(coin_pair)
@@ -211,38 +209,38 @@ def sell_strategy(coin_pair, strategy_index):
             main_market, coin = coin_pair.split('-')
             print(print_str.format(strategy_index, coin_pair, round(rsi, 2), current_price, coin, main_market,
                                    Messenger.generate_bittrex_URL(coin_pair)))
-            Database[strategy_index].simulate_sell(coin_pair, rsi, current_price)
+            Database_List[strategy_index].simulate_sell(coin_pair, current_price, rsi)
     if strategy_index == 2:
         rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit='thirtyMin')
         current_price = get_current_price(coin_pair)
-        profit_margin = Database[strategy_index].get_simulated_profit_margin(coin_pair, current_price)
+        profit_margin = Database_List[strategy_index].get_simulated_profit_margin(coin_pair, current_price)
         if profit_margin >= 2.5:
             main_market, coin = coin_pair.split('-')
             print(print_str.format(strategy_index, coin_pair, round(rsi, 2), current_price, coin, main_market,
                                    Messenger.generate_bittrex_URL(coin_pair)))
-            Database[strategy_index].simulate_sell(coin_pair, rsi, current_price)
+            Database_List[strategy_index].simulate_sell(coin_pair, current_price, rsi)
     if strategy_index == 3:
         rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit='fiveMin')
         current_price = get_current_price(coin_pair)
-        profit_margin = Database[strategy_index].get_simulated_profit_margin(coin_pair, current_price)
+        profit_margin = Database_List[strategy_index].get_simulated_profit_margin(coin_pair, current_price)
         if profit_margin >= 2.5:
             main_market, coin = coin_pair.split('-')
             print(print_str.format(strategy_index, coin_pair, round(rsi, 2), current_price, coin, main_market,
                                    Messenger.generate_bittrex_URL(coin_pair)))
-            Database[strategy_index].simulate_sell(coin_pair, rsi, current_price)
+            Database_List[strategy_index].simulate_sell(coin_pair, current_price, rsi)
 
 
 if __name__ == '__main__':
     def analyse_buys():
         for strategy_index in range(number_of_strategies):
-            if len(Database[strategy_index].simulated_trades['trackedCoinPairs']) < 1:
+            if len(Database_List[strategy_index].simulated_trades['trackedCoinPairs']) < 1:
                 for coin_pair in btc_coin_pairs:
                     buy_strategy(coin_pair, strategy_index)
 
 
     def analyse_sells():
         for strategy_index in range(number_of_strategies):
-            for coin_pair in Database[strategy_index].simulated_trades['trackedCoinPairs']:
+            for coin_pair in Database_List[strategy_index].simulated_trades['trackedCoinPairs']:
                 sell_strategy(coin_pair, strategy_index)
 
 
@@ -253,7 +251,4 @@ if __name__ == '__main__':
             analyse_buys()
             analyse_sells()
         except Exception:
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            print(exc_type, fname, exc_tb.tb_lineno)
             logger.exception(Exception)

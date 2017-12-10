@@ -8,8 +8,6 @@ import hmac
 import hashlib
 import requests
 
-import sys, os
-
 try:
     from urllib import urlencode
     from urlparse import urljoin
@@ -218,6 +216,7 @@ class Bittrex(object):
     def get_orderbook(self, market, depth_type, depth=20):
         """
         Used to get retrieve the orderbook for a given market
+
         :param market: String literal for the market (ex: BTC-LTC)
         :type market: str
         :param depth_type: buy, sell or both to identify the type of orderbook to return.
@@ -398,6 +397,15 @@ class Bittrex(object):
         return self.api_query('getorder', {'uuid': uuid})
 
     def get_withdrawal_history(self, currency=None):
+        """
+        Used to get withdraw history for the currency
+
+        :param currency: String literal for the currency (ie. BTC)
+        :type currency: str
+
+        :return:
+        :rtype : dict
+        """
         if currency is None:
             params = {}
         else:
@@ -406,6 +414,15 @@ class Bittrex(object):
         return self.api_query('getwithdrawalhistory', params)
 
     def get_deposit_history(self, currency=None):
+        """
+        Used to get deposit history for the currency
+
+        :param currency: String literal for the currency (ie. BTC)
+        :type currency: str
+
+        :return:
+        :rtype : dict
+        """
         if currency is None:
             params = {}
         else:

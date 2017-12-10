@@ -1,16 +1,13 @@
 # Crypto Signal Tracker
 
-Track 250+ crypto currencies and their trading signals through Crypto Signal Tracker.
+## Introduction
 
-#### Technical Analysis Automated:
-* Relative Strength Index (RSI)
-* Ichimoku Cloud (Leading Span A, Leading Span B, Conversion Line, Base Line)
-* Simple Moving Average
-* Exponential Moving Average
-* Breakouts
+Use Crypto Signal Tracker to track and simulate trades on 250+ crypto currencies by utilising their trading signals. This can be used to test the effectiveness of possible trading strategies.
 
 #### Features:
 * Tracking for over 250 coins on Bittrex
+* Automated technical analysis (TA)
+* Simulated trading analysis and tracking
 * Email alerts for various signals
 * Well documented script
 * Automated Technical Analysis that's implemented from scratch for simplicity and ease of use
@@ -19,9 +16,8 @@ Track 250+ crypto currencies and their trading signals through Crypto Signal Tra
 You can build on top of this tool and implement algorithm trading and some machine learning models to experiment with predictive analysis.
 
 #### Coming Soon:
-* Bollinger Band
+* Bollinger Bands
 * Web Client
-* Simulated Trading Analysis
 * Back-Testing
 
 
@@ -34,7 +30,7 @@ You can build on top of this tool and implement algorithm trading and some machi
 ## How to setup
 1) This project requires Python 3.X.X, which can be be found [here](https://www.python.org/ftp/python/3.6.3/python-3.6.3.exe)
 2) To install the dependencies for this project, run `pip install -r requirements.txt`. If you receive a `'pip' is not recognized as an internal or external command` error, you need to add `pip` to your environmental `path` variable.
-3) Add a `secrets.json` file to the root directory of your project. The contents of the file should mirror the following:
+3) Add a directory named `database` the root directory of your project and add a `secrets.json` file to it. The contents of the file should mirror the following:
 
 ```json
 {
@@ -66,7 +62,38 @@ You can build on top of this tool and implement algorithm trading and some machi
 If you don't want to use the email notifications, you can leave out the `gmail` code.
 
 ## How to run
-Navigate to your file directory in terminal, run with `python app.py`
+Navigate to your file directory in terminal, and run with the command `python app.py`
+
+## Simulated Trading
+This system allows you to simulate and track crypto currency trades in order to test out different trading strategy. It uses a local database strategy to ensure data is not lost.
+
+To use this functionality, first set the `number_of_strategies` variable, in the `app.py` file, to the number of strategies you wish to test.
+You can then place your trading strategy code in the `buy_strategy` and `sell_strategy` functions also located in the `app.py` file.
+Each of these functions have roughly the following structure:
+```python
+def x_strategy(coin_pair, strategy_index):
+    # There's some setup and error check code here...
+    if strategy_index == 0: # Execute code for strategy 0
+        current_price = get_current_price(coin_pair)
+        # TODO: Add you buy/sell strategy code here (ex: using the RSI and/or 24 hour trading volume)
+        if your_buy_or_sell_condition: # If your indicators detect a buy/sell, add a simulated buy/sell to the database
+            # There's some logging code here...
+            
+            # Add this buy/sale to the database
+            Database_List[strategy_index].simulate_sell(coin_pair, current_price)
+            
+    if strategy_index == 1: # Execute code for strategy 1
+        # TODO: Add strategy 1's code here
+        
+    if strategy_index == 2: # Execute code for strategy 2
+        # TODO: Add strategy 2's code here
+        
+    # Etc...
+
+```
+
+See the source code for more examples.
+
 
 ## Liability
 I am not your financial adviser, nor is this tool. Use this program as an educational tool, and nothing more. None of the contributors to this project are liable for any loses you may incur. Be wise and always do your own research.
