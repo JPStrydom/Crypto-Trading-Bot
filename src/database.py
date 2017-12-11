@@ -1,8 +1,8 @@
-import json
-from datetime import datetime
 import pydash as py_
+from datetime import datetime
 
 from src.logger import logger
+from src.directory_utilities import get_json_from_file, write_json_to_file
 
 bittrex_trade_commission = 0.0025
 
@@ -14,15 +14,7 @@ class Database(object):
 
     def __init__(self, trade_strategy_index):
         self.file_string = 'database/simulated-trades-{}.json'.format(trade_strategy_index)
-        try:
-            with open(self.file_string) as simulated_trades_file:
-                self.simulated_trades = json.load(simulated_trades_file)
-                simulated_trades_file.close()
-        except (IOError, json.decoder.JSONDecodeError):
-            with open(self.file_string, 'w') as simulated_trades_file:
-                self.simulated_trades = {"trackedCoinPairs": [], "trades": []}
-                json.dump(self.simulated_trades, simulated_trades_file, indent=4)
-                simulated_trades_file.close()
+        self.simulated_trades = get_json_from_file(self.file_string, {"trackedCoinPairs": [], "trades": []})
 
     def simulate_buy(self, coin_pair, price, rsi=-1, btc_amount=1):
         """
@@ -49,11 +41,10 @@ class Database(object):
                 "price": price
             }
         }
-        with open(self.file_string, 'w') as simulated_trades_file:
-            self.simulated_trades['trackedCoinPairs'].append(coin_pair)
-            self.simulated_trades['trades'].append(new_buy_object)
-            json.dump(self.simulated_trades, simulated_trades_file, indent=4)
-            simulated_trades_file.close()
+
+        self.simulated_trades['trackedCoinPairs'].append(coin_pair)
+        self.simulated_trades['trades'].append(new_buy_object)
+        write_json_to_file(self.file_string, self.simulated_trades)
 
     def simulate_sell(self, coin_pair, price, rsi=-1):
         """
@@ -75,13 +66,11 @@ class Database(object):
             "price": price
         }
 
-        with open(self.file_string, 'w') as simulated_trades_file:
-            self.simulated_trades['trackedCoinPairs'].remove(coin_pair)
-            simulated_trade = self.get_simulated_trade(coin_pair)
-            simulated_trade['sell'] = sell_object
-            simulated_trade['profit_margin'] = self.get_simulated_profit_margin(coin_pair, price)
-            json.dump(self.simulated_trades, simulated_trades_file, indent=4)
-            simulated_trades_file.close()
+        self.simulated_trades['trackedCoinPairs'].remove(coin_pair)
+        simulated_trade = self.get_simulated_trade(coin_pair)
+        simulated_trade['sell'] = sell_object
+        simulated_trade['profit_margin'] = self.get_simulated_profit_margin(coin_pair, price)
+        write_json_to_file(self.file_string, self.simulated_trades)
 
     def get_simulated_trade(self, coin_pair):
         """

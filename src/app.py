@@ -5,6 +5,7 @@ from src.bittrex import Bittrex
 from src.messenger import Messenger
 from src.database import Database
 from src.logger import logger
+from src.directory_utilities import get_json_from_file
 
 
 def create_databases(num_of_strategies):
@@ -14,13 +15,32 @@ def create_databases(num_of_strategies):
     return database_array
 
 
-with open('database/secrets.json') as secrets_file:
-    secrets = json.load(secrets_file)
-    secrets_file.close()
-    Bittrex = Bittrex(secrets)
-    Messenger = Messenger(secrets)
-    number_of_strategies = 4
-    Database_List = create_databases(number_of_strategies)
+secrets_file_directory = 'database/secrets.json'
+secrets_template = {
+    "bittrex": {
+        "bittrex_key": "BITTREX_API_KEY",
+        "bittrex_secret": "BITTREX_SECRET"
+    },
+    "gmail": {
+        "address_list": [
+            "EXAMPLE_RECIPIENT_1@GMAIL.COM",
+            "EXAMPLE_RECIPIENT_2@GMAIL.COM",
+            "ETC..."
+        ],
+        "username": "EXAMPLE_EMAIL@GMAIL.COM",
+        "password": "GMAIL_PASSWORD"
+    }
+}
+secrets = get_json_from_file(secrets_file_directory, secrets_template)
+if secrets == secrets_template:
+    print('Please completed the `secrets.json` file in your `database` directory')
+    exit()
+
+Bittrex = Bittrex(secrets)
+Messenger = Messenger(secrets)
+# TODO: Set the number of strategies you wish to test here
+number_of_strategies = 4
+Database_List = create_databases(number_of_strategies)
 
 
 def get_markets(main_market_filter=None):

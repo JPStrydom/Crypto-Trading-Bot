@@ -1,12 +1,13 @@
 """
    See https://bittrex.com/Home/Api
 """
-
-from src.logger import logger
 import time
 import hmac
 import hashlib
 import requests
+
+from src.logger import logger
+from src.directory_utilities import write_json_to_file
 
 try:
     from urllib import urlencode
@@ -50,14 +51,13 @@ ACCOUNT_SET = {
 }
 
 
-def encrypt(api_key, api_secret, export=True, export_fn='secrets.json'):
+def encrypt(api_key, api_secret, export=True, export_fn='database/secrets.json'):
     cipher = AES.new(getpass.getpass('Input encryption password (string will not show)'))
     api_key_n = cipher.encrypt(api_key)
     api_secret_n = cipher.encrypt(api_secret)
     api = {'key': str(api_key_n), 'secret': str(api_secret_n)}
     if export:
-        with open(export_fn, 'w') as outfile:
-            json.dump(api, outfile)
+        write_json_to_file(export_fn, api)
     return api
 
 
