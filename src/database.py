@@ -36,7 +36,7 @@ class Database(object):
         current_date = datetime.now().strftime('%Y/%m/%d %I:%M:%S')
         new_buy_object = {
             "coinPair": coin_pair,
-            "amount": btc_amount * (1 - bittrex_trade_commission) / price,
+            "amount": round(btc_amount * (1 - bittrex_trade_commission) / price, 8),
             "buy": {
                 "date": current_date,
                 "rsi": rsi,
@@ -99,7 +99,7 @@ class Database(object):
         :type current_price: float
         """
         trade = self.get_simulated_open_trade(coin_pair)
-        buy_btc_amount = trade['amount'] * trade['buy']['price']
-        sell_btc_amount = trade['amount'] * current_price * (1 - bittrex_trade_commission)
+        buy_btc_amount = round(trade['amount'] * trade['buy']['price'], 8)
+        sell_btc_amount = round(trade['amount'] * current_price * (1 - bittrex_trade_commission), 8)
 
         return 100 * (sell_btc_amount - buy_btc_amount) / buy_btc_amount
