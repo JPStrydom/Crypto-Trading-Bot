@@ -74,8 +74,8 @@ class Database(object):
 
         self.simulated_trades['trackedCoinPairs'].remove(coin_pair)
         simulated_trade = self.get_simulated_open_trade(coin_pair)
-        simulated_trade['sell'] = sell_object
         simulated_trade['profit_margin'] = self.get_simulated_profit_margin(coin_pair, price)
+        simulated_trade['sell'] = sell_object
         write_json_to_file(self.file_string, self.simulated_trades)
 
     def get_simulated_open_trade(self, coin_pair):
@@ -87,6 +87,9 @@ class Database(object):
         """
         trade_index = py_.find_index(self.simulated_trades['trades'],
                                      lambda trade: trade['coinPair'] == coin_pair and 'sell' not in trade)
+        if trade_index == -1:
+            logger.error('Could not find simulated open trade for {} coin pair'.format(coin_pair))
+            return None
         return self.simulated_trades['trades'][trade_index]
 
     def get_simulated_profit_margin(self, coin_pair, current_price):
@@ -102,4 +105,5 @@ class Database(object):
         buy_btc_amount = round(trade['amount'] * trade['buy']['price'], 8)
         sell_btc_amount = round(trade['amount'] * current_price * (1 - bittrex_trade_commission), 8)
 
-        return 100 * (sell_btc_amount - buy_btc_amount) / buy_btc_amount
+        profit_margin = 100 * (sell_btc_amount - buy_btc_amount) / buy_btc_amount
+        return profit_margin
