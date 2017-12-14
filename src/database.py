@@ -71,11 +71,14 @@ class Database(object):
             "24HrVolume": day_volume,
             "price": price
         }
+        profit_margin = self.get_simulated_profit_margin(coin_pair, price)
 
         self.simulated_trades['trackedCoinPairs'].remove(coin_pair)
+
         simulated_trade = self.get_simulated_open_trade(coin_pair)
-        simulated_trade['profit_margin'] = self.get_simulated_profit_margin(coin_pair, price)
         simulated_trade['sell'] = sell_object
+        simulated_trade['profit_margin'] = profit_margin
+
         write_json_to_file(self.file_string, self.simulated_trades)
 
     def get_simulated_open_trade(self, coin_pair):
