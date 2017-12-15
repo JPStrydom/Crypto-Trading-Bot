@@ -1,4 +1,3 @@
-import json
 import pydash as py_
 
 from src.bittrex import Bittrex
@@ -181,6 +180,9 @@ def buy_strategy(coin_pair, strategy_index):
         day_volume = get_current_24hr_volume(coin_pair)
         current_price = get_current_price(coin_pair)
         if rsi is not None and rsi <= 30:
+            if rsi <= 20:
+                Messenger.send_RSI_email(rsi, coin_pair, current_price, 'JP')
+                Messenger.play_beep();
             main_market, coin = coin_pair.split('-')
             print(print_str.format(strategy_index, coin_pair, round(rsi), round(day_volume), main_market,
                                    Messenger.generate_bittrex_URL(coin_pair)))

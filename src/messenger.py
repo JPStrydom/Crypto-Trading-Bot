@@ -1,4 +1,5 @@
 import smtplib
+import winsound
 
 
 class Messenger(object):
@@ -73,3 +74,7 @@ class Messenger(object):
                   "\n\nRegards,\nCrypto Bot".format(recipient_name, round(rsi, 2), coin_pair, current_price,
                                                     main_market, coin, self.generate_bittrex_URL(coin_pair))
         self.send_email(subject, message)
+
+    @staticmethod
+    def play_beep(frequency=2000, duration=1000):
+        winsound.Beep(frequency, duration)
