@@ -77,4 +77,12 @@ class Messenger(object):
 
     @staticmethod
     def play_beep(frequency=2000, duration=1000):
+        """
+        Used to play a beep sound
+
+        :param frequency: The frequency of the beep
+        :type frequency: int
+        :param duration: The duration of the beep
+        :type duration: int
+        """
         winsound.Beep(frequency, duration)
