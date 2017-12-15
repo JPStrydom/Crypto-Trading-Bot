@@ -226,7 +226,7 @@ def sell_strategy(coin_pair, strategy_index):
         current_price = get_current_price(coin_pair)
         profit_margin = Database_List[strategy_index].get_simulated_profit_margin(coin_pair, current_price)
         if rsi is not None and rsi >= 45:
-            print(print_str.format(strategy_index, coin_pair, round(rsi), profit_margin,
+            print(print_str.format(strategy_index, coin_pair, round(rsi), round(profit_margin),
                                    Messenger.generate_bittrex_URL(coin_pair)))
             Database_List[strategy_index].simulate_sell(coin_pair, current_price, rsi, day_volume)
     if strategy_index == 1:
@@ -235,7 +235,7 @@ def sell_strategy(coin_pair, strategy_index):
         current_price = get_current_price(coin_pair)
         profit_margin = Database_List[strategy_index].get_simulated_profit_margin(coin_pair, current_price)
         if profit_margin >= 2.5:
-            print(print_str.format(strategy_index, coin_pair, round(rsi), profit_margin,
+            print(print_str.format(strategy_index, coin_pair, round(rsi), round(profit_margin),
                                    Messenger.generate_bittrex_URL(coin_pair)))
             Database_List[strategy_index].simulate_sell(coin_pair, current_price, rsi, day_volume)
     if strategy_index == 2:
@@ -244,7 +244,7 @@ def sell_strategy(coin_pair, strategy_index):
         current_price = get_current_price(coin_pair)
         profit_margin = Database_List[strategy_index].get_simulated_profit_margin(coin_pair, current_price)
         if rsi is not None and rsi >= 35:
-            print(print_str.format(strategy_index, coin_pair, round(rsi), profit_margin,
+            print(print_str.format(strategy_index, coin_pair, round(rsi), round(profit_margin),
                                    Messenger.generate_bittrex_URL(coin_pair)))
             Database_List[strategy_index].simulate_sell(coin_pair, current_price, rsi, day_volume)
     if strategy_index == 3:
@@ -253,7 +253,7 @@ def sell_strategy(coin_pair, strategy_index):
         current_price = get_current_price(coin_pair)
         profit_margin = Database_List[strategy_index].get_simulated_profit_margin(coin_pair, current_price)
         if profit_margin >= 2.5:
-            print(print_str.format(strategy_index, coin_pair, round(rsi), profit_margin,
+            print(print_str.format(strategy_index, coin_pair, round(rsi), round(profit_margin),
                                    Messenger.generate_bittrex_URL(coin_pair)))
             Database_List[strategy_index].simulate_sell(coin_pair, current_price, rsi, day_volume)
 
