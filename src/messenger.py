@@ -1,5 +1,6 @@
 import smtplib
 import winsound
+from termcolor import cprint
 
 
 class Messenger(object):
@@ -13,6 +14,13 @@ class Messenger(object):
         self.login = secrets['gmail']['username']
         self.password = secrets['gmail']['password']
         self.smtp_server = 'smtp.gmail.com:587'
+
+        self.header_str = '\nTracking {} Bittrex Markets\n'
+
+        self.buy_str = 'Buy on {: <10} \t-> \t\tRSI: {} \t\t24 Hour Volume: {: >6} {} \t\t Buy Price: {} \t\tURL: {}'
+        self.sell_str = 'Sell on {: <10} \t-> \t\tRSI: {} \t\tProfit Margin: {} % \t\t Sell Price: {} \t\tURL: {}'
+
+        self.previous_no_sell_str = ''
 
     @staticmethod
     def generate_bittrex_URL(btc_coin_pair):
@@ -72,6 +80,61 @@ class Messenger(object):
                   "\n\nRegards,\nCrypto Bot".format(recipient_name, round(rsi, 2), coin_pair, day_volume,
                                                     self.generate_bittrex_URL(coin_pair))
         self.send_email(subject, message)
+
+    def print_header(self, num_of_coin_pairs):
+        """
+        Used to print the console header
+
+        :param num_of_coin_pairs: Amount of available Bittrex market pairs
+        :type num_of_coin_pairs: int
+        """
+        cprint(self.header_str.format(num_of_coin_pairs), attrs=['bold', 'underline'])
+
+    def print_buy(self, coin_pair, rsi, day_volume, current_buy_price):
+        """
+        Used to print a buy's info to the console
+
+        :param coin_pair: String literal for the market (ex: BTC-LTC)
+        :type coin_pair: str
+        :param rsi: The coin pair's RSI
+        :type rsi: float
+        :param day_volume: Coin pair's current 24 hour volume
+        :type day_volume: float
+        :param current_buy_price: Market's current price
+        :type current_buy_price: float
+        """
+        main_market, coin = coin_pair.split('-')
+        cprint(self.buy_str.format(coin_pair, round(rsi), round(day_volume), main_market, current_buy_price,
+                                   self.generate_bittrex_URL(coin_pair)), 'blue', attrs=['bold'])
+
+    def print_sell(self, coin_pair, rsi, profit_margin, current_sell_price):
+        """
+        Used to print a buy's info to the console
+
+        :param coin_pair: String literal for the market (ex: BTC-LTC)
+        :type coin_pair: str
+        :param rsi: The coin pair's RSI
+        :type rsi: float
+        :param profit_margin: Profit made on the trade
+        :type profit_margin: float
+        :param current_sell_price: Market's current price
+        :type current_sell_price: float
+        """
+        cprint(self.sell_str.format(coin_pair, round(rsi), round(profit_margin, 2), current_sell_price,
+                                    self.generate_bittrex_URL(coin_pair)), 'green', attrs=['bold'])
+
+    def print_no_buy_string(self, coin_pair, rsi, day_volume, current_buy_price):
+        main_market, coin = coin_pair.split('-')
+        print_str = 'No ' + self.buy_str.format(coin_pair, round(rsi), round(day_volume), main_market,
+                                                current_buy_price, self.generate_bittrex_URL(coin_pair))
+        cprint(print_str, 'grey')
+
+    def print_no_sell_string(self, coin_pair, rsi, profit_margin, current_sell_price):
+        print_str = 'No ' + self.sell_str.format(coin_pair, round(rsi), round(profit_margin, 2), current_sell_price,
+                                                 self.generate_bittrex_URL(coin_pair))
+        if print_str != self.previous_no_sell_str:
+            self.previous_no_sell_str = print_str
+            cprint(print_str, 'red')
 
     @staticmethod
     def play_beep(frequency=2000, duration=1000):

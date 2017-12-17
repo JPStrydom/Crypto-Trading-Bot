@@ -6,7 +6,6 @@ from src.database import Database
 from src.logger import logger
 from src.directory_utilities import get_json_from_file
 
-
 secrets_file_directory = 'database/secrets.json'
 secrets_template = {
     "bittrex": {
@@ -171,31 +170,31 @@ def calculate_RSI(coin_pair, period, unit):
 def buy_strategy(coin_pair):
     if coin_pair in Database.trades['trackedCoinPairs']:
         return
-    print_str = 'Buy on {: <10} \t-> \t\tRSI: {} \t\t24 Hour Volume: {: >6} {} \t\t Buy Price: {} \t\tURL: {}'
     rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit='fiveMin')
     day_volume = get_current_24hr_volume(coin_pair)
     current_buy_price = get_current_price(coin_pair, 'ask')
-    if rsi is not None and rsi <= 20 and day_volume >= 10 and current_buy_price > 0.000001:
+    if rsi is not None and rsi <= 20 and day_volume >= 50 and current_buy_price > 0.000001:
         Messenger.send_RSI_email(rsi, coin_pair, day_volume, 'JP')
-        # Messenger.play_beep()
-        main_market, coin = coin_pair.split('-')
-        print(print_str.format(coin_pair, round(rsi), round(day_volume), main_market, current_buy_price,
-                               Messenger.generate_bittrex_URL(coin_pair)))
+        Messenger.print_buy(coin_pair, rsi, day_volume, current_buy_price)
+        Messenger.play_beep()
         Database.store_buy(coin_pair, current_buy_price, rsi, day_volume)
+    else:
+        Messenger.print_no_buy_string(coin_pair, rsi, day_volume, current_buy_price)
 
 
 def sell_strategy(coin_pair):
     if coin_pair not in Database.trades['trackedCoinPairs']:
         return
-    print_str = 'Sell on {: <10} \t-> \t\tRSI: {} \t\tProfit Margin: {} % \t\t Sell Price: {} \t\tURL: {}'
     rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit='fiveMin')
     day_volume = get_current_24hr_volume(coin_pair)
     current_sell_price = get_current_price(coin_pair, 'bid')
     profit_margin = Database.get_profit_margin(coin_pair, current_sell_price)
     if (rsi is not None and rsi >= 45 and profit_margin >= 0) or profit_margin > 5:
-        print(print_str.format(coin_pair, round(rsi), round(profit_margin, 2), current_sell_price,
-                               Messenger.generate_bittrex_URL(coin_pair)))
+        Messenger.print_sell(coin_pair, rsi, profit_margin, current_sell_price)
+        Messenger.play_beep()
         Database.store_sell(coin_pair, current_sell_price, rsi, day_volume)
+    else:
+        Messenger.print_no_sell_string(coin_pair, rsi, profit_margin, current_sell_price)
 
 
 if __name__ == '__main__':
@@ -211,7 +210,7 @@ if __name__ == '__main__':
 
 
     btc_coin_pairs = get_markets('BTC')
-    print('Tracking {} Bittrex markets'.format(len(btc_coin_pairs)))
+    Messenger.print_header(len(btc_coin_pairs))
     while True:
         try:
             analyse_buys()
