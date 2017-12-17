@@ -48,7 +48,7 @@ class Messenger(object):
         server.quit()
         return errors
 
-    def send_RSI_email(self, rsi, coin_pair, current_price, recipient_name='Folks'):
+    def send_RSI_email(self, rsi, coin_pair, day_volume, recipient_name='Folks'):
         """
         Used to send a low RSI specific email from the account specified in the secrets.json file to the entire
         address list specified in the secrets.json file
@@ -57,8 +57,8 @@ class Messenger(object):
         :type rsi: float
         :param coin_pair: Coin pair the low RSI occurred on (ex: BTC-ETH)
         :type coin_pair: str
-        :param current_price: Coin pair's current price
-        :type current_price: float
+        :param day_volume: Coin pair's current 24 hour volume
+        :type day_volume: float
         :param recipient_name: Name of the email's recipient (ex: John)
         :type recipient_name: str
 
@@ -66,13 +66,11 @@ class Messenger(object):
         :rtype : dict
         """
 
-        main_market, coin = coin_pair.split('-')
-
         subject = 'Crypto Bot: Low RSI on {} Market'.format(coin_pair)
         message = "Howdy {},\n\nI've detected a low RSI of {} on the {} market. " \
-                  "The current market price is {:.8f} {} per {}\n\nHere's a Bittrex URL: {}" \
-                  "\n\nRegards,\nCrypto Bot".format(recipient_name, round(rsi, 2), coin_pair, current_price,
-                                                    main_market, coin, self.generate_bittrex_URL(coin_pair))
+                  "The current 24 hour market volume is {}\n\nHere's a Bittrex URL: {}" \
+                  "\n\nRegards,\nCrypto Bot".format(recipient_name, round(rsi, 2), coin_pair, day_volume,
+                                                    self.generate_bittrex_URL(coin_pair))
         self.send_email(subject, message)
 
     @staticmethod

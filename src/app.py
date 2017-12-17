@@ -57,12 +57,14 @@ def get_markets(main_market_filter=None):
     return markets
 
 
-def get_current_buy_price(coin_pair):
+def get_current_price(coin_pair, price_type):
     """
     Gets current market price for a coin pair
 
     :param coin_pair: Coin pair market to check (ex: BTC-ETH, BTC-FCT)
     :type coin_pair: str
+    :param price_type: The type of price to get (one of: 'ask', 'bid')
+    :type price_type: str
 
     :return: Coin pair's current market price
     :rtype : float
@@ -72,25 +74,11 @@ def get_current_buy_price(coin_pair):
     if not coin_summary['success']:
         logger.error('Failed to fetch Bittrex market summary for the {} market'.format(coin_pair))
         return None
-    return coin_summary['result'][0]['Ask']
-
-
-def get_current_sell_price(coin_pair):
-    """
-    Gets current market price for a coin pair
-
-    :param coin_pair: Coin pair market to check (ex: BTC-ETH, BTC-FCT)
-    :type coin_pair: str
-
-    :return: Coin pair's current market price
-    :rtype : float
-    """
-
-    coin_summary = Bittrex.get_market_summary(coin_pair)
-    if not coin_summary['success']:
-        logger.error('Failed to fetch Bittrex market summary for the {} market'.format(coin_pair))
-        return None
-    return coin_summary['result'][0]['Bid']
+    if price_type == 'ask':
+        return coin_summary['result'][0]['Ask']
+    if price_type == 'bid':
+        return coin_summary['result'][0]['Bid']
+    return coin_summary['result'][0]['Last']
 
 
 def get_current_24hr_volume(coin_pair):
@@ -186,11 +174,10 @@ def buy_strategy(coin_pair):
     print_str = 'Buy on {: <10} \t-> \t\tRSI: {} \t\t24 Hour Volume: {: >6} {} \t\tURL: {}'
     rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit='fiveMin')
     day_volume = get_current_24hr_volume(coin_pair)
-    current_buy_price = get_current_buy_price(coin_pair)
-    if rsi is not None and rsi <= 20 and day_volume >= 10:
-        if rsi <= 20:
-            Messenger.send_RSI_email(rsi, coin_pair, current_buy_price, 'JP')
-            Messenger.play_beep()
+    current_buy_price = get_current_price(coin_pair, 'ask')
+    if rsi is not None and rsi <= 30 and day_volume >= 10:
+        Messenger.send_RSI_email(rsi, coin_pair, day_volume, 'JP')
+        # Messenger.play_beep()
         main_market, coin = coin_pair.split('-')
         print(print_str.format(coin_pair, round(rsi), round(day_volume), main_market,
                                Messenger.generate_bittrex_URL(coin_pair)))
@@ -203,9 +190,9 @@ def sell_strategy(coin_pair):
     print_str = 'Sell on {: <10} \t-> \t\tRSI: {} \t\tProfit Margin: {} % \t\tURL: {}'
     rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit='fiveMin')
     day_volume = get_current_24hr_volume(coin_pair)
-    current_sell_price = get_current_sell_price(coin_pair)
+    current_sell_price = get_current_price(coin_pair, 'bid')
     profit_margin = Database.get_profit_margin(coin_pair, current_sell_price)
-    if rsi is not None and rsi >= 35 and profit_margin >= 1:
+    if rsi is not None and rsi >= 45 and profit_margin >= 1:
         print(print_str.format(coin_pair, round(rsi), round(profit_margin, 2),
                                Messenger.generate_bittrex_URL(coin_pair)))
         Database.store_sell(coin_pair, current_sell_price, rsi, day_volume)
