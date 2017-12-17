@@ -248,7 +248,7 @@ class Bittrex(object):
     def buy_limit(self, market, quantity, rate):
         """
         Used to place a buy order in a specific market. Use buylimit to place
-        limit orders Make sure you have the proper permissions set on your
+        limit orders. Make sure you have the proper permissions set on your
         API keys for this call to work
         /market/buylimit
 
@@ -268,7 +268,7 @@ class Bittrex(object):
     def sell_limit(self, market, quantity, rate):
         """
         Used to place a sell order in a specific market. Use selllimit to place
-        limit orders Make sure you have the proper permissions set on your
+        limit orders. Make sure you have the proper permissions set on your
         API keys for this call to work
         /market/selllimit
 
