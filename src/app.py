@@ -178,7 +178,7 @@ def buy_strategy(coin_pair):
         Messenger.print_buy(coin_pair, rsi, day_volume, current_buy_price)
         Messenger.play_beep()
         Database.store_buy(coin_pair, current_buy_price, rsi, day_volume)
-    else:
+    elif rsi is not None:
         Messenger.print_no_buy_string(coin_pair, rsi, day_volume, current_buy_price)
 
 
@@ -193,7 +193,7 @@ def sell_strategy(coin_pair):
         Messenger.print_sell(coin_pair, rsi, profit_margin, current_sell_price)
         Messenger.play_beep()
         Database.store_sell(coin_pair, current_sell_price, rsi, day_volume)
-    else:
+    elif rsi is not None:
         Messenger.print_no_sell_string(coin_pair, rsi, profit_margin, current_sell_price)
 
 
@@ -220,6 +220,7 @@ if __name__ == '__main__':
         try:
             analyse_buys()
             analyse_sells()
+
         except ConnectionError as exception:
             Messenger.print_error_string('connection')
             logger.exception(exception)
