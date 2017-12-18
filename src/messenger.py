@@ -17,10 +17,16 @@ class Messenger(object):
 
         self.header_str = '\nTracking {} Bittrex Markets\n'
 
-        self.buy_str = 'Buy on {: <10} \t-> \t\tRSI: {} \t\t24 Hour Volume: {: >6} {} \t\t Buy Price: {} \t\tURL: {}'
-        self.sell_str = 'Sell on {: <10} \t-> \t\tRSI: {} \t\tProfit Margin: {} % \t\t Sell Price: {} \t\tURL: {}'
+        self.buy_str = 'Buy on {:<10}\t->\t\tRSI: {:>2}\t\t24 Hour Volume: {:>5} {}\t\t Buy Price: {:.8f}\t\tURL: {}'
+        self.sell_str = 'Sell on {:<10}\t->\t\tRSI: {:>2}\t\tProfit Margin: {:>4} %\t\t Sell Price: {:.8f}\t\tURL: {}'
 
         self.previous_no_sell_str = ''
+
+        self.error_str = {
+            'connection': '\nUnable to connect to the internet. Please check your connection and try again.\n',
+            'JSONDecode': '\nFailed to decode JSON.\n',
+            'unknown': '\nAn unknown exception occurred.\n'
+        }
 
     @staticmethod
     def generate_bittrex_URL(btc_coin_pair):
@@ -109,7 +115,7 @@ class Messenger(object):
 
     def print_sell(self, coin_pair, rsi, profit_margin, current_sell_price):
         """
-        Used to print a buy's info to the console
+        Used to print a sales's info to the console
 
         :param coin_pair: String literal for the market (ex: BTC-LTC)
         :type coin_pair: str
@@ -124,17 +130,49 @@ class Messenger(object):
                                     self.generate_bittrex_URL(coin_pair)), 'green', attrs=['bold'])
 
     def print_no_buy_string(self, coin_pair, rsi, day_volume, current_buy_price):
+        """
+        Used to print a no-buy's info to the console
+
+        :param coin_pair: String literal for the market (ex: BTC-LTC)
+        :type coin_pair: str
+        :param rsi: The coin pair's RSI
+        :type rsi: float
+        :param day_volume: Coin pair's current 24 hour volume
+        :type day_volume: float
+        :param current_buy_price: Market's current price
+        :type current_buy_price: float
+        """
         main_market, coin = coin_pair.split('-')
         print_str = 'No ' + self.buy_str.format(coin_pair, round(rsi), round(day_volume), main_market,
                                                 current_buy_price, self.generate_bittrex_URL(coin_pair))
         cprint(print_str, 'grey')
 
     def print_no_sell_string(self, coin_pair, rsi, profit_margin, current_sell_price):
+        """
+        Used to print a no-sales's info to the console
+
+        :param coin_pair: String literal for the market (ex: BTC-LTC)
+        :type coin_pair: str
+        :param rsi: The coin pair's RSI
+        :type rsi: float
+        :param profit_margin: Profit made on the trade
+        :type profit_margin: float
+        :param current_sell_price: Market's current price
+        :type current_sell_price: float
+        """
         print_str = 'No ' + self.sell_str.format(coin_pair, round(rsi), round(profit_margin, 2), current_sell_price,
                                                  self.generate_bittrex_URL(coin_pair))
         if print_str != self.previous_no_sell_str:
             self.previous_no_sell_str = print_str
             cprint(print_str, 'red')
+
+    def print_error_string(self, error_type):
+        """
+        Prints the error type message to the console
+
+        :param error_type: The error type (one of: 'connection', 'JSONDecode', 'unknown')
+        """
+        cprint(self.error_str[error_type], 'red', attrs=['bold'])
 
     @staticmethod
     def play_beep(frequency=2000, duration=1000):
