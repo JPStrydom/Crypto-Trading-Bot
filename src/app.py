@@ -208,12 +208,21 @@ if __name__ == '__main__':
         for coin_pair in Database.trades['trackedCoinPairs']:
             sell_strategy(coin_pair)
 
+    try:
+        btc_coin_pairs = get_markets('BTC')
+        Messenger.print_header(len(btc_coin_pairs))
+    except ConnectionError as exception:
+        Messenger.print_error_string('connection')
+        logger.exception(exception)
+        exit()
 
-    btc_coin_pairs = get_markets('BTC')
-    Messenger.print_header(len(btc_coin_pairs))
     while True:
         try:
             analyse_buys()
             analyse_sells()
+        except ConnectionError as exception:
+            Messenger.print_error_string('connection')
+            logger.exception(exception)
         except Exception:
+            Messenger.print_error_string('unknown')
             logger.exception(Exception)
