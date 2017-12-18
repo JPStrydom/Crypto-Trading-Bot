@@ -173,7 +173,8 @@ def buy_strategy(coin_pair):
     rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit='fiveMin')
     day_volume = get_current_24hr_volume(coin_pair)
     current_buy_price = get_current_price(coin_pair, 'ask')
-    if rsi is not None and rsi <= 20 and day_volume >= 50 and current_buy_price > 0.000001:
+    if rsi is not None and rsi <= 25 and day_volume >= 50 and current_buy_price > 0.00001:
+        # TODO: Buy code
         Messenger.send_RSI_email(rsi, coin_pair, day_volume, 'JP')
         Messenger.print_buy(coin_pair, rsi, day_volume, current_buy_price)
         Messenger.play_beep()
@@ -189,7 +190,8 @@ def sell_strategy(coin_pair):
     day_volume = get_current_24hr_volume(coin_pair)
     current_sell_price = get_current_price(coin_pair, 'bid')
     profit_margin = Database.get_profit_margin(coin_pair, current_sell_price)
-    if (rsi is not None and rsi >= 45 and profit_margin >= 0) or profit_margin > 5:
+    if (rsi is not None and rsi >= 50 and profit_margin >= 0) or profit_margin > 2.5:
+        # TODO: Sell code
         Messenger.print_sell(coin_pair, rsi, profit_margin, current_sell_price)
         Messenger.play_beep()
         Database.store_sell(coin_pair, current_sell_price, rsi, day_volume)
@@ -227,3 +229,43 @@ if __name__ == '__main__':
         except Exception:
             Messenger.print_error_string('unknown')
             logger.exception(Exception)
+
+
+""""
+TODO: New Trade Structure
+{
+    "trackedExchanges": [
+        "BTC-BAT"
+    ],
+    "trades": [
+        {
+            "exchange": "BTC-GCR",
+            "quantity" : 0,
+            "buy": {
+                "orderUuid": "",
+		        "dateOpened" : "2014-07-13T07:45:46.27",
+		        "dateClosed" : null,
+                "price" : 0.00000000,
+                "pricePerUnit" : null,
+		        "commissionPaid" : 0.00000000,
+                "stats": {
+                    "rsi": 28.826884497522684,
+                    "24HrVolume": 58.60208234
+                }
+            },
+            "sell": {
+                "orderUuid": "",
+		        "dateOpened" : "2014-07-13T07:45:46.27",
+		        "dateClosed" : null,
+                "price" : 0.00000000,
+                "pricePerUnit" : null,
+		        "commissionPaid" : 0.00000000,
+                "stats": {
+                    "rsi": 28.826884497522684,
+                    "24HrVolume": 58.60208234
+                }
+            }
+        }
+    ]
+}
+"""

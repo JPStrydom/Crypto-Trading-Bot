@@ -16,7 +16,7 @@ class Database(object):
         self.file_string = 'database/trades.json'
         self.trades = get_json_from_file(self.file_string, {"trackedCoinPairs": [], "trades": []})
 
-    def store_buy(self, coin_pair, price, rsi=-1, day_volume=-1, btc_amount=1):
+    def store_buy(self, coin_pair, price, rsi=-1, day_volume=-1, btc_amount=0.00001):
         """
         Used to place a trade in the database
 
