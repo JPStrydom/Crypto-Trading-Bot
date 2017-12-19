@@ -16,6 +16,7 @@ Use Crypto Signal Tracker to track and simulate trades on 250+ crypto currencies
 You can build on top of this tool and implement algorithm trading and some machine learning models to experiment with predictive analysis.
 
 #### Coming Soon:
+* Live Trading (alpha on `dev/live-trading` branch)
 * Bollinger Bands
 * Web Client
 * Back-Testing
