@@ -33,7 +33,6 @@ class Messenger(object):
         """
         Generates the URL string for the coin pairs Bittrex page
         """
-
         return 'https://bittrex.com/Market/Index?MarketName={}'.format(btc_coin_pair)
 
     def send_email(self, subject, message):
@@ -49,7 +48,6 @@ class Messenger(object):
         :return: Errors received from the smtp server (if any)
         :rtype : dict
         """
-
         header = 'From: %s\n' % self.from_address
         header += 'To: %s\n' % ','.join(self.to_address_list)
         header += 'Subject: %s\n\n' % subject
@@ -79,7 +77,6 @@ class Messenger(object):
         :return: Errors received from the smtp server (if any)
         :rtype : dict
         """
-
         subject = 'Crypto Bot: Low RSI on {} Market'.format(coin_pair)
         message = "Howdy {},\n\nI've detected a low RSI of {} on the {} market. " \
                   "The current 24 hour market volume is {}\n\nHere's a Bittrex URL: {}" \

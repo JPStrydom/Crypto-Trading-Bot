@@ -42,7 +42,6 @@ def get_markets(main_market_filter=None):
     :return: All Bittrex markets (with filter applied, if any)
     :rtype : list
     """
-
     markets = Bittrex.get_markets()
     if not markets['success']:
         logger.error('Failed to fetch Bittrex markets')
@@ -68,7 +67,6 @@ def get_current_price(coin_pair, price_type):
     :return: Coin pair's current market price
     :rtype : float
     """
-
     coin_summary = Bittrex.get_market_summary(coin_pair)
     if not coin_summary['success']:
         logger.error('Failed to fetch Bittrex market summary for the {} market'.format(coin_pair))
@@ -90,7 +88,6 @@ def get_current_24hr_volume(coin_pair):
     :return: Coin pair's current 24 hour market volume
     :rtype : float
     """
-
     coin_summary = Bittrex.get_market_summary(coin_pair)
     if not coin_summary['success']:
         logger.error('Failed to fetch Bittrex market summary for the {} market'.format(coin_pair))
@@ -108,7 +105,6 @@ def get_closing_prices(coin_pair, period, unit):
 
     :return: Array of closing prices
     """
-
     historical_data = Bittrex.get_historical_data(coin_pair, period, unit)
     closing_prices = []
     for i in historical_data:
@@ -122,7 +118,6 @@ def calculate_RSI(coin_pair, period, unit):
     If the returned value is above 70, it's overbought (SELL IT!)
     If the returned value is below 30, it's oversold (BUY IT!)
     """
-
     closing_prices = get_closing_prices(coin_pair, period * 3, unit)
     count = 0
     change = []
