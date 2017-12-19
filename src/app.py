@@ -176,6 +176,33 @@ def calculate_RSI(coin_pair, period, unit):
     return new_rs
 
 
+def buy(coin_pair, btc_quantity, price, trade_time_limit):
+    """
+    Used to place a buy order to Bittrex. Wait until the order is completed.
+    If the order is not filled within trade_time_limit minutes cancel it.
+
+    :param coin_pair:
+    :param btc_quantity:
+    :param price:
+    :param trade_time_limit:
+
+    :return:
+    """
+    """
+    place limit buy
+    wait 5 seconds
+    get order
+    while less than trade_time_limit minutes have passed and order hasn't completed:
+        wait 5 seconds
+        get order
+    if order hasn't completed:
+        return with error
+    store order in correct format
+    """
+
+    return 0
+
+
 def buy_strategy(coin_pair):
     if coin_pair in Database.trades['trackedCoinPairs']:
         return
@@ -184,7 +211,7 @@ def buy_strategy(coin_pair):
     current_buy_price = get_current_price(coin_pair, 'ask')
     if rsi is not None and rsi <= 25 and day_volume >= 50 and current_buy_price > 0.00001:
         # TODO: Buy code
-        Messenger.send_RSI_email(rsi, coin_pair, day_volume, 'JP')
+        Messenger.send_buy_email(coin_pair, 0.00001, current_buy_price, rsi, day_volume, 'JP')
         Messenger.print_buy(coin_pair, rsi, day_volume, current_buy_price)
         Messenger.play_beep()
         Database.store_buy(coin_pair, current_buy_price, rsi, day_volume)

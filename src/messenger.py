@@ -29,11 +29,11 @@ class Messenger(object):
         }
 
     @staticmethod
-    def generate_bittrex_URL(btc_coin_pair):
+    def generate_bittrex_URL(coin_pair):
         """
         Generates the URL string for the coin pairs Bittrex page
         """
-        return 'https://bittrex.com/Market/Index?MarketName={}'.format(btc_coin_pair)
+        return 'https://bittrex.com/Market/Index?MarketName={}'.format(coin_pair)
 
     def send_email(self, subject, message):
         """
@@ -60,28 +60,53 @@ class Messenger(object):
         server.quit()
         return errors
 
-    def send_RSI_email(self, rsi, coin_pair, day_volume, recipient_name='Folks'):
+    def send_RSI_email(self, coin_pair, rsi, day_volume, recipient_name='Folks'):
         """
         Used to send a low RSI specific email from the account specified in the secrets.json file to the entire
         address list specified in the secrets.json file
 
-        :param rsi: Low RSI
-        :type rsi: float
         :param coin_pair: Coin pair the low RSI occurred on (ex: BTC-ETH)
         :type coin_pair: str
+        :param rsi: Low RSI
+        :type rsi: float
         :param day_volume: Coin pair's current 24 hour volume
         :type day_volume: float
         :param recipient_name: Name of the email's recipient (ex: John)
         :type recipient_name: str
-
-        :return: Errors received from the smtp server (if any)
-        :rtype : dict
         """
         subject = 'Crypto Bot: Low RSI on {} Market'.format(coin_pair)
         message = "Howdy {},\n\nI've detected a low RSI of {} on the {} market. " \
                   "The current 24 hour market volume is {}\n\nHere's a Bittrex URL: {}" \
-                  "\n\nRegards,\nCrypto Bot".format(recipient_name, round(rsi, 2), coin_pair, day_volume,
+                  "\n\nRegards,\nCrypto Bot".format(recipient_name, round(rsi), coin_pair, round(day_volume),
                                                     self.generate_bittrex_URL(coin_pair))
+        self.send_email(subject, message)
+
+    def send_buy_email(self, coin_pair, quantity, unit_price, rsi, day_volume, recipient_name='Folks'):
+        """
+        Used to send a buy specific email from the account specified in the secrets.json file to the entire
+        address list specified in the secrets.json file
+
+        :param coin_pair: Coin pair the low RSI occurred on (ex: BTC-ETH)
+        :type coin_pair: str
+        :param quantity: The quantity of coin pair bought
+        :type quantity: float
+        :param unit_price: The coin's unit price
+        :type unit_price: float
+        :param rsi: Low RSI
+        :type rsi: float
+        :param day_volume: Coin pair's current 24 hour volume
+        :type day_volume: float
+        :param recipient_name: Name of the email's recipient (ex: John)
+        :type recipient_name: str
+        """
+        btc_value = round(quantity * unit_price, 8)
+        main_market, coin = coin_pair.split('-')
+        subject = 'Crypto Bot: Buy on {} Market'.format(coin_pair)
+        message = "Howdy {},\n\nI've just bought {} {} on the {} market - which is currently valued at {} {}.\n\n" \
+                  "The market currently has an RSI of {} and a 24 hour market volume of {}\n\n" \
+                  "Here's a Bittrex URL: {}\n\nRegards,\n" \
+                  "Crypto Bot".format(recipient_name, round(quantity, 4), coin, coin_pair, btc_value, main_market,
+                                      round(rsi), coin_pair, day_volume, self.generate_bittrex_URL(coin_pair))
         self.send_email(subject, message)
 
     def print_header(self, num_of_coin_pairs):
