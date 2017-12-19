@@ -99,11 +99,15 @@ def get_closing_prices(coin_pair, period, unit):
     """
     Returns closing prices within a specified time frame for a coin pair
 
+    :param coin_pair: String literal for the market (ex: BTC-LTC)
     :type coin_pair: str
+    :param period: Number of periods to query
     :type period: int
+    :param unit: Ticker interval (one of: 'oneMin', 'fiveMin', 'thirtyMin', 'hour', 'week', 'day', and 'month')
     :type unit: str
 
     :return: Array of closing prices
+    :rtype : list
     """
     historical_data = Bittrex.get_historical_data(coin_pair, period, unit)
     closing_prices = []
@@ -115,8 +119,18 @@ def get_closing_prices(coin_pair, period, unit):
 def calculate_RSI(coin_pair, period, unit):
     """
     Calculates the Relative Strength Index for a coin_pair
-    If the returned value is above 70, it's overbought (SELL IT!)
-    If the returned value is below 30, it's oversold (BUY IT!)
+    If the returned value is above 75, it's overbought (SELL IT!)
+    If the returned value is below 25, it's oversold (BUY IT!)
+
+    :param coin_pair: String literal for the market (ex: BTC-LTC)
+    :type coin_pair: str
+    :param period: Number of periods to query
+    :type period: int
+    :param unit: Ticker interval (one of: 'oneMin', 'fiveMin', 'thirtyMin', 'hour', 'week', 'day', and 'month')
+    :type unit: str
+
+    :return: RSI
+    :rtype : float
     """
     closing_prices = get_closing_prices(coin_pair, period * 3, unit)
     count = 0
