@@ -52,7 +52,7 @@ class Database(object):
 
         write_json_to_file(self.file_string, self.trades)
 
-    def store_sell(self, coin_pair, price, rsi=-1, day_volume=-1):
+    def store_sell(self, coin_pair, price, rsi=-1, profit_margin=-1):
         """
         Used to place a trade in the database
 
@@ -62,26 +62,24 @@ class Database(object):
         :type price: float
         :param rsi: Market's current RSI
         :type rsi: float
-        :param day_volume: Market's 24 hour volume
-        :type day_volume: float
+        :param profit_margin: Profit made on the trade
+        :type profit_margin: float
         """
         if coin_pair not in self.trades['trackedCoinPairs']:
             return logger.warning("Trying to sell on the {} market, which is not a tracked coin pair")
 
         current_date = datetime.now().strftime('%Y/%m/%d %I:%M:%S')
-        trade = self.get_open_trade(coin_pair)
 
         sell_object = {
             "date": current_date,
             "rsi": rsi,
-            "24HrVolume": day_volume,
+            "profitMargin": profit_margin,
             "price": price
         }
-        profit_margin = self.get_profit_margin(coin_pair, price, trade)
 
         self.trades['trackedCoinPairs'].remove(coin_pair)
+        trade = self.get_open_trade(coin_pair)
         trade['sell'] = sell_object
-        trade['profitMargin'] = profit_margin
 
         write_json_to_file(self.file_string, self.trades)
 

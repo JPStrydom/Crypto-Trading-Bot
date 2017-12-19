@@ -103,10 +103,38 @@ class Messenger(object):
         main_market, coin = coin_pair.split('-')
         subject = 'Crypto Bot: Buy on {} Market'.format(coin_pair)
         message = "Howdy {},\n\nI've just bought {} {} on the {} market - which is currently valued at {} {}.\n\n" \
-                  "The market currently has an RSI of {} and a 24 hour market volume of {}\n\n" \
+                  "The market currently has an RSI of {} and a 24 hour market volume of {}.\n\n" \
                   "Here's a Bittrex URL: {}\n\nRegards,\n" \
                   "Crypto Bot".format(recipient_name, round(quantity, 4), coin, coin_pair, btc_value, main_market,
                                       round(rsi), coin_pair, day_volume, self.generate_bittrex_URL(coin_pair))
+        self.send_email(subject, message)
+
+    def send_sell_email(self, coin_pair, quantity, unit_price, rsi, profit_margin, recipient_name='Folks'):
+        """
+        Used to send a sell specific email from the account specified in the secrets.json file to the entire
+        address list specified in the secrets.json file
+
+        :param coin_pair: Coin pair the low RSI occurred on (ex: BTC-ETH)
+        :type coin_pair: str
+        :param quantity: The quantity of coin pair bought
+        :type quantity: float
+        :param unit_price: The coin's unit price
+        :type unit_price: float
+        :param rsi: Low RSI
+        :type rsi: float
+        :param profit_margin: Profit made on the trade
+        :type profit_margin: float
+        :param recipient_name: Name of the email's recipient (ex: John)
+        :type recipient_name: str
+        """
+        btc_value = round(quantity * unit_price, 8)
+        main_market, coin = coin_pair.split('-')
+        subject = 'Crypto Bot: Sell on {} Market'.format(coin_pair)
+        message = "Howdy {},\n\nI've just sold {} {} on the {} market - which is currently valued at {} {}.\n\n" \
+                  "The market currently has an RSI of {} and a profit of {}% was made.\n\n" \
+                  "Here's a Bittrex URL: {}\n\nRegards,\n" \
+                  "Crypto Bot".format(recipient_name, round(quantity, 4), coin, coin_pair, btc_value, main_market,
+                                      round(rsi), coin_pair, profit_margin, self.generate_bittrex_URL(coin_pair))
         self.send_email(subject, message)
 
     def print_header(self, num_of_coin_pairs):
@@ -118,35 +146,35 @@ class Messenger(object):
         """
         cprint(self.header_str.format(num_of_coin_pairs), attrs=['bold', 'underline'])
 
-    def print_buy(self, coin_pair, rsi, day_volume, current_buy_price):
+    def print_buy(self, coin_pair, current_buy_price, rsi, day_volume):
         """
         Used to print a buy's info to the console
 
         :param coin_pair: String literal for the market (ex: BTC-LTC)
         :type coin_pair: str
+        :param current_buy_price: Market's current price
+        :type current_buy_price: float
         :param rsi: The coin pair's RSI
         :type rsi: float
         :param day_volume: Coin pair's current 24 hour volume
         :type day_volume: float
-        :param current_buy_price: Market's current price
-        :type current_buy_price: float
         """
         main_market, coin = coin_pair.split('-')
         cprint(self.buy_str.format(coin_pair, round(rsi), round(day_volume), main_market, current_buy_price,
                                    self.generate_bittrex_URL(coin_pair)), 'blue', attrs=['bold'])
 
-    def print_sell(self, coin_pair, rsi, profit_margin, current_sell_price):
+    def print_sell(self, coin_pair, current_sell_price, rsi, profit_margin):
         """
         Used to print a sales's info to the console
 
         :param coin_pair: String literal for the market (ex: BTC-LTC)
         :type coin_pair: str
+        :param current_sell_price: Market's current price
+        :type current_sell_price: float
         :param rsi: The coin pair's RSI
         :type rsi: float
         :param profit_margin: Profit made on the trade
         :type profit_margin: float
-        :param current_sell_price: Market's current price
-        :type current_sell_price: float
         """
         cprint(self.sell_str.format(coin_pair, round(rsi), round(profit_margin, 2), current_sell_price,
                                     self.generate_bittrex_URL(coin_pair)), 'green', attrs=['bold'])

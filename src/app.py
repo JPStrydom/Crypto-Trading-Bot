@@ -176,7 +176,7 @@ def calculate_RSI(coin_pair, period, unit):
     return new_rs
 
 
-def buy(coin_pair, btc_quantity, price, trade_time_limit):
+def buy(coin_pair, btc_quantity, price, stats, trade_time_limit=2):
     """
     Used to place a buy order to Bittrex. Wait until the order is completed.
     If the order is not filled within trade_time_limit minutes cancel it.
@@ -184,6 +184,7 @@ def buy(coin_pair, btc_quantity, price, trade_time_limit):
     :param coin_pair:
     :param btc_quantity:
     :param price:
+    :param stats:
     :param trade_time_limit:
 
     :return:
@@ -199,8 +200,40 @@ def buy(coin_pair, btc_quantity, price, trade_time_limit):
         return with error
     store order in correct format
     """
+    Messenger.send_buy_email(coin_pair, btc_quantity, price, stats["rsi"], stats["24HrVolume"], 'JP')
+    Messenger.print_buy(coin_pair, price, stats["rsi"], stats["24HrVolume"])
+    Messenger.play_beep()
+    Database.store_buy(coin_pair, price, stats["rsi"], stats["24HrVolume"])
 
-    return 0
+
+def sell(coin_pair, btc_quantity, price, stats, trade_time_limit=2):
+    """
+    Used to place a sell order to Bittrex. Wait until the order is completed.
+    If the order is not filled within trade_time_limit minutes cancel it.
+
+    :param coin_pair:
+    :param btc_quantity:
+    :param price:
+    :param stats:
+    :param trade_time_limit:
+
+    :return:
+    """
+    """
+    place limit sell
+    wait 5 seconds
+    get order
+    while less than trade_time_limit minutes have passed and order hasn't completed:
+        wait 5 seconds
+        get order
+    if order hasn't completed:
+        return with error
+    store order in correct format
+    """
+    Messenger.send_buy_email(coin_pair, btc_quantity, price, stats["rsi"], stats["profitMargin"], 'JP')
+    Messenger.print_sell(coin_pair, price, stats["rsi"], stats["profitMargin"])
+    Messenger.play_beep()
+    Database.store_sell(coin_pair, price, stats["rsi"], stats["profitMargin"])
 
 
 def buy_strategy(coin_pair):
@@ -211,10 +244,11 @@ def buy_strategy(coin_pair):
     current_buy_price = get_current_price(coin_pair, 'ask')
     if rsi is not None and rsi <= 25 and day_volume >= 50 and current_buy_price > 0.00001:
         # TODO: Buy code
-        Messenger.send_buy_email(coin_pair, 0.00001, current_buy_price, rsi, day_volume, 'JP')
-        Messenger.print_buy(coin_pair, rsi, day_volume, current_buy_price)
-        Messenger.play_beep()
-        Database.store_buy(coin_pair, current_buy_price, rsi, day_volume)
+        buy_stats = {
+            "rsi": rsi,
+            "24HrVolume": day_volume
+        }
+        buy(coin_pair, 0.00001, current_buy_price, buy_stats)
     elif rsi is not None and rsi <= 50:
         Messenger.print_no_buy_string(coin_pair, rsi, day_volume, current_buy_price)
 
@@ -223,14 +257,15 @@ def sell_strategy(coin_pair):
     if coin_pair not in Database.trades['trackedCoinPairs']:
         return
     rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit='fiveMin')
-    day_volume = get_current_24hr_volume(coin_pair)
     current_sell_price = get_current_price(coin_pair, 'bid')
     profit_margin = Database.get_profit_margin(coin_pair, current_sell_price)
     if (rsi is not None and rsi >= 50 and profit_margin >= 0) or profit_margin > 2.5:
         # TODO: Sell code
-        Messenger.print_sell(coin_pair, rsi, profit_margin, current_sell_price)
-        Messenger.play_beep()
-        Database.store_sell(coin_pair, current_sell_price, rsi, day_volume)
+        sell_stats = {
+            "rsi": rsi,
+            "profitMargin": profit_margin
+        }
+        sell(coin_pair, 0.00001, current_sell_price, sell_stats)
     elif rsi is not None:
         Messenger.print_no_sell_string(coin_pair, rsi, profit_margin, current_sell_price)
 
