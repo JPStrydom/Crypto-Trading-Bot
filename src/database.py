@@ -31,12 +31,16 @@ class Database(object):
         :param btc_amount: Amount of BTC to spend on coin
         :type btc_amount: float
         """
+
         if coin_pair in self.simulated_trades['trackedCoinPairs']:
             return logger.warning("Trying to buy on the {} market, which is already a tracked coin pair")
+
         current_date = datetime.now().strftime('%Y/%m/%d %I:%M:%S')
+        amount = round(btc_amount * (1 - bittrex_trade_commission) / price, 8)
+
         new_buy_object = {
             "coinPair": coin_pair,
-            "amount": round(btc_amount * (1 - bittrex_trade_commission) / price, 8),
+            "amount": amount,
             "buy": {
                 "date": current_date,
                 "rsi": rsi,
@@ -47,6 +51,7 @@ class Database(object):
 
         self.simulated_trades['trackedCoinPairs'].append(coin_pair)
         self.simulated_trades['trades'].append(new_buy_object)
+
         write_json_to_file(self.file_string, self.simulated_trades)
 
     def simulate_sell(self, coin_pair, price, rsi=-1, day_volume=-1):
@@ -62,22 +67,24 @@ class Database(object):
         :param day_volume: Market's 24 hour volume
         :type day_volume: float
         """
+
         if coin_pair not in self.simulated_trades['trackedCoinPairs']:
             return logger.warning("Trying to sell on the {} market, which is not a tracked coin pair")
+
         current_date = datetime.now().strftime('%Y/%m/%d %I:%M:%S')
+        simulated_trade = self.get_simulated_open_trade(coin_pair)
+
         sell_object = {
             "date": current_date,
             "rsi": rsi,
             "24HrVolume": day_volume,
             "price": price
         }
-        profit_margin = self.get_simulated_profit_margin(coin_pair, price)
+        profit_margin = self.get_simulated_profit_margin(coin_pair, price, simulated_trade)
 
         self.simulated_trades['trackedCoinPairs'].remove(coin_pair)
-
-        simulated_trade = self.get_simulated_open_trade(coin_pair)
         simulated_trade['sell'] = sell_object
-        simulated_trade['profit_margin'] = profit_margin
+        simulated_trade['profitMargin'] = profit_margin
 
         write_json_to_file(self.file_string, self.simulated_trades)
 
@@ -88,6 +95,7 @@ class Database(object):
         :param coin_pair: String literal for the market (ex: BTC-LTC)
         :type coin_pair: str
         """
+
         trade_index = py_.find_index(self.simulated_trades['trades'],
                                      lambda trade: trade['coinPair'] == coin_pair and 'sell' not in trade)
         if trade_index == -1:
@@ -95,7 +103,7 @@ class Database(object):
             return None
         return self.simulated_trades['trades'][trade_index]
 
-    def get_simulated_profit_margin(self, coin_pair, current_price):
+    def get_simulated_profit_margin(self, coin_pair, current_price, trade=None):
         """
         Used to get the simulated profit margin for a coin pair simulated trade
 
@@ -103,9 +111,18 @@ class Database(object):
         :type coin_pair: str
         :param current_price: Market's current price
         :type current_price: float
+        :param trade: The trade to get the profit margin on
+            Not required If empty, find it
+        :type trade: dict
+
+        :return: Profit margin
+        :rtype : float
         """
-        trade = self.get_simulated_open_trade(coin_pair)
-        buy_btc_amount = round(trade['amount'] * trade['buy']['price'], 8)
+
+        if trade is None:
+            trade = self.get_simulated_open_trade(coin_pair)
+
+        buy_btc_amount = round(trade['amount'] * trade['buy']['price'] / (1 - bittrex_trade_commission), 8)
         sell_btc_amount = round(trade['amount'] * current_price * (1 - bittrex_trade_commission), 8)
 
         profit_margin = 100 * (sell_btc_amount - buy_btc_amount) / buy_btc_amount
