@@ -9,23 +9,23 @@ class Messenger(object):
     """
 
     def __init__(self, secrets):
-        self.from_address = secrets['gmail']['username']
-        self.to_address_list = secrets['gmail']['address_list']
-        self.login = secrets['gmail']['username']
-        self.password = secrets['gmail']['password']
-        self.smtp_server = 'smtp.gmail.com:587'
+        self.from_address = secrets["gmail"]["username"]
+        self.to_address_list = secrets["gmail"]["address_list"]
+        self.login = secrets["gmail"]["username"]
+        self.password = secrets["gmail"]["password"]
+        self.smtp_server = "smtp.gmail.com:587"
 
-        self.header_str = '\nTracking {} Bittrex Markets\n'
+        self.header_str = "\nTracking {} Bittrex Markets\n"
 
-        self.buy_str = 'Buy on {:<10}\t->\t\tRSI: {:>2}\t\t24 Hour Volume: {:>5} {}\t\t Buy Price: {:.8f}\t\tURL: {}'
-        self.sell_str = 'Sell on {:<10}\t->\t\tRSI: {:>2}\t\tProfit Margin: {:>4} %\t\t Sell Price: {:.8f}\t\tURL: {}'
+        self.buy_str = "Buy on {:<10}\t->\t\tRSI: {:>2}\t\t24 Hour Volume: {:>5} {}\t\t Buy Price: {:.8f}\t\tURL: {}"
+        self.sell_str = "Sell on {:<10}\t->\t\tRSI: {:>2}\t\tProfit Margin: {:>4} %\t\t Sell Price: {:.8f}\t\tURL: {}"
 
-        self.previous_no_sell_str = ''
+        self.previous_no_sell_str = ""
 
         self.error_str = {
-            'connection': '\nUnable to connect to the internet. Please check your connection and try again.\n',
-            'JSONDecode': '\nFailed to decode JSON.\n',
-            'unknown': '\nAn unknown exception occurred.\n'
+            "connection": "\nUnable to connect to the internet. Please check your connection and try again.\n",
+            "JSONDecode": "\nFailed to decode JSON.\n",
+            "unknown": "\nAn unknown exception occurred.\n"
         }
 
     @staticmethod
@@ -33,7 +33,7 @@ class Messenger(object):
         """
         Generates the URL string for the coin pairs Bittrex page
         """
-        return 'https://bittrex.com/Market/Index?MarketName={}'.format(coin_pair)
+        return "https://bittrex.com/Market/Index?MarketName={}".format(coin_pair)
 
     def send_email(self, subject, message):
         """
@@ -48,9 +48,9 @@ class Messenger(object):
         :return: Errors received from the smtp server (if any)
         :rtype : dict
         """
-        header = 'From: %s\n' % self.from_address
-        header += 'To: %s\n' % ','.join(self.to_address_list)
-        header += 'Subject: %s\n\n' % subject
+        header = "From: %s\n" % self.from_address
+        header += "To: %s\n" % ",".join(self.to_address_list)
+        header += "Subject: %s\n\n" % subject
         message = header + message
 
         server = smtplib.SMTP(self.smtp_server)
@@ -60,7 +60,7 @@ class Messenger(object):
         server.quit()
         return errors
 
-    def send_RSI_email(self, coin_pair, rsi, day_volume, recipient_name='Folks'):
+    def send_RSI_email(self, coin_pair, rsi, day_volume, recipient_name="Folks"):
         """
         Used to send a low RSI specific email from the account specified in the secrets.json file to the entire
         address list specified in the secrets.json file
@@ -74,14 +74,14 @@ class Messenger(object):
         :param recipient_name: Name of the email's recipient (ex: John)
         :type recipient_name: str
         """
-        subject = 'Crypto Bot: Low RSI on {} Market'.format(coin_pair)
+        subject = "Crypto Bot: Low RSI on {} Market".format(coin_pair)
         message = "Howdy {},\n\nI've detected a low RSI of {} on the {} market. " \
                   "The current 24 hour market volume is {}\n\nHere's a Bittrex URL: {}" \
                   "\n\nRegards,\nCrypto Bot".format(recipient_name, round(rsi), coin_pair, round(day_volume),
                                                     self.generate_bittrex_URL(coin_pair))
         self.send_email(subject, message)
 
-    def send_buy_email(self, coin_pair, quantity, unit_price, rsi, day_volume, recipient_name='Folks'):
+    def send_buy_email(self, coin_pair, quantity, unit_price, rsi, day_volume, recipient_name="Folks"):
         """
         Used to send a buy specific email from the account specified in the secrets.json file to the entire
         address list specified in the secrets.json file
@@ -90,26 +90,26 @@ class Messenger(object):
         :type coin_pair: str
         :param quantity: The quantity of coin pair bought
         :type quantity: float
-        :param unit_price: The coin's unit price
+        :param unit_price: The coin"s unit price
         :type unit_price: float
         :param rsi: Low RSI
         :type rsi: float
-        :param day_volume: Coin pair's current 24 hour volume
+        :param day_volume: Coin pair"s current 24 hour volume
         :type day_volume: float
-        :param recipient_name: Name of the email's recipient (ex: John)
+        :param recipient_name: Name of the email"s recipient (ex: John)
         :type recipient_name: str
         """
         btc_value = round(quantity * unit_price, 8)
-        main_market, coin = coin_pair.split('-')
-        subject = 'Crypto Bot: Buy on {} Market'.format(coin_pair)
+        main_market, coin = coin_pair.split("-")
+        subject = "Crypto Bot: Buy on {} Market".format(coin_pair)
         message = "Howdy {},\n\nI've just bought {} {} on the {} market - which is currently valued at {} {}.\n\n" \
                   "The market currently has an RSI of {} and a 24 hour market volume of {}.\n\n" \
                   "Here's a Bittrex URL: {}\n\nRegards,\n" \
                   "Crypto Bot".format(recipient_name, round(quantity, 4), coin, coin_pair, btc_value, main_market,
-                                      round(rsi), coin_pair, day_volume, self.generate_bittrex_URL(coin_pair))
+                                      round(rsi), day_volume, self.generate_bittrex_URL(coin_pair))
         self.send_email(subject, message)
 
-    def send_sell_email(self, coin_pair, quantity, unit_price, rsi, profit_margin, recipient_name='Folks'):
+    def send_sell_email(self, coin_pair, quantity, unit_price, rsi, profit_margin, recipient_name="Folks"):
         """
         Used to send a sell specific email from the account specified in the secrets.json file to the entire
         address list specified in the secrets.json file
@@ -128,8 +128,8 @@ class Messenger(object):
         :type recipient_name: str
         """
         btc_value = round(quantity * unit_price, 8)
-        main_market, coin = coin_pair.split('-')
-        subject = 'Crypto Bot: Sell on {} Market'.format(coin_pair)
+        main_market, coin = coin_pair.split("-")
+        subject = "Crypto Bot: Sell on {} Market".format(coin_pair)
         message = "Howdy {},\n\nI've just sold {} {} on the {} market - which is currently valued at {} {}.\n\n" \
                   "The market currently has an RSI of {} and a profit of {}% was made.\n\n" \
                   "Here's a Bittrex URL: {}\n\nRegards,\n" \
@@ -144,7 +144,7 @@ class Messenger(object):
         :param num_of_coin_pairs: Quantity of available Bittrex market pairs
         :type num_of_coin_pairs: int
         """
-        cprint(self.header_str.format(num_of_coin_pairs), attrs=['bold', 'underline'])
+        cprint(self.header_str.format(num_of_coin_pairs), attrs=["bold", "underline"])
 
     def print_buy(self, coin_pair, current_buy_price, rsi, day_volume):
         """
@@ -159,9 +159,9 @@ class Messenger(object):
         :param day_volume: Coin pair's current 24 hour volume
         :type day_volume: float
         """
-        main_market, coin = coin_pair.split('-')
+        main_market, coin = coin_pair.split("-")
         cprint(self.buy_str.format(coin_pair, round(rsi), round(day_volume), main_market, current_buy_price,
-                                   self.generate_bittrex_URL(coin_pair)), 'blue', attrs=['bold'])
+                                   self.generate_bittrex_URL(coin_pair)), "blue", attrs=["bold"])
 
     def print_sell(self, coin_pair, current_sell_price, rsi, profit_margin):
         """
@@ -177,7 +177,7 @@ class Messenger(object):
         :type profit_margin: float
         """
         cprint(self.sell_str.format(coin_pair, round(rsi), round(profit_margin, 2), current_sell_price,
-                                    self.generate_bittrex_URL(coin_pair)), 'green', attrs=['bold'])
+                                    self.generate_bittrex_URL(coin_pair)), "green", attrs=["bold"])
 
     def print_no_buy_string(self, coin_pair, rsi, day_volume, current_buy_price):
         """
@@ -192,10 +192,10 @@ class Messenger(object):
         :param current_buy_price: Market's current price
         :type current_buy_price: float
         """
-        main_market, coin = coin_pair.split('-')
-        print_str = 'No ' + self.buy_str.format(coin_pair, round(rsi), round(day_volume), main_market,
+        main_market, coin = coin_pair.split("-")
+        print_str = "No " + self.buy_str.format(coin_pair, round(rsi), round(day_volume), main_market,
                                                 current_buy_price, self.generate_bittrex_URL(coin_pair))
-        cprint(print_str, 'grey')
+        cprint(print_str, "grey")
 
     def print_no_sell_string(self, coin_pair, rsi, profit_margin, current_sell_price):
         """
@@ -210,11 +210,11 @@ class Messenger(object):
         :param current_sell_price: Market's current price
         :type current_sell_price: float
         """
-        print_str = 'No ' + self.sell_str.format(coin_pair, round(rsi), round(profit_margin, 2), current_sell_price,
+        print_str = "No " + self.sell_str.format(coin_pair, round(rsi), round(profit_margin, 2), current_sell_price,
                                                  self.generate_bittrex_URL(coin_pair))
         if print_str != self.previous_no_sell_str:
             self.previous_no_sell_str = print_str
-            cprint(print_str, 'red')
+            cprint(print_str, "red")
 
     def print_error_string(self, error_type):
         """
@@ -222,7 +222,7 @@ class Messenger(object):
 
         :param error_type: The error type (one of: 'connection', 'JSONDecode', 'unknown')
         """
-        cprint(self.error_str[error_type], 'red', attrs=['bold'])
+        cprint(self.error_str[error_type], "red", attrs=["bold"])
 
     @staticmethod
     def play_beep(frequency=2000, duration=1000):
