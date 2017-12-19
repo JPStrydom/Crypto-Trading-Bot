@@ -188,7 +188,7 @@ def buy_strategy(coin_pair):
         Messenger.print_buy(coin_pair, rsi, day_volume, current_buy_price)
         Messenger.play_beep()
         Database.store_buy(coin_pair, current_buy_price, rsi, day_volume)
-    elif rsi is not None:
+    elif rsi is not None and rsi <= 50:
         Messenger.print_no_buy_string(coin_pair, rsi, day_volume, current_buy_price)
 
 
@@ -219,6 +219,7 @@ if __name__ == '__main__':
         for coin_pair in Database.trades['trackedCoinPairs']:
             sell_strategy(coin_pair)
 
+
     try:
         btc_coin_pairs = get_markets('BTC')
         Messenger.print_header(len(btc_coin_pairs))
@@ -238,7 +239,6 @@ if __name__ == '__main__':
         except Exception:
             Messenger.print_error_string('unknown')
             logger.exception(Exception)
-
 
 """"
 TODO: New Trade Structure

@@ -88,7 +88,7 @@ class Messenger(object):
         """
         Used to print the console header
 
-        :param num_of_coin_pairs: Amount of available Bittrex market pairs
+        :param num_of_coin_pairs: Quantity of available Bittrex market pairs
         :type num_of_coin_pairs: int
         """
         cprint(self.header_str.format(num_of_coin_pairs), attrs=['bold', 'underline'])

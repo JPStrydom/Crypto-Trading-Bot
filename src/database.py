@@ -16,7 +16,7 @@ class Database(object):
         self.file_string = 'database/trades.json'
         self.trades = get_json_from_file(self.file_string, {"trackedCoinPairs": [], "trades": []})
 
-    def store_buy(self, coin_pair, price, rsi=-1, day_volume=-1, btc_amount=0.00001):
+    def store_buy(self, coin_pair, price, rsi=-1, day_volume=-1, btc_quantity=0.00001):
         """
         Used to place a trade in the database
 
@@ -28,8 +28,8 @@ class Database(object):
         :type rsi: float
         :param day_volume: Market's 24 hour volume
         :type day_volume: float
-        :param btc_amount: Amount of BTC to spend on coin
-        :type btc_amount: float
+        :param btc_quantity: Quantity of BTC to spend on coin
+        :type btc_quantity: float
         """
         if coin_pair in self.trades['trackedCoinPairs']:
             return logger.warning("Trying to buy on the {} market, which is already a tracked coin pair")
@@ -38,7 +38,7 @@ class Database(object):
 
         new_buy_object = {
             "coinPair": coin_pair,
-            "amount": round(btc_amount * (1 - bittrex_trade_commission) / price, 8),
+            "quantity": round(btc_quantity * (1 - bittrex_trade_commission) / price, 8),
             "buy": {
                 "date": current_date,
                 "rsi": rsi,
@@ -122,9 +122,9 @@ class Database(object):
         if trade is None:
             trade = self.get_open_trade(coin_pair)
 
-        buy_btc_amount = round(trade['amount'] * trade['buy']['price'] / (1 - bittrex_trade_commission), 8)
-        sell_btc_amount = round(trade['amount'] * current_price * (1 - bittrex_trade_commission), 8)
+        buy_btc_quantity = round(trade['quantity'] * trade['buy']['price'] / (1 - bittrex_trade_commission), 8)
+        sell_btc_quantity = round(trade['quantity'] * current_price * (1 - bittrex_trade_commission), 8)
 
-        profit_margin = 100 * (sell_btc_amount - buy_btc_amount) / buy_btc_amount
+        profit_margin = 100 * (sell_btc_quantity - buy_btc_quantity) / buy_btc_quantity
 
         return profit_margin
