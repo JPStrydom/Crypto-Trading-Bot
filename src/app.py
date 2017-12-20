@@ -1,4 +1,5 @@
 import pydash as py_
+import time
 
 from src.bittrex import Bittrex
 from src.messenger import Messenger
@@ -6,7 +7,7 @@ from src.database import Database
 from src.logger import logger
 from src.directory_utilities import get_json_from_file
 
-secrets_file_directory = 'database/secrets.json'
+secrets_file_directory = "database/secrets.json"
 secrets_template = {
     "bittrex": {
         "bittrex_key": "BITTREX_API_KEY",
@@ -24,7 +25,7 @@ secrets_template = {
 }
 secrets = get_json_from_file(secrets_file_directory, secrets_template)
 if secrets == secrets_template:
-    print('Please completed the `secrets.json` file in your `database` directory')
+    print("Please completed the `secrets.json` file in your `database` directory")
     exit()
 
 Bittrex = Bittrex(secrets)
@@ -43,15 +44,15 @@ def get_markets(main_market_filter=None):
     :rtype : list
     """
     markets = Bittrex.get_markets()
-    if not markets['success']:
-        logger.error('Failed to fetch Bittrex markets')
+    if not markets["success"]:
+        logger.error("Failed to fetch Bittrex markets")
         exit()
 
-    markets = markets['result']
+    markets = markets["result"]
     if main_market_filter is not None:
-        market_check = main_market_filter + '-'
-        markets = py_.filter_(markets, lambda market: market_check in market['MarketName'])
-    markets = py_.map_(markets, lambda market: market['MarketName'])
+        market_check = main_market_filter + "-"
+        markets = py_.filter_(markets, lambda market: market_check in market["MarketName"])
+    markets = py_.map_(markets, lambda market: market["MarketName"])
     return markets
 
 
@@ -68,14 +69,14 @@ def get_current_price(coin_pair, price_type):
     :rtype : float
     """
     coin_summary = Bittrex.get_market_summary(coin_pair)
-    if not coin_summary['success']:
-        logger.error('Failed to fetch Bittrex market summary for the {} market'.format(coin_pair))
+    if not coin_summary["success"]:
+        logger.error("Failed to fetch Bittrex market summary for the {} market".format(coin_pair))
         return None
-    if price_type == 'ask':
-        return coin_summary['result'][0]['Ask']
-    if price_type == 'bid':
-        return coin_summary['result'][0]['Bid']
-    return coin_summary['result'][0]['Last']
+    if price_type == "ask":
+        return coin_summary["result"][0]["Ask"]
+    if price_type == "bid":
+        return coin_summary["result"][0]["Bid"]
+    return coin_summary["result"][0]["Last"]
 
 
 def get_current_24hr_volume(coin_pair):
@@ -89,10 +90,10 @@ def get_current_24hr_volume(coin_pair):
     :rtype : float
     """
     coin_summary = Bittrex.get_market_summary(coin_pair)
-    if not coin_summary['success']:
-        logger.error('Failed to fetch Bittrex market summary for the {} market'.format(coin_pair))
+    if not coin_summary["success"]:
+        logger.error("Failed to fetch Bittrex market summary for the {} market".format(coin_pair))
         return None
-    return coin_summary['result'][0]['BaseVolume']
+    return coin_summary["result"][0]["BaseVolume"]
 
 
 def get_closing_prices(coin_pair, period, unit):
@@ -112,7 +113,7 @@ def get_closing_prices(coin_pair, period, unit):
     historical_data = Bittrex.get_historical_data(coin_pair, period, unit)
     closing_prices = []
     for i in historical_data:
-        closing_prices.append(i['C'])
+        closing_prices.append(i["C"])
     return closing_prices
 
 
@@ -176,7 +177,8 @@ def calculate_RSI(coin_pair, period, unit):
     return new_rs
 
 
-def buy(coin_pair, btc_quantity, price, stats, trade_time_limit=2):
+def buy(coin_pair, btc_quantity, price, stats, trade_time_limit=1):
+    # TODO: Finish buy code
     """
     Used to place a buy order to Bittrex. Wait until the order is completed.
     If the order is not filled within trade_time_limit minutes cancel it.
@@ -189,7 +191,25 @@ def buy(coin_pair, btc_quantity, price, stats, trade_time_limit=2):
 
     :return:
     """
-    """
+    quantity_to_buy = btc_quantity / price
+    buy_data = Bittrex.buy_limit(coin_pair, quantity_to_buy, price)
+
+    if not buy_data["success"]:
+        return logger.error("Failed to buy on {} market.".format(coin_pair))
+
+    Database.store_initial_buy(coin_pair, buy_data["result"]["uuid"])
+
+    start_time = time.time()
+    buy_order_data = Bittrex.get_order(buy_data["result"]["uuid"])
+    while time.time() - start_time <= trade_time_limit * 60 and buy_order_data["result"]["IsOpen"]:
+        buy_order_data = Bittrex.get_order(buy_data["result"]["uuid"])
+
+    if buy_order_data["result"]["IsOpen"]:
+        logger.error("Failed to complete buy order on {} within {} minutes.".format(coin_pair, trade_time_limit * 60))
+        Bittrex.cancel(buy_data["result"]["uuid"])
+
+    Database.store_buy(buy_order_data["result"], stats)
+    """ PSUDO
     place limit buy
     wait 5 seconds
     get order
@@ -200,93 +220,91 @@ def buy(coin_pair, btc_quantity, price, stats, trade_time_limit=2):
         return with error
     store order in correct format
     """
-    Messenger.send_buy_email(coin_pair, btc_quantity, price, stats["rsi"], stats["24HrVolume"], 'JP')
+    Messenger.send_buy_email(coin_pair, btc_quantity / price, price, stats["rsi"], stats["24HrVolume"], "JP")
     Messenger.print_buy(coin_pair, price, stats["rsi"], stats["24HrVolume"])
     Messenger.play_beep()
-    Database.store_buy(coin_pair, price, stats["rsi"], stats["24HrVolume"])
+    # Database.store_buy(coin_pair, price, stats["rsi"], stats["24HrVolume"], btc_quantity)
 
 
-def sell(coin_pair, btc_quantity, price, stats, trade_time_limit=2):
+def sell(coin_pair, price, stats, trade_time_limit=2):
+    # TODO: Finish sell code
     """
     Used to place a sell order to Bittrex. Wait until the order is completed.
     If the order is not filled within trade_time_limit minutes cancel it.
 
     :param coin_pair:
-    :param btc_quantity:
     :param price:
     :param stats:
     :param trade_time_limit:
 
     :return:
     """
-    """
+    """ PSUDO
     place limit sell
     wait 5 seconds
     get order
-    while less than trade_time_limit minutes have passed and order hasn't completed:
+    while less than trade_time_limit minutes have passed and order hasn"t completed:
         wait 5 seconds
         get order
     if order hasn't completed:
         return with error
     store order in correct format
     """
-    Messenger.send_buy_email(coin_pair, btc_quantity, price, stats["rsi"], stats["profitMargin"], 'JP')
+    # Messenger.send_sell_email(coin_pair, btc_quantity, price, stats["rsi"], stats["profitMargin"], "JP")
     Messenger.print_sell(coin_pair, price, stats["rsi"], stats["profitMargin"])
     Messenger.play_beep()
     Database.store_sell(coin_pair, price, stats["rsi"], stats["profitMargin"])
 
 
 def buy_strategy(coin_pair):
-    if coin_pair in Database.trades['trackedCoinPairs']:
+    if coin_pair in Database.trades["trackedCoinPairs"]:
         return
-    rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit='fiveMin')
+    rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit="fiveMin")
     day_volume = get_current_24hr_volume(coin_pair)
-    current_buy_price = get_current_price(coin_pair, 'ask')
+    current_buy_price = get_current_price(coin_pair, "ask")
     if rsi is not None and rsi <= 25 and day_volume >= 50 and current_buy_price > 0.00001:
-        # TODO: Buy code
         buy_stats = {
             "rsi": rsi,
             "24HrVolume": day_volume
         }
-        buy(coin_pair, 0.00001, current_buy_price, buy_stats)
+        buy(coin_pair, 0.001, current_buy_price, buy_stats)
     elif rsi is not None and rsi <= 50:
         Messenger.print_no_buy_string(coin_pair, rsi, day_volume, current_buy_price)
 
 
 def sell_strategy(coin_pair):
-    if coin_pair not in Database.trades['trackedCoinPairs']:
+    if coin_pair not in Database.trades["trackedCoinPairs"]:
         return
-    rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit='fiveMin')
-    current_sell_price = get_current_price(coin_pair, 'bid')
+    rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit="fiveMin")
+    current_sell_price = get_current_price(coin_pair, "bid")
     profit_margin = Database.get_profit_margin(coin_pair, current_sell_price)
     if (rsi is not None and rsi >= 50 and profit_margin >= 0) or profit_margin > 2.5:
-        # TODO: Sell code
         sell_stats = {
             "rsi": rsi,
             "profitMargin": profit_margin
         }
-        sell(coin_pair, 0.00001, current_sell_price, sell_stats)
+        sell(coin_pair, current_sell_price, sell_stats)
     elif rsi is not None:
         Messenger.print_no_sell_string(coin_pair, rsi, profit_margin, current_sell_price)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     def analyse_buys():
-        if len(Database.trades['trackedCoinPairs']) < 1:
+        if len(Database.trades["trackedCoinPairs"]) < 1:
             for coin_pair in btc_coin_pairs:
                 buy_strategy(coin_pair)
 
 
     def analyse_sells():
-        for coin_pair in Database.trades['trackedCoinPairs']:
+        for coin_pair in Database.trades["trackedCoinPairs"]:
             sell_strategy(coin_pair)
 
 
     try:
-        btc_coin_pairs = get_markets('BTC')
+        btc_coin_pairs = get_markets("BTC")
         Messenger.print_header(len(btc_coin_pairs))
     except ConnectionError as exception:
-        Messenger.print_error_string('connection')
+        Messenger.print_error_string("connection")
         logger.exception(exception)
         exit()
 
@@ -296,10 +314,10 @@ if __name__ == '__main__':
             analyse_sells()
 
         except ConnectionError as exception:
-            Messenger.print_error_string('connection')
+            Messenger.print_error_string("connection")
             logger.exception(exception)
         except Exception:
-            Messenger.print_error_string('unknown')
+            Messenger.print_error_string("unknown")
             logger.exception(Exception)
 
 """"
