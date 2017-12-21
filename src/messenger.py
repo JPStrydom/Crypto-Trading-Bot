@@ -17,8 +17,8 @@ class Messenger(object):
 
         self.header_str = "\nTracking {} Bittrex Markets\n"
 
-        self.buy_str = "Buy on {:<10}\t->\t\tRSI: {:>2}\t\t24 Hour Volume: {:>5} {}\t\t Buy Price: {:.8f}\t\tURL: {}"
-        self.sell_str = "Sell on {:<10}\t->\t\tRSI: {:>2}\t\tProfit Margin: {:>4} %\t\t Sell Price: {:.8f}\t\tURL: {}"
+        self.buy_str = "Buy on {:<10}\t->\t\tRSI: {:>2}\t\t24 Hour Volume: {:>5} {}\t\tBuy Price: {:.8f}\t\tURL: {}"
+        self.sell_str = "Sell on {:<10}\t->\t\tRSI: {:>2}\t\tProfit Margin: {:>4} %\t\tSell Price: {:.8f}\t\tURL: {}"
 
         self.previous_no_sell_str = ""
 
