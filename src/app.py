@@ -220,11 +220,10 @@ def buy(coin_pair, btc_quantity, price, stats, trade_time_limit=1):
 
     Messenger.send_buy_email(coin_pair, btc_quantity / price, price, stats["rsi"], stats["24HrVolume"], "JP")
     Messenger.print_buy(coin_pair, price, stats["rsi"], stats["24HrVolume"])
-    Messenger.play_beep()
+    Messenger.play_sw_imperial_march()
 
 
 def sell(coin_pair, price, stats, trade_time_limit=1):
-    # TODO: Finish sell code
     """
     Used to place a sell order to Bittrex. Wait until the order is completed.
     If the order is not filled within trade_time_limit minutes cancel it.
@@ -250,7 +249,7 @@ def sell(coin_pair, price, stats, trade_time_limit=1):
 
     Messenger.send_sell_email(coin_pair, trade["quantity"], price, stats["rsi"], stats["profitMargin"], "JP")
     Messenger.print_sell(coin_pair, price, stats["rsi"], stats["profitMargin"])
-    Messenger.play_beep()
+    Messenger.play_sw_theme()
 
 
 def get_order(order_uuid, trade_time_limit):

@@ -1,6 +1,8 @@
 import smtplib
 import winsound
+import time
 from termcolor import cprint
+from math import floor, ceil
 
 
 class Messenger(object):
@@ -17,8 +19,8 @@ class Messenger(object):
 
         self.header_str = "\nTracking {} Bittrex Markets\n"
 
-        self.buy_str = "Buy on {:<10}\t->\t\tRSI: {:>4}\t\t24 Hour Volume: {:>5} {}\t\tBuy Price: {:.8f}\t\tURL: {}"
-        self.sell_str = "Sell on {:<10}\t->\t\tRSI: {:>4}\t\tProfit Margin: {:>4} %\t\tSell Price: {:.8f}\t\tURL: {}"
+        self.buy_str = "Buy on {:<10}\t->\t\tRSI: {:>2}\t\t24 Hour Volume: {:>5} {}\t\tBuy Price: {:.8f}\t\tURL: {}"
+        self.sell_str = "Sell on {:<10}\t->\t\tRSI: {:>2}\t\tProfit Margin: {:>4} %\t\tSell Price: {:.8f}\t\tURL: {}"
 
         self.previous_no_sell_str = ""
 
@@ -80,7 +82,7 @@ class Messenger(object):
         subject = "Crypto Bot: Low RSI on {} Market".format(coin_pair)
         message = "Howdy {},\n\nI've detected a low RSI of {} on the {} market. " \
                   "The current 24 hour market volume is {}\n\nHere's a Bittrex URL: {}" \
-                  "\n\nRegards,\nCrypto Bot".format(recipient_name, round(rsi, 2), coin_pair, round(day_volume, 2),
+                  "\n\nRegards,\nCrypto Bot".format(recipient_name, ceil(rsi), coin_pair, floor(day_volume),
                                                     self.generate_bittrex_URL(coin_pair))
         self.send_email(subject, message)
 
@@ -109,7 +111,7 @@ class Messenger(object):
                   "The market currently has an RSI of {} and a 24 hour market volume of {}.\n\n" \
                   "Here's a Bittrex URL: {}\n\nRegards,\n" \
                   "Crypto Bot".format(recipient_name, round(quantity, 4), coin, coin_pair, btc_value, main_market,
-                                      round(rsi, 2), round(day_volume, 2), self.generate_bittrex_URL(coin_pair))
+                                      ceil(rsi), floor(day_volume), self.generate_bittrex_URL(coin_pair))
         self.send_email(subject, message)
 
     def send_sell_email(self, coin_pair, quantity, unit_price, rsi, profit_margin, recipient_name="Folks"):
@@ -137,7 +139,7 @@ class Messenger(object):
                   "The market currently has an RSI of {} and a profit of {}% was made.\n\n" \
                   "Here's a Bittrex URL: {}\n\nRegards,\n" \
                   "Crypto Bot".format(recipient_name, round(quantity, 4), coin, coin_pair, btc_value, main_market,
-                                      round(rsi, 2), coin_pair, round(profit_margin, 2),
+                                      floor(rsi), coin_pair, round(profit_margin, 2),
                                       self.generate_bittrex_URL(coin_pair))
         self.send_email(subject, message)
 
@@ -164,7 +166,7 @@ class Messenger(object):
         :type day_volume: float
         """
         main_market, coin = coin_pair.split("-")
-        cprint(self.buy_str.format(coin_pair, round(rsi, 2), round(day_volume, 2), main_market, current_buy_price,
+        cprint(self.buy_str.format(coin_pair, ceil(rsi), floor(day_volume), main_market, current_buy_price,
                                    self.generate_bittrex_URL(coin_pair)), "blue", attrs=["bold"])
 
     def print_sell(self, coin_pair, current_sell_price, rsi, profit_margin):
@@ -180,7 +182,7 @@ class Messenger(object):
         :param profit_margin: Profit made on the trade
         :type profit_margin: float
         """
-        cprint(self.sell_str.format(coin_pair, round(rsi, 2), round(profit_margin, 2), current_sell_price,
+        cprint(self.sell_str.format(coin_pair, floor(rsi), round(profit_margin, 2), current_sell_price,
                                     self.generate_bittrex_URL(coin_pair)), "green", attrs=["bold"])
 
     def print_no_buy_string(self, coin_pair, rsi, day_volume, current_buy_price):
@@ -197,7 +199,7 @@ class Messenger(object):
         :type current_buy_price: float
         """
         main_market, coin = coin_pair.split("-")
-        print_str = "No " + self.buy_str.format(coin_pair, round(rsi, 2), round(day_volume, 2), main_market,
+        print_str = "No " + self.buy_str.format(coin_pair, ceil(rsi), floor(day_volume), main_market,
                                                 current_buy_price, self.generate_bittrex_URL(coin_pair))
         cprint(print_str, "grey")
 
@@ -214,7 +216,7 @@ class Messenger(object):
         :param current_sell_price: Market's current price
         :type current_sell_price: float
         """
-        print_str = "No " + self.sell_str.format(coin_pair, round(rsi, 2), round(profit_margin, 2), current_sell_price,
+        print_str = "No " + self.sell_str.format(coin_pair, floor(rsi), round(profit_margin, 2), current_sell_price,
                                                  self.generate_bittrex_URL(coin_pair))
         if print_str != self.previous_no_sell_str:
             self.previous_no_sell_str = print_str
@@ -241,3 +243,62 @@ class Messenger(object):
         :type duration: int
         """
         winsound.Beep(frequency, duration)
+
+    @staticmethod
+    def play_sw_theme():
+        """
+        Used to play the Star Wars theme song
+        """
+        winsound.Beep(1046, 800)
+        winsound.Beep(1567, 800)
+        winsound.Beep(1396, 50)
+        winsound.Beep(1318, 50)
+        winsound.Beep(1174, 50)
+        winsound.Beep(2093, 800)
+
+        time.sleep(0.3)
+
+        winsound.Beep(1567, 600)
+        winsound.Beep(1396, 50)
+        winsound.Beep(1318, 50)
+        winsound.Beep(1174, 50)
+        winsound.Beep(2093, 800)
+
+        time.sleep(0.3)
+
+        winsound.Beep(1567, 600)
+        winsound.Beep(1396, 50)
+        winsound.Beep(1318, 50)
+        winsound.Beep(1396, 50)
+        winsound.Beep(1174, 800)
+
+    @staticmethod
+    def play_sw_imperial_march():
+        """
+        Used to play the Star Wars Imperial March song
+        """
+        winsound.Beep(440, 500)
+        winsound.Beep(440, 500)
+        winsound.Beep(440, 500)
+
+        winsound.Beep(349, 375)
+        winsound.Beep(523, 150)
+        winsound.Beep(440, 600)
+
+        winsound.Beep(349, 375)
+        winsound.Beep(523, 150)
+        winsound.Beep(440, 1000)
+
+        time.sleep(0.2)
+
+        winsound.Beep(659, 500)
+        winsound.Beep(659, 500)
+        winsound.Beep(659, 500)
+
+        winsound.Beep(698, 375)
+        winsound.Beep(523, 150)
+        winsound.Beep(415, 600)
+
+        winsound.Beep(349, 375)
+        winsound.Beep(523, 150)
+        winsound.Beep(440, 1000)
