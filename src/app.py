@@ -359,6 +359,15 @@ if __name__ == "__main__":
         except json.decoder.JSONDecodeError as exception:
             Messenger.print_error_string("JSONDecode")
             logger.exception(exception)
+        except KeyError as exception:
+            Messenger.print_error_string("keyError")
+            logger.exception(exception)
+        except ValueError as exception:
+            Messenger.print_error_string("valueError")
+            logger.exception(exception)
+        except TypeError as exception:
+            Messenger.print_error_string("typeError")
+            logger.exception(exception)
         except Exception:
             Messenger.print_error_string("unknown")
             logger.exception(Exception)

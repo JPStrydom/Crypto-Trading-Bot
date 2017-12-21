@@ -25,6 +25,9 @@ class Messenger(object):
         self.error_str = {
             "connection": "\nUnable to connect to the internet. Please check your connection and try again.\n",
             "JSONDecode": "\nFailed to decode JSON.\n",
+            "keyError": "\nInvalid key provided to obj/dict.\n",
+            "valueError": "\nValue error occurred.\n",
+            "typeError": "\nType error occurred.\n",
             "unknown": "\nAn unknown exception occurred.\n"
         }
 
@@ -221,7 +224,9 @@ class Messenger(object):
         """
         Prints the error type message to the console
 
-        :param error_type: The error type (one of: 'connection', 'JSONDecode', 'unknown')
+        :param error_type: The error type
+            (one of: 'connection', 'JSONDecode', 'keyError', 'valueError', 'typeError', 'unknown')
+        :type error_type: str
         """
         cprint(self.error_str[error_type], "red", attrs=["bold"])
 
