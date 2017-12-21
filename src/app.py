@@ -1,5 +1,6 @@
 import pydash as py_
 import time
+import json
 
 from src.bittrex import Bittrex
 from src.messenger import Messenger
@@ -21,12 +22,26 @@ secrets_template = {
         ],
         "username": "EXAMPLE_EMAIL@GMAIL.COM",
         "password": "GMAIL_PASSWORD"
+    },
+    "tradeParameters": {
+        "buy": {
+            "btcAmount": 0,
+            "rsiThreshold": 0,
+            "24HourVolumeThreshold": 0,
+            "minimumUnitPrice": 0
+        },
+        "sell": {
+            "rsiThreshold": 0,
+            "profitMarginThreshold": 0
+        }
     }
 }
 secrets = get_json_from_file(secrets_file_directory, secrets_template)
 if secrets == secrets_template:
     print("Please completed the `secrets.json` file in your `database` directory")
     exit()
+buy_params = secrets["tradeParameters"]["buy"]
+sell_params = secrets["tradeParameters"]["sell"]
 
 Bittrex = Bittrex(secrets)
 Messenger = Messenger(secrets)
@@ -178,82 +193,103 @@ def calculate_RSI(coin_pair, period, unit):
 
 
 def buy(coin_pair, btc_quantity, price, stats, trade_time_limit=1):
-    # TODO: Finish buy code
     """
     Used to place a buy order to Bittrex. Wait until the order is completed.
     If the order is not filled within trade_time_limit minutes cancel it.
 
-    :param coin_pair:
-    :param btc_quantity:
-    :param price:
-    :param stats:
-    :param trade_time_limit:
-
-    :return:
+    :param coin_pair: String literal for the market (ex: BTC-LTC)
+    :type coin_pair: str
+    :param btc_quantity: The amount of BTC to buy with
+    :type btc_quantity: float
+    :param price: The price at which to buy
+    :type price: float
+    :param stats: The buy stats object
+    :type stats: dict
+    :param trade_time_limit: The time in minutes to wait fot the order before cancelling it
+    :type trade_time_limit: float
     """
-    quantity_to_buy = btc_quantity / price
-    buy_data = Bittrex.buy_limit(coin_pair, quantity_to_buy, price)
-
+    buy_data = Bittrex.buy_limit(coin_pair, btc_quantity / price, price)
     if not buy_data["success"]:
         return logger.error("Failed to buy on {} market.".format(coin_pair))
-
     Database.store_initial_buy(coin_pair, buy_data["result"]["uuid"])
 
-    start_time = time.time()
-    buy_order_data = Bittrex.get_order(buy_data["result"]["uuid"])
-    while time.time() - start_time <= trade_time_limit * 60 and buy_order_data["result"]["IsOpen"]:
-        buy_order_data = Bittrex.get_order(buy_data["result"]["uuid"])
-
-    if buy_order_data["result"]["IsOpen"]:
-        logger.error("Failed to complete buy order on {} within {} minutes.".format(coin_pair, trade_time_limit * 60))
-        Bittrex.cancel(buy_data["result"]["uuid"])
-
+    buy_order_data = get_order(buy_data["result"]["uuid"], trade_time_limit * 60)
+    if buy_order_data is None:
+        return
     Database.store_buy(buy_order_data["result"], stats)
-    """ PSUDO
-    place limit buy
-    wait 5 seconds
-    get order
-    while less than trade_time_limit minutes have passed and order hasn't completed:
-        wait 5 seconds
-        get order
-    if order hasn't completed:
-        return with error
-    store order in correct format
-    """
+
     Messenger.send_buy_email(coin_pair, btc_quantity / price, price, stats["rsi"], stats["24HrVolume"], "JP")
     Messenger.print_buy(coin_pair, price, stats["rsi"], stats["24HrVolume"])
     Messenger.play_beep()
-    # Database.store_buy(coin_pair, price, stats["rsi"], stats["24HrVolume"], btc_quantity)
 
 
-def sell(coin_pair, price, stats, trade_time_limit=2):
+def sell(coin_pair, price, stats, trade_time_limit=1):
     # TODO: Finish sell code
     """
     Used to place a sell order to Bittrex. Wait until the order is completed.
     If the order is not filled within trade_time_limit minutes cancel it.
 
-    :param coin_pair:
-    :param price:
-    :param stats:
-    :param trade_time_limit:
+    :param coin_pair: String literal for the market (ex: BTC-LTC)
+    :type coin_pair: str
+    :param price: The price at which to buy
+    :type price: float
+    :param stats: The buy stats object
+    :type stats: dict
+    :param trade_time_limit: The time in minutes to wait fot the order before cancelling it
+    :type trade_time_limit: float
+    """
+    trade = Database.get_open_trade(coin_pair)
+    sell_data = Bittrex.sell_limit(coin_pair, trade["quantity"], price)
+    if not sell_data["success"]:
+        return logger.error("Failed to sell on {} market.".format(coin_pair))
 
-    :return:
-    """
-    """ PSUDO
-    place limit sell
-    wait 5 seconds
-    get order
-    while less than trade_time_limit minutes have passed and order hasn"t completed:
-        wait 5 seconds
-        get order
-    if order hasn't completed:
-        return with error
-    store order in correct format
-    """
-    # Messenger.send_sell_email(coin_pair, btc_quantity, price, stats["rsi"], stats["profitMargin"], "JP")
+    sell_order_data = get_order(sell_data["result"]["uuid"], trade_time_limit * 60)
+    if sell_order_data is None:
+        return
+    Database.store_sell(sell_order_data["result"], stats)
+
+    Messenger.send_sell_email(coin_pair, trade["quantity"], price, stats["rsi"], stats["24HrVolume"], "JP")
     Messenger.print_sell(coin_pair, price, stats["rsi"], stats["profitMargin"])
     Messenger.play_beep()
-    Database.store_sell(coin_pair, price, stats["rsi"], stats["profitMargin"])
+
+
+def get_order(order_uuid, trade_time_limit):
+    """
+    Used to get an order from Bittrex by it's UUID.
+    First wait until the order is completed before retrieving it.
+    If the order is not completed within trade_time_limit seconds, cancel it.
+
+    :param order_uuid: The order's UUID
+    :type order_uuid: str
+    :param trade_time_limit: The time in seconds to wait fot the order before cancelling it
+    :type trade_time_limit: float
+
+    :return: Order object
+    :rtype : dict
+    """
+    start_time = time.time()
+    order_data = Bittrex.get_order(order_uuid)
+    while time.time() - start_time <= trade_time_limit and order_data["result"]["IsOpen"]:
+        order_data = Bittrex.get_order(order_uuid)
+
+    if order_data["result"]["IsOpen"]:
+        logger.error("Failed to complete order with UUID {} within {} minutes.".format(order_uuid, trade_time_limit))
+        Bittrex.cancel(order_uuid)
+        return None
+
+    return order_data
+
+
+def check_buy_parameters(rsi, day_volume, current_buy_price):
+    return rsi is not None and rsi <= buy_params["rsiThreshold"] and \
+           day_volume >= buy_params["24HourVolumeThreshold"] and \
+           current_buy_price > buy_params["minimumUnitPrice"]
+
+
+def check_sell_parameters(rsi, profit_margin):
+    return (rsi is not None and rsi >= sell_params["rsiThreshold"] and
+            profit_margin > sell_params["minProfitMarginThreshold"]) or \
+           profit_margin > sell_params["profitMarginThreshold"]
 
 
 def buy_strategy(coin_pair):
@@ -262,12 +298,13 @@ def buy_strategy(coin_pair):
     rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit="fiveMin")
     day_volume = get_current_24hr_volume(coin_pair)
     current_buy_price = get_current_price(coin_pair, "ask")
-    if rsi is not None and rsi <= 25 and day_volume >= 50 and current_buy_price > 0.00001:
+
+    if check_buy_parameters(rsi, day_volume, current_buy_price):
         buy_stats = {
             "rsi": rsi,
             "24HrVolume": day_volume
         }
-        buy(coin_pair, 0.001, current_buy_price, buy_stats)
+        buy(coin_pair, buy_params["btcAmount"], current_buy_price, buy_stats)
     elif rsi is not None and rsi <= 50:
         Messenger.print_no_buy_string(coin_pair, rsi, day_volume, current_buy_price)
 
@@ -278,7 +315,8 @@ def sell_strategy(coin_pair):
     rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit="fiveMin")
     current_sell_price = get_current_price(coin_pair, "bid")
     profit_margin = Database.get_profit_margin(coin_pair, current_sell_price)
-    if (rsi is not None and rsi >= 50 and profit_margin >= 0) or profit_margin > 2.5:
+
+    if check_sell_parameters(rsi, profit_margin):
         sell_stats = {
             "rsi": rsi,
             "profitMargin": profit_margin
@@ -312,49 +350,15 @@ if __name__ == "__main__":
         try:
             analyse_buys()
             analyse_sells()
+            time.sleep(15)
 
         except ConnectionError as exception:
             Messenger.print_error_string("connection")
             logger.exception(exception)
+        except json.decoder.JSONDecodeError as exception:
+            Messenger.print_error_string("JSONDecode")
+            logger.exception(exception)
         except Exception:
             Messenger.print_error_string("unknown")
             logger.exception(Exception)
-
-""""
-TODO: New Trade Structure
-{
-    "trackedExchanges": [
-        "BTC-BAT"
-    ],
-    "trades": [
-        {
-            "exchange": "BTC-GCR",
-            "quantity" : 0,
-            "buy": {
-                "orderUuid": "",
-		        "dateOpened" : "2014-07-13T07:45:46.27",
-		        "dateClosed" : null,
-                "price" : 0.00000000,
-                "pricePerUnit" : null,
-		        "commissionPaid" : 0.00000000,
-                "stats": {
-                    "rsi": 28.826884497522684,
-                    "24HrVolume": 58.60208234
-                }
-            },
-            "sell": {
-                "orderUuid": "",
-		        "dateOpened" : "2014-07-13T07:45:46.27",
-		        "dateClosed" : null,
-                "price" : 0.00000000,
-                "pricePerUnit" : null,
-		        "commissionPaid" : 0.00000000,
-                "stats": {
-                    "rsi": 28.826884497522684,
-                    "24HrVolume": 58.60208234
-                }
-            }
-        }
-    ]
-}
-"""
+            exit()

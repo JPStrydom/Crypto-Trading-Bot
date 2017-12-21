@@ -75,7 +75,9 @@ class Database(object):
         :type stats: dict
         """
         if bittrex_order["Exchange"] not in self.trades["trackedCoinPairs"]:
-            return logger.warning("Trying to buy on the {} market without an initial buy.".format(bittrex_order["Exchange"]))
+            return logger.warning(
+                "Trying to buy on the {} market without an initial buy object.".format(bittrex_order["Exchange"])
+            )
 
         order = self.convert_bittrex_order_object(bittrex_order, stats)
 
@@ -85,34 +87,24 @@ class Database(object):
 
         write_json_to_file(self.file_string, self.trades)
 
-    def store_sell(self, coin_pair, price, rsi=-1, profit_margin=-1):
+    def store_sell(self, bittrex_order, stats):
         """
         Used to place a sell trade in the database
 
-        :param coin_pair: String literal for the market (ex: BTC-LTC)
-        :type coin_pair: str
-        :param price: Market's current price
-        :type price: float
-        :param rsi: Market's current RSI
-        :type rsi: float
-        :param profit_margin: Profit made on the trade
-        :type profit_margin: float
+        :param bittrex_order: Bittrex sell order object
+        :type bittrex_order: dict
+        :param stats: The sell stats to store
+        :type stats: dict
         """
-        if coin_pair not in self.trades["trackedCoinPairs"]:
-            return logger.warning("Trying to sell on the {} market which is not tracked.".format(coin_pair))
+        if bittrex_order["Exchange"] not in self.trades["trackedCoinPairs"]:
+            return logger.warning(
+                "Trying to sell on the {} market which is not tracked.".format(bittrex_order["Exchange"])
+            )
 
-        current_date = datetime.now().strftime("%Y/%m/%d %I:%M:%S")
+        order = self.convert_bittrex_order_object(bittrex_order, stats)
 
-        sell_object = {
-            "date": current_date,
-            "rsi": rsi,
-            "profitMargin": profit_margin,
-            "price": price
-        }
-
-        self.trades["trackedCoinPairs"].remove(coin_pair)
-        trade = self.get_open_trade(coin_pair)
-        trade["sell"] = sell_object
+        trade = self.get_open_trade(bittrex_order["Exchange"])
+        trade["sell"] = order
 
         write_json_to_file(self.file_string, self.trades)
 
