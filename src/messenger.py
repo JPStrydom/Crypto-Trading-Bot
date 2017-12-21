@@ -25,13 +25,15 @@ class Messenger(object):
         self.previous_no_sell_str = ""
 
         self.error_str = {
-            "connection": "\nUnable to connect to the internet. Please check your connection and try again.\n",
-            "JSONDecode": "\nFailed to decode JSON.\n",
-            "keyError": "\nInvalid key provided to obj/dict.\n",
-            "valueError": "\nValue error occurred.\n",
-            "typeError": "\nType error occurred.\n",
-            "unknown": "\nAn unknown exception occurred.\n"
+            "connection": "Unable to connect to the internet. Please check your connection and try again.",
+            "JSONDecode": "Failed to decode JSON.",
+            "keyError": "Invalid key provided to obj/dict.",
+            "valueError": "Value error occurred.",
+            "typeError": "Type error occurred.",
+            "unknown": "An unknown exception occurred."
         }
+
+        self.order_error_str = "Failed to complete order with UUID {} within {} seconds on {} market."
 
     @staticmethod
     def generate_bittrex_URL(coin_pair):
@@ -108,10 +110,10 @@ class Messenger(object):
         main_market, coin = coin_pair.split("-")
         subject = "Crypto Bot: Buy on {} Market".format(coin_pair)
         message = "Howdy {},\n\nI've just bought {} {} on the {} market - which is currently valued at {} {}.\n\n" \
-                  "The market currently has an RSI of {} and a 24 hour market volume of {}.\n\n" \
+                  "The market currently has an RSI of {} and a 24 hour market volume of {} {}.\n\n" \
                   "Here's a Bittrex URL: {}\n\nRegards,\n" \
                   "Crypto Bot".format(recipient_name, round(quantity, 4), coin, coin_pair, btc_value, main_market,
-                                      ceil(rsi), floor(day_volume), self.generate_bittrex_URL(coin_pair))
+                                      ceil(rsi), floor(day_volume), main_market, self.generate_bittrex_URL(coin_pair))
         self.send_email(subject, message)
 
     def send_sell_email(self, coin_pair, quantity, unit_price, rsi, profit_margin, recipient_name="Folks"):
@@ -139,7 +141,7 @@ class Messenger(object):
                   "The market currently has an RSI of {} and a profit of {}% was made.\n\n" \
                   "Here's a Bittrex URL: {}\n\nRegards,\n" \
                   "Crypto Bot".format(recipient_name, round(quantity, 4), coin, coin_pair, btc_value, main_market,
-                                      floor(rsi), coin_pair, round(profit_margin, 2),
+                                      floor(rsi), round(profit_margin, 2),
                                       self.generate_bittrex_URL(coin_pair))
         self.send_email(subject, message)
 
@@ -185,7 +187,7 @@ class Messenger(object):
         cprint(self.sell_str.format(coin_pair, floor(rsi), round(profit_margin, 2), current_sell_price,
                                     self.generate_bittrex_URL(coin_pair)), "green", attrs=["bold"])
 
-    def print_no_buy_string(self, coin_pair, rsi, day_volume, current_buy_price):
+    def print_no_buy(self, coin_pair, rsi, day_volume, current_buy_price):
         """
         Used to print a no-buy's info to the console
 
@@ -203,7 +205,7 @@ class Messenger(object):
                                                 current_buy_price, self.generate_bittrex_URL(coin_pair))
         cprint(print_str, "grey")
 
-    def print_no_sell_string(self, coin_pair, rsi, profit_margin, current_sell_price):
+    def print_no_sell(self, coin_pair, rsi, profit_margin, current_sell_price):
         """
         Used to print a no-sales's info to the console
 
@@ -222,7 +224,7 @@ class Messenger(object):
             self.previous_no_sell_str = print_str
             cprint(print_str, "red")
 
-    def print_error_string(self, error_type):
+    def print_exception_error(self, error_type):
         """
         Prints the error type message to the console
 
@@ -230,7 +232,25 @@ class Messenger(object):
             (one of: 'connection', 'JSONDecode', 'keyError', 'valueError', 'typeError', 'unknown')
         :type error_type: str
         """
-        cprint(self.error_str[error_type], "red", attrs=["bold"])
+        cprint("\n" + self.error_str[error_type] + "\n", "red", attrs=["bold"])
+
+    def print_order_error(self, order_uuid, trade_time_limit, coin_pair):
+        """
+        Prints an order error message to the console
+
+        :param order_uuid: The order UUID
+        :type order_uuid: str
+        :param trade_time_limit: The trade time limit in seconds
+        :type trade_time_limit: float
+        :param coin_pair: String literal for the market (ex: BTC-LTC)
+        :type coin_pair: str
+
+        :return: Error string
+        :rtype : str
+        """
+        error_str = self.order_error_str.format(order_uuid, trade_time_limit, coin_pair)
+        cprint("\n" + error_str + "\n", "red", attrs=["bold"])
+        return error_str
 
     @staticmethod
     def play_beep(frequency=2000, duration=1000):

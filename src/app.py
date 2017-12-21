@@ -193,7 +193,7 @@ def calculate_RSI(coin_pair, period, unit):
     return new_rs
 
 
-def buy(coin_pair, btc_quantity, price, stats, trade_time_limit=1):
+def buy(coin_pair, btc_quantity, price, stats, trade_time_limit=2):
     """
     Used to place a buy order to Bittrex. Wait until the order is completed.
     If the order is not filled within trade_time_limit minutes cancel it.
@@ -215,16 +215,15 @@ def buy(coin_pair, btc_quantity, price, stats, trade_time_limit=1):
     Database.store_initial_buy(coin_pair, buy_data["result"]["uuid"])
 
     buy_order_data = get_order(buy_data["result"]["uuid"], trade_time_limit * 60)
-    if buy_order_data is None:
-        return
     Database.store_buy(buy_order_data["result"], stats)
 
-    Messenger.send_buy_email(coin_pair, btc_quantity / price, price, stats["rsi"], stats["24HrVolume"], "JP")
+    Messenger.send_buy_email(coin_pair, buy_order_data["result"]["quantity"], price, stats["rsi"], stats["24HrVolume"],
+                             "JP")
     Messenger.print_buy(coin_pair, price, stats["rsi"], stats["24HrVolume"])
     Messenger.play_sw_imperial_march()
 
 
-def sell(coin_pair, price, stats, trade_time_limit=1):
+def sell(coin_pair, price, stats, trade_time_limit=2):
     """
     Used to place a sell order to Bittrex. Wait until the order is completed.
     If the order is not filled within trade_time_limit minutes cancel it.
@@ -244,11 +243,11 @@ def sell(coin_pair, price, stats, trade_time_limit=1):
         return logger.error("Failed to sell on {} market.".format(coin_pair))
 
     sell_order_data = get_order(sell_data["result"]["uuid"], trade_time_limit * 60)
-    if sell_order_data is None:
-        return
+    # TODO: Handle partial/incomplete sales
     Database.store_sell(sell_order_data["result"], stats)
 
-    Messenger.send_sell_email(coin_pair, trade["quantity"], price, stats["rsi"], stats["profitMargin"], "JP")
+    Messenger.send_sell_email(coin_pair, sell_order_data["result"]["quantity"], price, stats["rsi"],
+                              stats["profitMargin"], "JP")
     Messenger.print_sell(coin_pair, price, stats["rsi"], stats["profitMargin"])
     Messenger.play_sw_theme()
 
@@ -274,9 +273,10 @@ def get_order(order_uuid, trade_time_limit):
         order_data = Bittrex.get_order(order_uuid)
 
     if order_data["result"]["IsOpen"]:
-        logger.error("Failed to complete order with UUID {} within {} seconds.".format(order_uuid, trade_time_limit))
+        error_str = Messenger.print_order_error(order_uuid, trade_time_limit, order_data["result"]["Exchange"])
+        logger.error(error_str)
         Bittrex.cancel(order_uuid)
-        return None
+        return order_data
 
     return order_data
 
@@ -307,7 +307,7 @@ def buy_strategy(coin_pair):
         }
         buy(coin_pair, buy_params["btcAmount"], current_buy_price, buy_stats)
     elif rsi is not None and rsi <= 50:
-        Messenger.print_no_buy_string(coin_pair, rsi, day_volume, current_buy_price)
+        Messenger.print_no_buy(coin_pair, rsi, day_volume, current_buy_price)
 
 
 def sell_strategy(coin_pair):
@@ -324,7 +324,7 @@ def sell_strategy(coin_pair):
         }
         sell(coin_pair, current_sell_price, sell_stats)
     elif rsi is not None:
-        Messenger.print_no_sell_string(coin_pair, rsi, profit_margin, current_sell_price)
+        Messenger.print_no_sell(coin_pair, rsi, profit_margin, current_sell_price)
 
 
 if __name__ == "__main__":
@@ -343,7 +343,7 @@ if __name__ == "__main__":
         btc_coin_pairs = get_markets("BTC")
         Messenger.print_header(len(btc_coin_pairs))
     except ConnectionError as exception:
-        Messenger.print_error_string("connection")
+        Messenger.print_exception_error("connection")
         logger.exception(exception)
         exit()
 
@@ -354,24 +354,23 @@ if __name__ == "__main__":
             time.sleep(10)
 
         except ConnectionError as exception:
-            Messenger.print_error_string("connection")
+            Messenger.print_exception_error("connection")
             logger.exception(exception)
         except json.decoder.JSONDecodeError as exception:
-            Messenger.print_error_string("JSONDecode")
+            Messenger.print_exception_error("JSONDecode")
+            logger.exception(exception)
+        except TypeError as exception:
+            Messenger.print_exception_error("typeError")
             logger.exception(exception)
         except KeyError as exception:
-            Messenger.print_error_string("keyError")
+            Messenger.print_exception_error("keyError")
             logger.exception(exception)
             exit()
         except ValueError as exception:
-            Messenger.print_error_string("valueError")
-            logger.exception(exception)
-            exit()
-        except TypeError as exception:
-            Messenger.print_error_string("typeError")
+            Messenger.print_exception_error("valueError")
             logger.exception(exception)
             exit()
         except Exception:
-            Messenger.print_error_string("unknown")
+            Messenger.print_exception_error("unknown")
             logger.exception(Exception)
             exit()
