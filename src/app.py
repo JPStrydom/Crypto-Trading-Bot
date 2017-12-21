@@ -40,8 +40,9 @@ secrets = get_json_from_file(secrets_file_directory, secrets_template)
 if secrets == secrets_template:
     print("Please completed the `secrets.json` file in your `database` directory")
     exit()
-buy_params = secrets["tradeParameters"]["buy"]
-sell_params = secrets["tradeParameters"]["sell"]
+trade_params = secrets["tradeParameters"]
+buy_params = trade_params["buy"]
+sell_params = trade_params["sell"]
 
 Bittrex = Bittrex(secrets)
 Messenger = Messenger(secrets)
@@ -295,7 +296,7 @@ def check_sell_parameters(rsi, profit_margin):
 def buy_strategy(coin_pair):
     if coin_pair in Database.trades["trackedCoinPairs"]:
         return
-    rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit="fiveMin")
+    rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit=trade_params["tickerInterval"])
     day_volume = get_current_24hr_volume(coin_pair)
     current_buy_price = get_current_price(coin_pair, "ask")
 
@@ -312,7 +313,7 @@ def buy_strategy(coin_pair):
 def sell_strategy(coin_pair):
     if coin_pair not in Database.trades["trackedCoinPairs"]:
         return
-    rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit="fiveMin")
+    rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit=trade_params["tickerInterval"])
     current_sell_price = get_current_price(coin_pair, "bid")
     profit_margin = Database.get_profit_margin(coin_pair, current_sell_price)
 
@@ -361,12 +362,15 @@ if __name__ == "__main__":
         except KeyError as exception:
             Messenger.print_error_string("keyError")
             logger.exception(exception)
+            exit()
         except ValueError as exception:
             Messenger.print_error_string("valueError")
             logger.exception(exception)
+            exit()
         except TypeError as exception:
             Messenger.print_error_string("typeError")
             logger.exception(exception)
+            exit()
         except Exception:
             Messenger.print_error_string("unknown")
             logger.exception(Exception)
