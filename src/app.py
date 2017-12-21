@@ -248,7 +248,7 @@ def sell(coin_pair, price, stats, trade_time_limit=1):
         return
     Database.store_sell(sell_order_data["result"], stats)
 
-    Messenger.send_sell_email(coin_pair, trade["quantity"], price, stats["rsi"], stats["24HrVolume"], "JP")
+    Messenger.send_sell_email(coin_pair, trade["quantity"], price, stats["rsi"], stats["profitMargin"], "JP")
     Messenger.print_sell(coin_pair, price, stats["rsi"], stats["profitMargin"])
     Messenger.play_beep()
 
@@ -274,7 +274,7 @@ def get_order(order_uuid, trade_time_limit):
         order_data = Bittrex.get_order(order_uuid)
 
     if order_data["result"]["IsOpen"]:
-        logger.error("Failed to complete order with UUID {} within {} minutes.".format(order_uuid, trade_time_limit))
+        logger.error("Failed to complete order with UUID {} within {} seconds.".format(order_uuid, trade_time_limit))
         Bittrex.cancel(order_uuid)
         return None
 
