@@ -77,7 +77,7 @@ class Messenger(object):
         subject = "Crypto Bot: Low RSI on {} Market".format(coin_pair)
         message = "Howdy {},\n\nI've detected a low RSI of {} on the {} market. " \
                   "The current 24 hour market volume is {}\n\nHere's a Bittrex URL: {}" \
-                  "\n\nRegards,\nCrypto Bot".format(recipient_name, round(rsi), coin_pair, round(day_volume),
+                  "\n\nRegards,\nCrypto Bot".format(recipient_name, round(rsi, 2), coin_pair, round(day_volume),
                                                     self.generate_bittrex_URL(coin_pair))
         self.send_email(subject, message)
 
@@ -106,7 +106,7 @@ class Messenger(object):
                   "The market currently has an RSI of {} and a 24 hour market volume of {}.\n\n" \
                   "Here's a Bittrex URL: {}\n\nRegards,\n" \
                   "Crypto Bot".format(recipient_name, round(quantity, 4), coin, coin_pair, btc_value, main_market,
-                                      round(rsi), day_volume, self.generate_bittrex_URL(coin_pair))
+                                      round(rsi, 2), day_volume, self.generate_bittrex_URL(coin_pair))
         self.send_email(subject, message)
 
     def send_sell_email(self, coin_pair, quantity, unit_price, rsi, profit_margin, recipient_name="Folks"):
@@ -134,7 +134,7 @@ class Messenger(object):
                   "The market currently has an RSI of {} and a profit of {}% was made.\n\n" \
                   "Here's a Bittrex URL: {}\n\nRegards,\n" \
                   "Crypto Bot".format(recipient_name, round(quantity, 4), coin, coin_pair, btc_value, main_market,
-                                      round(rsi), coin_pair, profit_margin, self.generate_bittrex_URL(coin_pair))
+                                      round(rsi, 2), coin_pair, profit_margin, self.generate_bittrex_URL(coin_pair))
         self.send_email(subject, message)
 
     def print_header(self, num_of_coin_pairs):
@@ -160,7 +160,7 @@ class Messenger(object):
         :type day_volume: float
         """
         main_market, coin = coin_pair.split("-")
-        cprint(self.buy_str.format(coin_pair, round(rsi), round(day_volume), main_market, current_buy_price,
+        cprint(self.buy_str.format(coin_pair, round(rsi, 2), round(day_volume), main_market, current_buy_price,
                                    self.generate_bittrex_URL(coin_pair)), "blue", attrs=["bold"])
 
     def print_sell(self, coin_pair, current_sell_price, rsi, profit_margin):
@@ -176,7 +176,7 @@ class Messenger(object):
         :param profit_margin: Profit made on the trade
         :type profit_margin: float
         """
-        cprint(self.sell_str.format(coin_pair, round(rsi), round(profit_margin, 2), current_sell_price,
+        cprint(self.sell_str.format(coin_pair, round(rsi, 2), round(profit_margin, 2), current_sell_price,
                                     self.generate_bittrex_URL(coin_pair)), "green", attrs=["bold"])
 
     def print_no_buy_string(self, coin_pair, rsi, day_volume, current_buy_price):
@@ -193,7 +193,7 @@ class Messenger(object):
         :type current_buy_price: float
         """
         main_market, coin = coin_pair.split("-")
-        print_str = "No " + self.buy_str.format(coin_pair, round(rsi), round(day_volume), main_market,
+        print_str = "No " + self.buy_str.format(coin_pair, round(rsi, 2), round(day_volume), main_market,
                                                 current_buy_price, self.generate_bittrex_URL(coin_pair))
         cprint(print_str, "grey")
 
@@ -210,7 +210,7 @@ class Messenger(object):
         :param current_sell_price: Market's current price
         :type current_sell_price: float
         """
-        print_str = "No " + self.sell_str.format(coin_pair, round(rsi), round(profit_margin, 2), current_sell_price,
+        print_str = "No " + self.sell_str.format(coin_pair, round(rsi, 2), round(profit_margin, 2), current_sell_price,
                                                  self.generate_bittrex_URL(coin_pair))
         if print_str != self.previous_no_sell_str:
             self.previous_no_sell_str = print_str
