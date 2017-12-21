@@ -105,6 +105,7 @@ class Database(object):
 
         trade = self.get_open_trade(bittrex_order["Exchange"])
         trade["sell"] = order
+        self.trades["trackedCoinPairs"].remove(bittrex_order["Exchange"])
 
         write_json_to_file(self.file_string, self.trades)
 
