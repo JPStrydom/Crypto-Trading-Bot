@@ -270,6 +270,7 @@ def get_order(order_uuid, trade_time_limit):
     start_time = time.time()
     order_data = Bittrex.get_order(order_uuid)
     while time.time() - start_time <= trade_time_limit and order_data["result"]["IsOpen"]:
+        time.sleep(10)
         order_data = Bittrex.get_order(order_uuid)
 
     if order_data["result"]["IsOpen"]:
@@ -350,7 +351,7 @@ if __name__ == "__main__":
         try:
             analyse_buys()
             analyse_sells()
-            time.sleep(15)
+            time.sleep(10)
 
         except ConnectionError as exception:
             Messenger.print_error_string("connection")
