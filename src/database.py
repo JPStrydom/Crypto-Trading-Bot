@@ -82,7 +82,7 @@ class Database(object):
         order = self.convert_bittrex_order_object(bittrex_order, stats)
 
         trade = self.get_open_trade(bittrex_order["Exchange"])
-        trade["quantity"] = bittrex_order["Quantity"]
+        trade["quantity"] = bittrex_order["Quantity"] - bittrex_order["QuantityRemaining"]
         trade["buy"] = order
 
         write_json_to_file(self.file_string, self.trades)

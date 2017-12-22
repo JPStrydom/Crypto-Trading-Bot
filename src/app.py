@@ -304,7 +304,7 @@ def buy_strategy(coin_pair):
             "24HrVolume": day_volume
         }
         buy(coin_pair, buy_params["btcAmount"], current_buy_price, buy_stats)
-    elif rsi is not None and rsi <= 35:
+    elif rsi is not None and rsi <= buy_params["rsiThreshold"] + 15:
         Messenger.print_no_buy(coin_pair, rsi, day_volume, current_buy_price)
 
 
