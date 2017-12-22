@@ -88,68 +88,55 @@ class Messenger(object):
                                                     self.generate_bittrex_URL(coin_pair))
         self.send_email(subject, message)
 
-    def send_buy_email(self, coin_pair, quantity, unit_price, rsi, day_volume, recipient_name="Folks"):
+    def send_buy_email(self, order, stats, recipient_name="Folks"):
         """
         Used to send a buy specific email from the account specified in the secrets.json file to the entire
         address list specified in the secrets.json file
 
-        :param coin_pair: Coin pair the low RSI occurred on (ex: BTC-ETH)
-        :type coin_pair: str
-        :param quantity: The quantity of coin pair bought
-        :type quantity: float
-        :param unit_price: The coin"s unit price
-        :type unit_price: float
-        :param rsi: Low RSI
-        :type rsi: float
-        :param day_volume: Coin pair"s current 24 hour volume
-        :type day_volume: float
+        :param order: Bittrex trade object
+        :type order: dict
+        :param stats: The stats related to the trade
+        :type stats: dict
         :param recipient_name: Name of the email"s recipient (ex: John)
         :type recipient_name: str
         """
-        btc_value = round(quantity * unit_price, 8)
-        main_market, coin = coin_pair.split("-")
-        subject = "Crypto Bot: Buy on {} Market".format(coin_pair)
+        main_market, coin = order["Quantity"].split("-")
+        subject = "Crypto Bot: Buy on {} Market".format(order["Quantity"])
         message = "Howdy {},\n\nI've just bought {} {} on the {} market - which is currently valued at {} {}.\n\n" \
                   "The market currently has an RSI of {} and a 24 hour market volume of {} {}.\n\n" \
                   "Here's a Bittrex URL: {}\n\nRegards,\n" \
-                  "Crypto Bot".format(recipient_name, round(quantity, 4), coin, coin_pair, btc_value, main_market,
-                                      ceil(rsi), floor(day_volume), main_market, self.generate_bittrex_URL(coin_pair))
+                  "Crypto Bot".format(recipient_name, round(order["Quantity"], 4), coin, order["Exchange"],
+                                      order["Price"], main_market, ceil(stats["rsi"]), floor(stats["24HrVolume"]),
+                                      main_market, self.generate_bittrex_URL(order["Quantity"]))
         self.send_email(subject, message)
 
-    def send_sell_email(self, coin_pair, quantity, unit_price, rsi, profit_margin, recipient_name="Folks"):
+    def send_sell_email(self, order, stats, recipient_name="Folks"):
         """
         Used to send a sell specific email from the account specified in the secrets.json file to the entire
         address list specified in the secrets.json file
 
-        :param coin_pair: Coin pair the low RSI occurred on (ex: BTC-ETH)
-        :type coin_pair: str
-        :param quantity: The quantity of coin pair bought
-        :type quantity: float
-        :param unit_price: The coin's unit price
-        :type unit_price: float
-        :param rsi: Low RSI
-        :type rsi: float
-        :param profit_margin: Profit made on the trade
-        :type profit_margin: float
+        :param order: Bittrex trade object
+        :type order: dict
+        :param stats: The stats related to the trade
+        :type stats: dict
         :param recipient_name: Name of the email's recipient (ex: John)
         :type recipient_name: str
         """
-        btc_value = round(quantity * unit_price, 8)
-        main_market, coin = coin_pair.split("-")
-        subject = "Crypto Bot: Sell on {} Market".format(coin_pair)
+        main_market, coin = order["Exchange"].split("-")
+        subject = "Crypto Bot: Sell on {} Market".format(order["Exchange"])
         message = "Howdy {},\n\nI've just sold {} {} on the {} market - which is currently valued at {} {}.\n\n" \
                   "The market currently has an RSI of {} and a profit of {}% was made.\n\n" \
                   "Here's a Bittrex URL: {}\n\nRegards,\n" \
-                  "Crypto Bot".format(recipient_name, round(quantity, 4), coin, coin_pair, btc_value, main_market,
-                                      floor(rsi), round(profit_margin, 2),
-                                      self.generate_bittrex_URL(coin_pair))
+                  "Crypto Bot".format(recipient_name, round(order["Quantity"], 4), coin, order["Exchange"],
+                                      order["Price"], main_market, floor(stats["rsi"]), round(stats["profitMargin"], 2),
+                                      self.generate_bittrex_URL(order["Exchange"]))
         self.send_email(subject, message)
 
     def print_header(self, num_of_coin_pairs):
         """
         Used to print the console header
 
-        :param num_of_coin_pairs: Quantity of available Bittrex market pairs
+        :param num_of_coin_pairs: Number of available Bittrex market pairs
         :type num_of_coin_pairs: int
         """
         cprint(self.header_str.format(num_of_coin_pairs), attrs=["bold", "underline"])

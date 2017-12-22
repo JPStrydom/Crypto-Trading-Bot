@@ -217,8 +217,7 @@ def buy(coin_pair, btc_quantity, price, stats, trade_time_limit=2):
     buy_order_data = get_order(buy_data["result"]["uuid"], trade_time_limit * 60)
     Database.store_buy(buy_order_data["result"], stats)
 
-    Messenger.send_buy_email(coin_pair, buy_order_data["result"]["Quantity"], price, stats["rsi"], stats["24HrVolume"],
-                             "JP")
+    Messenger.send_buy_email(buy_order_data, stats, "JP")
     Messenger.print_buy(coin_pair, price, stats["rsi"], stats["24HrVolume"])
     Messenger.play_sw_imperial_march()
 
@@ -246,8 +245,7 @@ def sell(coin_pair, price, stats, trade_time_limit=2):
     # TODO: Handle partial/incomplete sales
     Database.store_sell(sell_order_data["result"], stats)
 
-    Messenger.send_sell_email(coin_pair, sell_order_data["result"]["Quantity"], price, stats["rsi"],
-                              stats["profitMargin"], "JP")
+    Messenger.send_sell_email(sell_order_data, stats, "JP")
     Messenger.print_sell(coin_pair, price, stats["rsi"], stats["profitMargin"])
     Messenger.play_sw_theme()
 
