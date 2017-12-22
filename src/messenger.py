@@ -12,7 +12,7 @@ class Messenger(object):
 
     def __init__(self, secrets):
         self.from_address = secrets["gmail"]["username"]
-        self.to_address_list = secrets["gmail"]["address_list"]
+        self.to_address_list = secrets["gmail"]["addressList"]
         self.login = secrets["gmail"]["username"]
         self.password = secrets["gmail"]["password"]
         self.smtp_server = "smtp.gmail.com:587"
