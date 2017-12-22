@@ -74,8 +74,8 @@ class Bittrex(object):
     """
 
     def __init__(self, secrets, dispatch=using_requests):
-        api_key = secrets["bittrex"]["bittrex_key"]
-        api_secret = secrets["bittrex"]["bittrex_secret"]
+        api_key = secrets["bittrex"]["bittrexKey"]
+        api_secret = secrets["bittrex"]["bittrexSecret"]
         self.api_key = str(api_key) if api_key is not None else ""
         self.api_secret = str(api_secret) if api_secret is not None else ""
         self.dispatch = dispatch

@@ -11,11 +11,11 @@ from src.directory_utilities import get_json_from_file
 secrets_file_directory = "database/secrets.json"
 secrets_template = {
     "bittrex": {
-        "bittrex_key": "BITTREX_API_KEY",
-        "bittrex_secret": "BITTREX_SECRET"
+        "bittrexKey": "BITTREX_API_KEY",
+        "bittrexSecret": "BITTREX_SECRET"
     },
     "gmail": {
-        "address_list": [
+        "addressList": [
             "EXAMPLE_RECIPIENT_1@GMAIL.COM",
             "EXAMPLE_RECIPIENT_2@GMAIL.COM",
             "ETC..."
@@ -217,7 +217,7 @@ def buy(coin_pair, btc_quantity, price, stats, trade_time_limit=2):
     buy_order_data = get_order(buy_data["result"]["uuid"], trade_time_limit * 60)
     Database.store_buy(buy_order_data["result"], stats)
 
-    Messenger.send_buy_email(buy_order_data["result"], stats, "JP")
+    Messenger.send_buy_email(buy_order_data["result"], stats)
     Messenger.print_buy(coin_pair, price, stats["rsi"], stats["24HrVolume"])
     Messenger.play_sw_imperial_march()
 
@@ -245,7 +245,7 @@ def sell(coin_pair, price, stats, trade_time_limit=2):
     # TODO: Handle partial/incomplete sales
     Database.store_sell(sell_order_data["result"], stats)
 
-    Messenger.send_sell_email(sell_order_data["result"], stats, "JP")
+    Messenger.send_sell_email(sell_order_data["result"], stats)
     Messenger.print_sell(coin_pair, price, stats["rsi"], stats["profitMargin"])
     Messenger.play_sw_theme()
 
@@ -304,7 +304,7 @@ def buy_strategy(coin_pair):
             "24HrVolume": day_volume
         }
         buy(coin_pair, buy_params["btcAmount"], current_buy_price, buy_stats)
-    elif rsi is not None and rsi <= 40:
+    elif rsi is not None and rsi <= 35:
         Messenger.print_no_buy(coin_pair, rsi, day_volume, current_buy_price)
 
 

@@ -19,6 +19,8 @@ class Messenger(object):
 
         self.header_str = "\nTracking {} Bittrex Markets\n"
 
+        self.recipient_name = secrets["gmail"]["recipientName"]
+
         self.buy_str = "Buy on {:<10}\t->\t\tRSI: {:>2}\t\t24 Hour Volume: {:>5} {}\t\tBuy Price: {:.8f}\t\tURL: {}"
         self.sell_str = "Sell on {:<10}\t->\t\tRSI: {:>2}\t\tProfit Margin: {:>4} %\t\tSell Price: {:.8f}\t\tURL: {}"
 
@@ -67,7 +69,7 @@ class Messenger(object):
         server.quit()
         return errors
 
-    def send_RSI_email(self, coin_pair, rsi, day_volume, recipient_name="Folks"):
+    def send_RSI_email(self, coin_pair, rsi, day_volume, recipient_name=None):
         """
         Used to send a low RSI specific email from the account specified in the secrets.json file to the entire
         address list specified in the secrets.json file
@@ -81,6 +83,8 @@ class Messenger(object):
         :param recipient_name: Name of the email's recipient (ex: John)
         :type recipient_name: str
         """
+        if recipient_name is None:
+            recipient_name = self.recipient_name
         subject = "Crypto Bot: Low RSI on {} Market".format(coin_pair)
         message = "Howdy {},\n\nI've detected a low RSI of {} on the {} market. " \
                   "The current 24 hour market volume is {}\n\nHere's a Bittrex URL: {}" \
@@ -88,7 +92,7 @@ class Messenger(object):
                                                     self.generate_bittrex_URL(coin_pair))
         self.send_email(subject, message)
 
-    def send_buy_email(self, order, stats, recipient_name="Folks"):
+    def send_buy_email(self, order, stats, recipient_name=None):
         """
         Used to send a buy specific email from the account specified in the secrets.json file to the entire
         address list specified in the secrets.json file
@@ -100,6 +104,8 @@ class Messenger(object):
         :param recipient_name: Name of the email"s recipient (ex: John)
         :type recipient_name: str
         """
+        if recipient_name is None:
+            recipient_name = self.recipient_name
         main_market, coin = order["Exchange"].split("-")
         subject = "Crypto Bot: Buy on {} Market".format(order["Quantity"])
         message = "Howdy {},\n\nI've just bought {} {} on the {} market - which is currently valued at {} {}.\n\n" \
@@ -110,7 +116,7 @@ class Messenger(object):
                                       main_market, self.generate_bittrex_URL(order["Quantity"]))
         self.send_email(subject, message)
 
-    def send_sell_email(self, order, stats, recipient_name="Folks"):
+    def send_sell_email(self, order, stats, recipient_name=None):
         """
         Used to send a sell specific email from the account specified in the secrets.json file to the entire
         address list specified in the secrets.json file
@@ -122,6 +128,8 @@ class Messenger(object):
         :param recipient_name: Name of the email's recipient (ex: John)
         :type recipient_name: str
         """
+        if recipient_name is None:
+            recipient_name = self.recipient_name
         main_market, coin = order["Exchange"].split("-")
         subject = "Crypto Bot: Sell on {} Market".format(order["Exchange"])
         message = "Howdy {},\n\nI've just sold {} {} on the {} market - which is currently valued at {} {}.\n\n" \
