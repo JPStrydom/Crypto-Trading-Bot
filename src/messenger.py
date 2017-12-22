@@ -93,14 +93,14 @@ class Messenger(object):
         Used to send a buy specific email from the account specified in the secrets.json file to the entire
         address list specified in the secrets.json file
 
-        :param order: Bittrex trade object
+        :param order: Bittrex trade object results field
         :type order: dict
         :param stats: The stats related to the trade
         :type stats: dict
         :param recipient_name: Name of the email"s recipient (ex: John)
         :type recipient_name: str
         """
-        main_market, coin = order["Quantity"].split("-")
+        main_market, coin = order["Exchange"].split("-")
         subject = "Crypto Bot: Buy on {} Market".format(order["Quantity"])
         message = "Howdy {},\n\nI've just bought {} {} on the {} market - which is currently valued at {} {}.\n\n" \
                   "The market currently has an RSI of {} and a 24 hour market volume of {} {}.\n\n" \
@@ -115,7 +115,7 @@ class Messenger(object):
         Used to send a sell specific email from the account specified in the secrets.json file to the entire
         address list specified in the secrets.json file
 
-        :param order: Bittrex trade object
+        :param order: Bittrex trade object results field
         :type order: dict
         :param stats: The stats related to the trade
         :type stats: dict
