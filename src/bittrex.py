@@ -5,6 +5,7 @@ import time
 import hmac
 import hashlib
 import requests
+import json
 
 from src.logger import logger
 from src.directory_utilities import write_json_to_file
@@ -18,7 +19,7 @@ except ImportError:
 
 try:
     from Crypto.Cipher import AES
-    import getpass, ast, json
+    import getpass, ast
 
     encrypted = True
 except ImportError:
