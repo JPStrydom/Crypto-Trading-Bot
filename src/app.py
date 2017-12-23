@@ -284,6 +284,30 @@ def get_order(order_uuid, trade_time_limit):
     return order_data
 
 
+def get_buy_minimum(coin_pair, stats):
+    """
+    Used to wait for the coin pair's RSI to reach a minimum and then return the buy price
+    at that minimum. Also update the stats RSI.
+
+    :param coin_pair: String literal for the market (ex: BTC-LTC)
+    :type coin_pair: str
+    :param stats: The stats related to the trade
+    :type stats: dict
+
+    :return: RSI minimum buy price
+    :rtype : float
+    """
+    rsi = stats["rsi"]
+    while rsi <= stats["rsi"]:
+        time.sleep(10)
+        print("RSI still dipping.\tCurrent RSI: {}\tPrevious RSI: {}".format(rsi, stats["rsi"]))
+        stats["rsi"] = rsi
+        rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit=trade_params["tickerInterval"])
+
+    stats["rsi"] = rsi
+    return get_current_price(coin_pair, "ask")
+
+
 def check_buy_parameters(rsi, day_volume, current_buy_price):
     return rsi is not None and rsi <= buy_params["rsiThreshold"] and \
            day_volume >= buy_params["24HourVolumeThreshold"] and \
@@ -308,6 +332,7 @@ def buy_strategy(coin_pair):
             "rsi": rsi,
             "24HrVolume": day_volume
         }
+        current_buy_price = get_buy_minimum(coin_pair, buy_stats)
         buy(coin_pair, buy_params["btcAmount"], current_buy_price, buy_stats)
     elif rsi is not None and rsi <= trade_params["pause"]["rsiThreshold"]:
         Messenger.print_no_buy(coin_pair, rsi, day_volume, current_buy_price)
