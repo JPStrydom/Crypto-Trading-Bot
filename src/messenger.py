@@ -22,7 +22,7 @@ class Messenger(object):
         self.recipient_name = secrets["gmail"]["recipientName"]
 
         self.coin_pause_str = "Pause tracking on {} with a high RSI of {:>2} for {} minutes."
-        self.coin_resume_str = "Resume tracking on all {} markets."
+        self.coin_resume_str = "Resuming tracking on all {} markets."
 
         self.buy_str = "Buy on {:<10}\t->\t\tRSI: {:>2}\t\t24 Hour Volume: {:>5} {}\t\tBuy Price: {:.8f}\t\tURL: {}"
         self.sell_str = "Sell on {:<10}\t->\t\tRSI: {:>2}\t\tProfit Margin: {:>4} %\t\tSell Price: {:.8f}\t\tURL: {}"
