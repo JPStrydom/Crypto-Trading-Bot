@@ -22,6 +22,7 @@ class Messenger(object):
         self.recipient_name = secrets["gmail"]["recipientName"]
 
         self.coin_pause_str = "Pause tracking on {} with a high RSI of {:>2} for {} minutes."
+        self.coin_resume_str = "Resume tracking on all {} markets."
 
         self.buy_str = "Buy on {:<10}\t->\t\tRSI: {:>2}\t\t24 Hour Volume: {:>5} {}\t\tBuy Price: {:.8f}\t\tURL: {}"
         self.sell_str = "Sell on {:<10}\t->\t\tRSI: {:>2}\t\tProfit Margin: {:>4} %\t\tSell Price: {:.8f}\t\tURL: {}"
@@ -197,6 +198,16 @@ class Messenger(object):
         """
         print_str = self.coin_pause_str.format(coin_pair, floor(rsi), round(pause_time))
         cprint(print_str, "grey")
+
+    def print_resume_pause(self, num_of_coin_pairs):
+        """
+        Used to print coin pause resume info to the console
+
+        :param num_of_coin_pairs: Number of available Bittrex market pairs
+        :type num_of_coin_pairs: int
+        """
+        print_str = self.coin_resume_str.format(num_of_coin_pairs)
+        cprint(print_str, "grey", attrs=["bold"])
 
     def print_no_buy(self, coin_pair, rsi, day_volume, current_buy_price):
         """

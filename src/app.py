@@ -352,8 +352,8 @@ if __name__ == "__main__":
     while True:
         try:
             if time.time() - market_fetch_time >= trade_params["pause"]["pauseTime"] * 60:
-                print("MEEEEMEEEES")
                 btc_coin_pairs = get_markets("BTC")
+                Messenger.print_resume_pause(len(btc_coin_pairs))
                 market_fetch_time = time.time()
             analyse_buys()
             analyse_sells()
