@@ -1,37 +1,41 @@
-# Crypto Signal Tracker
+# Crypto Trading Bot
 
 ## Introduction
 
-Use Crypto Signal Tracker to track and simulate trades on 250+ crypto currencies by utilising their trading signals. This can be used to test the effectiveness of possible trading strategies.
+Use Crypto Trading Bot to autonomously trade and monitor over 250 crypto currencies on Bittrex. Users can configure their
+own custom trading parameters which will control when the bot buys and sells.
 
 #### Features:
 * Tracking for over 250 coins on Bittrex
+* Automated trading based on user configurations
 * Automated technical analysis (TA)
-* Simulated trading analysis and tracking
-* Email alerts for various signals
-* Well documented script
-* Automated Technical Analysis that's implemented from scratch for simplicity and ease of use
+* Trade analysis and tracking
+* Email alerts for trades and signals
+* Informative console outputs for user monitoring
 * Logging to track and document errors on the Bittrex API
+* Well documented script
 
-You can build on top of this tool and implement algorithm trading and some machine learning models to experiment with predictive analysis.
+Users can add their own algorithms and trading strategies based on technical analysis signals such as RSI, 24 Hour Volume,
+and Unit Price.
 
 #### Coming Soon:
 * Bollinger Bands
-* Web Client
-* Back-Testing
-
 
 #### Shoutouts:
 * Bittrex for an awesome API
 * Eric Somdahl for writing the Python wrapper for the Bittrex API
-* Abenezer Mamo for creating the [Crypto Signals](https://github.com/AbenezerMamo/crypto-signal) project which formed the foundation for this project
-* Ryan Mullin for implementing the get_historical_data() method on v2 of the Bittrex API
+* Abenezer Mamo for creating the [Crypto Signals](https://github.com/AbenezerMamo/crypto-signal) project which formed the
+foundation for this project
 
 ## How to setup
-1) This project requires Python 3.X.X, which can be be found [here](https://www.python.org/ftp/python/3.6.3/python-3.6.3.exe)
-2) To install the dependencies for this project, run `pip install -r requirements.txt`. If you receive a `'pip' is not recognized as an internal or external command` error, you need to add `pip` to your environmental `path` variable.
-3) Add a directory named `database` the root directory of your project and add a `secrets.json` file to it. The contents of the file should mirror the following:
+1) This project requires Python 3.X.X, which can be be found [here](https://www.python.org/ftp/python/3.6.3/python-3.6.3.exe).
 
+2) To install the dependencies for this project, run `pip install -r requirements.txt`. If you receive a `'pip' is not recognized
+as an internal or external command` error, you need to add `pip` to your environmental `path` variable.
+
+3) Add a directory named `database` to the root directory of your project and add a `secrets.json` file to it. If you run
+the project without adding this file, the program will create it for you and populate it with the template values.
+The contents of the file should mirror the following:
 ```json
 {
     "bittrex": {
@@ -46,18 +50,47 @@ You can build on top of this tool and implement algorithm trading and some machi
         ],
         "username": "EXAMPLE_EMAIL@GMAIL.COM",
         "password": "GMAIL_PASSWORD"
+    },
+    "tradeParameters": {
+        "tickerInterval": "TICKER_INTERVAL",
+        "buy": {
+            "btcAmount": 0,
+            "rsiThreshold": 0,
+            "24HourVolumeThreshold": 0,
+            "minimumUnitPrice": 0
+        },
+        "sell": {
+            "rsiThreshold": 0,
+            "minProfitMarginThreshold": 0,
+            "profitMarginThreshold": 0
+        }
     }
 }
 ```
 
-4) To use the Bittrex functionality, you need to setup the following:
-     * `bittrex_key` is your Bittrex API key you can get from [here](https://bittrex.com/Manage#sectionApi)
-     * `bittrex_secret` is your Bittrex API secret key
+4) To use the **Bittrex** functionality, you need to setup the following:
+     * **`bittrex_key`** is your Bittrex API key you can get from [here](https://bittrex.com/Manage#sectionApi)
+     * **`bittrex_secret`** is your Bittrex API secret key
+        * _NOTE:_ The `READ INFO`, `TRADE LIMIT`, and `TRADE MARKET` permissions need to be enabled on your API key in
+        order for the trade functionality to be available
 
-5) To use the Gmail functionality, you need to setup the following:
-     * `username` is your gmail account's username (usually your account's email address)
-     * `password` is your gmail account's password
-     * `address_list` is the list of recipients you'd like to send emails to
+5) To use the **Gmail** functionality, you need to setup the following:
+     * **`username`** is your gmail account's username (usually your account's email address)
+     * **`password`** is your gmail account's password
+     * **`address_list`** is the list of recipients you'd like to send emails to
+
+5) To use the **Trade** functionality, you need to setup the following:
+     * **`tickerInterval`** is the exchange ticker interval you want to use. It should be one of the following: `oneMin`,
+     `fiveMin`, `thirtyMin`, `hour`, `week`, `day`, `month`
+     * **`buy`**: 
+        * `btcAmount` is the amount of BTC you want the bot to spend per buy
+        * `rsiThreshold` is the upper RSI threshold. An RSI lower than this will result in a buy signal
+        * `24HourVolumeThreshold` 
+        * `minimumUnitPrice`
+     * **`sell`**: 
+        * `rsiThreshold`
+        * `minProfitMarginThreshold`
+        * `profitMarginThreshold`
 
 If you don't want to use the email notifications, you can leave out the `gmail` code.
 
