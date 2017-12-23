@@ -107,7 +107,7 @@ class Messenger(object):
         if recipient_name is None:
             recipient_name = self.recipient_name
         main_market, coin = order["Exchange"].split("-")
-        subject = "Crypto Bot: Buy on {} Market".format(order["Quantity"])
+        subject = "Crypto Bot: Buy on {} Market".format(order["Exchange"])
         message = "Howdy {},\n\nI've just bought {} {} on the {} market - which is currently valued at {} {}.\n\n" \
                   "The market currently has an RSI of {} and a 24 hour market volume of {} {}.\n\n" \
                   "Here's a Bittrex URL: {}\n\nRegards,\n" \

@@ -209,6 +209,7 @@ def buy(coin_pair, btc_quantity, price, stats, trade_time_limit=2):
     :param trade_time_limit: The time in minutes to wait fot the order before cancelling it
     :type trade_time_limit: float
     """
+    # TODO: Wait x minutes until prise rises before buying
     buy_data = Bittrex.buy_limit(coin_pair, btc_quantity / price, price)
     if not buy_data["success"]:
         return logger.error("Failed to buy on {} market.".format(coin_pair))
