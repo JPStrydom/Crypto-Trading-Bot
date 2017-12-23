@@ -24,6 +24,11 @@ secrets_template = {
         "password": "GMAIL_PASSWORD"
     },
     "tradeParameters": {
+        "tickerInterval": "TICKER_INTERVAL",
+        "pause": {
+            "rsiThreshold": 0,
+            "pauseTime": 0
+        },
         "buy": {
             "btcAmount": 0,
             "rsiThreshold": 0,
@@ -209,7 +214,6 @@ def buy(coin_pair, btc_quantity, price, stats, trade_time_limit=2):
     :param trade_time_limit: The time in minutes to wait fot the order before cancelling it
     :type trade_time_limit: float
     """
-    # TODO: Wait x minutes until prise rises before buying
     buy_data = Bittrex.buy_limit(coin_pair, btc_quantity / price, price)
     if not buy_data["success"]:
         return logger.error("Failed to buy on {} market.".format(coin_pair))
@@ -305,8 +309,11 @@ def buy_strategy(coin_pair):
             "24HrVolume": day_volume
         }
         buy(coin_pair, buy_params["btcAmount"], current_buy_price, buy_stats)
-    elif rsi is not None and rsi <= buy_params["rsiThreshold"] + 15:
+    elif rsi is not None and rsi <= trade_params["pause"]["rsiThreshold"]:
         Messenger.print_no_buy(coin_pair, rsi, day_volume, current_buy_price)
+    else:
+        Messenger.print_coin_pause(coin_pair, rsi, trade_params["pause"]["pauseTime"])
+        btc_coin_pairs.remove(coin_pair)
 
 
 def sell_strategy(coin_pair):
@@ -338,16 +345,16 @@ if __name__ == "__main__":
             sell_strategy(coin_pair)
 
 
-    try:
-        btc_coin_pairs = get_markets("BTC")
-        Messenger.print_header(len(btc_coin_pairs))
-    except ConnectionError as exception:
-        Messenger.print_exception_error("connection")
-        logger.exception(exception)
-        exit()
+    btc_coin_pairs = get_markets("BTC")
+    market_fetch_time = time.time()
+    Messenger.print_header(len(btc_coin_pairs))
 
     while True:
         try:
+            if time.time() - market_fetch_time >= trade_params["pause"]["pauseTime"] * 60:
+                print("MEEEEMEEEES")
+                btc_coin_pairs = get_markets("BTC")
+                market_fetch_time = time.time()
             analyse_buys()
             analyse_sells()
             time.sleep(10)
@@ -355,12 +362,15 @@ if __name__ == "__main__":
         except ConnectionError as exception:
             Messenger.print_exception_error("connection")
             logger.exception(exception)
+            time.sleep(10)
         except json.decoder.JSONDecodeError as exception:
             Messenger.print_exception_error("JSONDecode")
             logger.exception(exception)
+            time.sleep(10)
         except TypeError as exception:
             Messenger.print_exception_error("typeError")
             logger.exception(exception)
+            time.sleep(10)
         except KeyError as exception:
             Messenger.print_exception_error("keyError")
             logger.exception(exception)

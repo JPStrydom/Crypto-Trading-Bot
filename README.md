@@ -53,6 +53,10 @@ The contents of the file should mirror the following:
     },
     "tradeParameters": {
         "tickerInterval": "TICKER_INTERVAL",
+        "pause": {
+            "rsiThreshold": 0,
+            "pauseTime": 0
+        },
         "buy": {
             "btcAmount": 0,
             "rsiThreshold": 0,
@@ -82,6 +86,10 @@ The contents of the file should mirror the following:
 5) To use the **Trade** functionality, you need to setup the following:
      * **`tickerInterval`** is the exchange ticker interval you want to use. It should be one of the following: `oneMin`,
      `fiveMin`, `thirtyMin`, `hour`, `week`, `day`, `month`
+     * **`pause`**: 
+        * `rsiThreshold` is the minimum RSI threshold to track coin pairs on. An RSI greater than this will result the 
+        coin pair being paused for `pauseTime` minutes.
+        * `pauseTime`: The amount of minutes to wait before re-checking paused coin pairs.
      * **`buy`**: 
         * `btcAmount` is the amount of BTC you want the bot to spend per buy
         * `rsiThreshold` is the upper RSI threshold. An RSI lower than this will result in a buy signal
