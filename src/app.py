@@ -301,9 +301,14 @@ def get_buy_minimum(coin_pair, stats):
     rsi = stats["rsi"]
     while rsi <= stats["rsi"]:
         time.sleep(10)
-        print("RSI still dipping on {}.\tCurrent RSI: {}\tPrevious RSI: {}".format(coin_pair, rsi, stats["rsi"]))
+        price = get_current_price(coin_pair, "ask")  # Temp
+        print("RSI still dipping on {}.\tCurrent RSI: {}\tPrevious RSI: {}\tPrice: {}".format(coin_pair, rsi,
+                                                                                              stats["rsi"], price))  # Temp
         stats["rsi"] = rsi
         rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit=trade_params["tickerInterval"])
+
+    price = get_current_price(coin_pair, "ask")  # Temp
+    print("Final RSI on {}\tRSI: {}\tPrice: {}".format(coin_pair, rsi, price))  # Temp
 
     stats["rsi"] = rsi
     return get_current_price(coin_pair, "ask")
