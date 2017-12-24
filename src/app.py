@@ -1,6 +1,7 @@
 import pydash as py_
 import time
 import json
+from requests.exceptions import SSLError
 
 from src.bittrex import Bittrex
 from src.messenger import Messenger
@@ -399,6 +400,10 @@ if __name__ == "__main__":
             Messenger.print_exception_error("connection")
             logger.exception(exception)
             time.sleep(10)
+        except SSLError as exception:
+            Messenger.print_exception_error("SSL")
+            logger.exception(exception)
+            time.sleep(30)
         except json.decoder.JSONDecodeError as exception:
             Messenger.print_exception_error("JSONDecode")
             logger.exception(exception)
