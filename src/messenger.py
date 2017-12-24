@@ -21,8 +21,10 @@ class Messenger(object):
 
         self.recipient_name = secrets["gmail"]["recipientName"]
 
-        self.coin_pause_str = "Pause tracking on {} with a high RSI of {:>2} for {} minutes."
-        self.coin_resume_str = "Resuming tracking on all {} markets."
+        self.bittrex_url = "https://bittrex.com/Market/Index?MarketName={}"
+
+        self.pause_str = "Pause tracking on {} with a high RSI of {:>2} for {} minutes."
+        self.resume_str = "Resuming tracking on all {} markets."
 
         self.buy_str = "Buy on {:<10}\t->\t\tRSI: {:>2}\t\t24 Hour Volume: {:>5} {}\t\tBuy Price: {:.8f}\t\tURL: {}"
         self.sell_str = "Sell on {:<10}\t->\t\tRSI: {:>2}\t\tProfit Margin: {:>4} %\t\tSell Price: {:.8f}\t\tURL: {}"
@@ -40,12 +42,11 @@ class Messenger(object):
 
         self.order_error_str = "Failed to complete order with UUID {} within {} seconds on {} market."
 
-    @staticmethod
-    def generate_bittrex_URL(coin_pair):
+    def generate_bittrex_URL(self, coin_pair):
         """
         Generates the URL string for the coin pairs Bittrex page
         """
-        return "https://bittrex.com/Market/Index?MarketName={}".format(coin_pair)
+        return self.bittrex_url.format(coin_pair)
 
     def send_email(self, subject, message):
         """
@@ -185,7 +186,7 @@ class Messenger(object):
         cprint(self.sell_str.format(coin_pair, floor(rsi), round(profit_margin, 2), current_sell_price,
                                     self.generate_bittrex_URL(coin_pair)), "green", attrs=["bold"])
 
-    def print_coin_pause(self, coin_pair, rsi, pause_time):
+    def print_pause(self, coin_pair, rsi, pause_time):
         """
         Used to print coin pause info to the console
 
@@ -196,18 +197,12 @@ class Messenger(object):
         :param pause_time: The amount of minutes to tracking will be paused on the coin pair
         :type pause_time: float
         """
-        print_str = self.coin_pause_str.format(coin_pair, floor(rsi), round(pause_time))
+        if rsi is None:
+            rsi = 'N/A'
+        else:
+            rsi = floor(rsi)
+        print_str = self.pause_str.format(coin_pair, rsi, round(pause_time))
         cprint(print_str, "grey")
-
-    def print_resume_pause(self, num_of_coin_pairs):
-        """
-        Used to print coin pause resume info to the console
-
-        :param num_of_coin_pairs: Number of available Bittrex market pairs
-        :type num_of_coin_pairs: int
-        """
-        print_str = self.coin_resume_str.format(num_of_coin_pairs)
-        cprint(print_str, "grey", attrs=["bold"])
 
     def print_no_buy(self, coin_pair, rsi, day_volume, current_buy_price):
         """
@@ -245,6 +240,16 @@ class Messenger(object):
         if print_str != self.previous_no_sell_str:
             self.previous_no_sell_str = print_str
             cprint(print_str, "red")
+
+    def print_resume_pause(self, num_of_coin_pairs):
+        """
+        Used to print coin pause resume info to the console
+
+        :param num_of_coin_pairs: Number of available Bittrex market pairs
+        :type num_of_coin_pairs: int
+        """
+        print_str = self.resume_str.format(num_of_coin_pairs)
+        cprint(print_str, "grey", attrs=["bold"])
 
     def print_exception_error(self, error_type):
         """

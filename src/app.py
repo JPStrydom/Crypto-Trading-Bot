@@ -46,6 +46,7 @@ if secrets == secrets_template:
     print("Please completed the `secrets.json` file in your `database` directory")
     exit()
 trade_params = secrets["tradeParameters"]
+pause_params = trade_params["pause"]
 buy_params = trade_params["buy"]
 sell_params = trade_params["sell"]
 
@@ -334,10 +335,10 @@ def buy_strategy(coin_pair):
         }
         current_buy_price = get_buy_minimum(coin_pair, buy_stats)
         buy(coin_pair, buy_params["btcAmount"], current_buy_price, buy_stats)
-    elif rsi is not None and rsi <= trade_params["pause"]["rsiThreshold"]:
+    elif rsi is not None and rsi <= pause_params["rsiThreshold"]:
         Messenger.print_no_buy(coin_pair, rsi, day_volume, current_buy_price)
     else:
-        Messenger.print_coin_pause(coin_pair, rsi, trade_params["pause"]["pauseTime"])
+        Messenger.print_pause(coin_pair, rsi, pause_params["pauseTime"])
         btc_coin_pairs.remove(coin_pair)
 
 
@@ -370,13 +371,18 @@ if __name__ == "__main__":
             sell_strategy(coin_pair)
 
 
-    btc_coin_pairs = get_markets("BTC")
     market_fetch_time = time.time()
-    Messenger.print_header(len(btc_coin_pairs))
+    try:
+        btc_coin_pairs = get_markets("BTC")
+        Messenger.print_header(len(btc_coin_pairs))
+    except ConnectionError as exception:
+        Messenger.print_exception_error("connection")
+        logger.exception(exception)
+        exit()
 
     while True:
         try:
-            if time.time() - market_fetch_time >= trade_params["pause"]["pauseTime"] * 60:
+            if time.time() - market_fetch_time >= pause_params["pauseTime"] * 60:
                 btc_coin_pairs = get_markets("BTC")
                 Messenger.print_resume_pause(len(btc_coin_pairs))
                 market_fetch_time = time.time()
