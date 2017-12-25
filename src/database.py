@@ -14,7 +14,7 @@ class Database(object):
 
     def __init__(self):
         default_trades = {"trackedCoinPairs": [], "trades": []}
-        default_app_data = {"coinPairs": [], "pauseTime": {"buy": None, "sell": None}}
+        default_app_data = {"coinPairs": [], "pausedTrackedCoinPairs": [], "pauseTime": {"buy": None, "sell": None}}
 
         self.trades_file_string = "database/trades.json"
         self.app_data_file_string = "database/app-data.json"
@@ -159,44 +159,64 @@ class Database(object):
         return profit_margin
 
     def store_coin_pairs(self, btc_coin_pairs):
+        """
+        Used to store the latest Bittrex available markets and update the buy pause time
+
+        :param btc_coin_pairs: String list of market pairs
+        :type btc_coin_pairs: list
+        """
         self.app_data["coinPairs"] = btc_coin_pairs
         self.app_data["pauseTime"]["buy"] = time.time()
 
         write_json_to_file(self.app_data_file_string, self.app_data)
 
     def resume_sells(self):
-        no_sell_trades = py_.filter_(
-            self.trades["trades"],
-            lambda trade: trade["coinPair"] not in self.trades["trackedCoinPairs"] and "sell" not in trade
-        )
-        no_sell_trades = py_.map_(no_sell_trades, lambda trade: trade["coinPair"])
-
-        if len(no_sell_trades) < 1:
+        """
+        Used to resume all paused sells and reset the sell pause time
+        """
+        if len(self.app_data["pausedTrackedCoinPairs"]) < 1:
             return
 
-        for sell in no_sell_trades:
-            self.trades["trackedCoinPairs"].append(sell)
+        self.app_data["pausedTrackedCoinPairs"] = []
         self.app_data["pauseTime"]["sell"] = None
 
-        # TODO: Add proper print function
-        print("Resuming sells on {}".format(no_sell_trades))
-
-        write_json_to_file(self.trades_file_string, self.trades)
         write_json_to_file(self.app_data_file_string, self.app_data)
 
     def pause_buy(self, coin_pair):
+        """
+        Used to pause buy tracking on the coin pair
+
+        :param coin_pair: String literal for the market (ex: BTC-LTC)
+        :type coin_pair: str
+        """
         self.app_data["coinPairs"].remove(coin_pair)
 
         write_json_to_file(self.app_data_file_string, self.app_data)
 
     def pause_sell(self, coin_pair):
-        self.trades["trackedCoinPairs"].remove(coin_pair)
-        self.app_data["pauseTime"]["sell"] = time.time()
+        """
+        Used to pause sell tracking on the coin pair and set the sell pause time
 
-        write_json_to_file(self.trades_file_string, self.trades)
+        :param coin_pair: String literal for the market (ex: BTC-LTC)
+        :type coin_pair: str
+        """
+        if coin_pair not in self.app_data["pausedTrackedCoinPairs"]:
+            return
+        self.app_data["pausedTrackedCoinPairs"].append(coin_pair)
+        if self.app_data["pauseTime"]["sell"] is None:
+            self.app_data["pauseTime"]["sell"] = time.time()
+
         write_json_to_file(self.app_data_file_string, self.app_data)
 
     def check_resume(self, pause_time, pause_type):
+        """
+        Used to check if the pause type cen be un-paused
+
+        :param pause_time: The amount of minutes tracking should be paused
+        :type pause_time: int
+        :param pause_type: The pause type to check (one of: 'buy', 'sell')
+        :type pause_type: str
+        """
         if self.app_data["pauseTime"][pause_type] is None:
             return False
         return time.time() - self.app_data["pauseTime"][pause_type] >= pause_time * 60

@@ -353,16 +353,20 @@ if __name__ == "__main__":
             Database.store_coin_pairs(get_markets("BTC"))
             Messenger.print_resume_pause(len(Database.app_data["coinPairs"]), "buy")
         if Database.check_resume(sell_pause_params["pauseTime"], "sell"):
+            Messenger.print_resume_pause(len(Database.app_data["pausedTrackedCoinPairs"]), "sell")
             Database.resume_sells()
 
     def analyse_buys():
-        if len(Database.trades["trackedCoinPairs"]) < 1:
+        trade_len = len(Database.trades["trackedCoinPairs"])
+        pause_trade_len = len(Database.app_data["pausedTrackedCoinPairs"])
+        if trade_len < 1 or pause_trade_len == trade_len:
             for coin_pair in Database.app_data["coinPairs"]:
                 buy_strategy(coin_pair)
 
     def analyse_sells():
         for coin_pair in Database.trades["trackedCoinPairs"]:
-            sell_strategy(coin_pair)
+            if coin_pair not in Database.app_data["pausedTrackedCoinPairs"]:
+                sell_strategy(coin_pair)
 
     try:
         if len(Database.app_data["coinPairs"]) < 1:
