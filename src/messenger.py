@@ -29,7 +29,7 @@ class Messenger(object):
         }
         self.resume_str = {
             "buy": "Resuming tracking on all {} markets.",
-            "sell": "Pause sell tracking on {}."
+            "sell": "Resume sell tracking on {}."
         }
 
         self.buy_str = "Buy on {:<10}\t->\t\tRSI: {:>2}\t\t24 Hour Volume: {:>5} {}\t\tBuy Price: {:.8f}\t\tURL: {}"
@@ -297,7 +297,7 @@ class Messenger(object):
         return error_str
 
     @staticmethod
-    def play_beep(frequency=2000, duration=1000):
+    def play_beep(frequency=1000, duration=1000):
         """
         Used to play a beep sound
 
