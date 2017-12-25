@@ -340,7 +340,7 @@ def sell_strategy(coin_pair):
             "profitMargin": profit_margin
         }
         sell(coin_pair, current_sell_price, sell_stats)
-    elif rsi is not None and profit_margin >= sell_trade_params["profitMarginThreshold"]:
+    elif rsi is not None and profit_margin >= sell_pause_params["profitMarginThreshold"]:
         Messenger.print_no_sell(coin_pair, rsi, profit_margin, current_sell_price)
     else:
         Messenger.print_pause(coin_pair, profit_margin, sell_pause_params["pauseTime"], "sell")
@@ -353,7 +353,7 @@ if __name__ == "__main__":
             Database.store_coin_pairs(get_markets("BTC"))
             Messenger.print_resume_pause(len(Database.app_data["coinPairs"]), "buy")
         if Database.check_resume(sell_pause_params["pauseTime"], "sell"):
-            Messenger.print_resume_pause(len(Database.app_data["pausedTrackedCoinPairs"]), "sell")
+            Messenger.print_resume_pause(Database.app_data["pausedTrackedCoinPairs"], "sell")
             Database.resume_sells()
 
     def analyse_buys():

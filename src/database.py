@@ -200,7 +200,7 @@ class Database(object):
         :param coin_pair: String literal for the market (ex: BTC-LTC)
         :type coin_pair: str
         """
-        if coin_pair not in self.app_data["pausedTrackedCoinPairs"]:
+        if coin_pair in self.app_data["pausedTrackedCoinPairs"]:
             return
         self.app_data["pausedTrackedCoinPairs"].append(coin_pair)
         if self.app_data["pauseTime"]["sell"] is None:
