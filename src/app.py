@@ -26,10 +26,6 @@ secrets_template = {
     },
     "tradeParameters": {
         "tickerInterval": "TICKER_INTERVAL",
-        "pause": {
-            "rsiThreshold": 0,
-            "pauseTime": 0
-        },
         "buy": {
             "btcAmount": 0,
             "rsiThreshold": 0,
@@ -40,6 +36,16 @@ secrets_template = {
             "rsiThreshold": 0,
             "profitMarginThreshold": 0
         }
+    },
+    "pauseParameters": {
+        "buy": {
+            "rsiThreshold": 0,
+            "pauseTime": 0
+        },
+        "sell": {
+            "profitMarginThreshold": 0,
+            "pauseTime": 0
+        }
     }
 }
 secrets = get_json_from_file(secrets_file_directory, secrets_template)
@@ -47,9 +53,11 @@ if secrets == secrets_template:
     print("Please completed the `secrets.json` file in your `database` directory")
     exit()
 trade_params = secrets["tradeParameters"]
-pause_params = trade_params["pause"]
-buy_params = trade_params["buy"]
-sell_params = trade_params["sell"]
+pause_params = secrets["pauseParameters"]
+buy_trade_params = trade_params["buy"]
+sell_trade_params = trade_params["sell"]
+buy_pause_params = pause_params["buy"]
+sell_pause_params = pause_params["sell"]
 
 Bittrex = Bittrex(secrets)
 Messenger = Messenger(secrets)
@@ -280,51 +288,23 @@ def get_order(order_uuid, trade_time_limit):
     if order_data["result"]["IsOpen"]:
         error_str = Messenger.print_order_error(order_uuid, trade_time_limit, order_data["result"]["Exchange"])
         logger.error(error_str)
+        # TODO: Don't cancel sells. Perhaps just up the price?
         Bittrex.cancel(order_uuid)
         return order_data
 
     return order_data
 
 
-def get_buy_minimum(coin_pair, stats):
-    """
-    Used to wait for the coin pair's RSI to reach a minimum and then return the buy price
-    at that minimum. Also update the stats RSI.
-
-    :param coin_pair: String literal for the market (ex: BTC-LTC)
-    :type coin_pair: str
-    :param stats: The stats related to the trade
-    :type stats: dict
-
-    :return: RSI minimum buy price
-    :rtype : float
-    """
-    rsi = stats["rsi"]
-    while rsi <= stats["rsi"]:
-        time.sleep(10)
-        price = get_current_price(coin_pair, "ask")  # Temp
-        print("RSI still dipping on {}.\tCurrent RSI: {}\tPrevious RSI: {}\tPrice: {}".format(coin_pair, rsi,
-                                                                                              stats["rsi"], price))  # Temp
-        stats["rsi"] = rsi
-        rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit=trade_params["tickerInterval"])
-
-    price = get_current_price(coin_pair, "ask")  # Temp
-    print("Final RSI on {}\tRSI: {}\tPrice: {}".format(coin_pair, rsi, price))  # Temp
-
-    stats["rsi"] = rsi
-    return get_current_price(coin_pair, "ask")
-
-
 def check_buy_parameters(rsi, day_volume, current_buy_price):
-    return rsi is not None and rsi <= buy_params["rsiThreshold"] and \
-           day_volume >= buy_params["24HourVolumeThreshold"] and \
-           current_buy_price > buy_params["minimumUnitPrice"]
+    return rsi is not None and rsi <= buy_trade_params["rsiThreshold"] and \
+           day_volume >= buy_trade_params["24HourVolumeThreshold"] and \
+           current_buy_price > buy_trade_params["minimumUnitPrice"]
 
 
 def check_sell_parameters(rsi, profit_margin):
-    return (rsi is not None and rsi >= sell_params["rsiThreshold"] and
-            profit_margin > sell_params["minProfitMarginThreshold"]) or \
-           profit_margin > sell_params["profitMarginThreshold"]
+    return (rsi is not None and rsi >= sell_trade_params["rsiThreshold"] and
+            profit_margin > sell_trade_params["minProfitMarginThreshold"]) or \
+           profit_margin > sell_trade_params["profitMarginThreshold"]
 
 
 def buy_strategy(coin_pair):
@@ -339,13 +319,12 @@ def buy_strategy(coin_pair):
             "rsi": rsi,
             "24HrVolume": day_volume
         }
-        current_buy_price = get_buy_minimum(coin_pair, buy_stats)
-        buy(coin_pair, buy_params["btcAmount"], current_buy_price, buy_stats)
-    elif rsi is not None and rsi <= pause_params["rsiThreshold"]:
+        buy(coin_pair, buy_trade_params["btcAmount"], current_buy_price, buy_stats)
+    elif rsi is not None and rsi <= buy_pause_params["rsiThreshold"]:
         Messenger.print_no_buy(coin_pair, rsi, day_volume, current_buy_price)
     else:
-        Messenger.print_pause(coin_pair, rsi, pause_params["pauseTime"])
-        btc_coin_pairs.remove(coin_pair)
+        Messenger.print_pause(coin_pair, rsi, buy_pause_params["pauseTime"], "buy")
+        Database.pause_buy(coin_pair)
 
 
 def sell_strategy(coin_pair):
@@ -361,26 +340,34 @@ def sell_strategy(coin_pair):
             "profitMargin": profit_margin
         }
         sell(coin_pair, current_sell_price, sell_stats)
-    elif rsi is not None:
+    elif rsi is not None and profit_margin >= sell_trade_params["profitMarginThreshold"]:
         Messenger.print_no_sell(coin_pair, rsi, profit_margin, current_sell_price)
+    else:
+        Messenger.print_pause(coin_pair, profit_margin, sell_pause_params["pauseTime"], "sell")
+        Database.pause_sell(coin_pair)
 
 
 if __name__ == "__main__":
+    def analyse_pauses():
+        if Database.check_resume(buy_pause_params["pauseTime"], "buy"):
+            Database.store_coin_pairs(get_markets("BTC"))
+            Messenger.print_resume_pause(len(Database.app_data["coinPairs"]), "buy")
+        if Database.check_resume(sell_pause_params["pauseTime"], "sell"):
+            Database.resume_sells()
+
     def analyse_buys():
         if len(Database.trades["trackedCoinPairs"]) < 1:
-            for coin_pair in btc_coin_pairs:
+            for coin_pair in Database.app_data["coinPairs"]:
                 buy_strategy(coin_pair)
-
 
     def analyse_sells():
         for coin_pair in Database.trades["trackedCoinPairs"]:
             sell_strategy(coin_pair)
 
-
-    market_fetch_time = time.time()
     try:
-        btc_coin_pairs = get_markets("BTC")
-        Messenger.print_header(len(btc_coin_pairs))
+        if len(Database.app_data["coinPairs"]) < 1:
+            Database.store_coin_pairs(get_markets("BTC"))
+        Messenger.print_header(len(Database.app_data["coinPairs"]))
     except ConnectionError as exception:
         Messenger.print_exception_error("connection")
         logger.exception(exception)
@@ -388,10 +375,7 @@ if __name__ == "__main__":
 
     while True:
         try:
-            if time.time() - market_fetch_time >= pause_params["pauseTime"] * 60:
-                btc_coin_pairs = get_markets("BTC")
-                Messenger.print_resume_pause(len(btc_coin_pairs))
-                market_fetch_time = time.time()
+            analyse_pauses()
             analyse_buys()
             analyse_sells()
             time.sleep(10)

@@ -23,8 +23,14 @@ class Messenger(object):
 
         self.bittrex_url = "https://bittrex.com/Market/Index?MarketName={}"
 
-        self.pause_str = "Pause tracking on {} with a high RSI of {:>2} for {} minutes."
-        self.resume_str = "Resuming tracking on all {} markets."
+        self.pause_str = {
+            "buy": "Pause buy tracking on {} with a high RSI of {} for {} minutes.",
+            "sell": "Pause sell tracking on {} with a low profit margin of {}% for {} minutes."
+        }
+        self.resume_str = {
+            "buy": "Resuming tracking on all {} markets.",
+            "sell": "Pause sell tracking on {}."
+        }
 
         self.buy_str = "Buy on {:<10}\t->\t\tRSI: {:>2}\t\t24 Hour Volume: {:>5} {}\t\tBuy Price: {:.8f}\t\tURL: {}"
         self.sell_str = "Sell on {:<10}\t->\t\tRSI: {:>2}\t\tProfit Margin: {:>4} %\t\tSell Price: {:.8f}\t\tURL: {}"
@@ -33,6 +39,7 @@ class Messenger(object):
 
         self.error_str = {
             "connection": "Unable to connect to the internet. Please check your connection and try again.",
+            "SSL": "An SSL error occurred. Waiting 30 seconds and then retrying.",
             "JSONDecode": "Failed to decode JSON.",
             "keyError": "Invalid key provided to obj/dict.",
             "valueError": "Value error occurred.",
@@ -186,23 +193,27 @@ class Messenger(object):
         cprint(self.sell_str.format(coin_pair, floor(rsi), round(profit_margin, 2), current_sell_price,
                                     self.generate_bittrex_URL(coin_pair)), "green", attrs=["bold"])
 
-    def print_pause(self, coin_pair, rsi, pause_time):
+    def print_pause(self, coin_pair, value, pause_time, pause_type):
         """
         Used to print coin pause info to the console
 
         :param coin_pair: String literal for the market (ex: BTC-LTC)
         :type coin_pair: str
-        :param rsi: The coin pair's RSI
-        :type rsi: float
+        :param value: Relevant resume value
+        :type value: float
         :param pause_time: The amount of minutes to tracking will be paused on the coin pair
         :type pause_time: float
+        :param pause_type: Type of pause (one of: 'buy', 'sell')
+        :type pause_type: str
         """
-        if rsi is None:
-            rsi = 'N/A'
+        if value is None:
+            value = 'N/A'
+        elif value < 0:
+            value = round(value, 2)
         else:
-            rsi = floor(rsi)
-        print_str = self.pause_str.format(coin_pair, rsi, round(pause_time))
-        cprint(print_str, "grey")
+            value = floor(value)
+        print_str = self.pause_str[pause_type].format(coin_pair, value, round(pause_time))
+        cprint(print_str, "yellow")
 
     def print_no_buy(self, coin_pair, rsi, day_volume, current_buy_price):
         """
@@ -238,28 +249,34 @@ class Messenger(object):
         print_str = "No " + self.sell_str.format(coin_pair, floor(rsi), round(profit_margin, 2), current_sell_price,
                                                  self.generate_bittrex_URL(coin_pair))
         if print_str != self.previous_no_sell_str:
+            color = "magenta"
+            if profit_margin <= 0:
+                color = "red"
             self.previous_no_sell_str = print_str
-            cprint(print_str, "red")
+            cprint(print_str, color)
 
-    def print_resume_pause(self, num_of_coin_pairs):
+    def print_resume_pause(self, value, pause_type):
         """
         Used to print coin pause resume info to the console
 
-        :param num_of_coin_pairs: Number of available Bittrex market pairs
-        :type num_of_coin_pairs: int
+        :param value: Relevant resume value
+        :type value: float
+        :param pause_type: Type of pause (one of: 'buy', 'sell')
+        :type pause_type: str
         """
-        print_str = self.resume_str.format(num_of_coin_pairs)
-        cprint(print_str, "grey", attrs=["bold"])
+        print_str = self.resume_str[pause_type].format(value)
+        cprint(print_str, "yellow", attrs=["bold"])
 
     def print_exception_error(self, error_type):
         """
         Prints the error type message to the console
 
         :param error_type: The error type
-            (one of: 'connection', 'JSONDecode', 'keyError', 'valueError', 'typeError', 'unknown')
+            (one of: 'connection', 'SSL', 'JSONDecode', 'keyError', 'valueError', 'typeError', 'unknown')
         :type error_type: str
         """
         cprint("\n" + self.error_str[error_type] + "\n", "red", attrs=["bold"])
+        self.play_beep()
 
     def print_order_error(self, order_uuid, trade_time_limit, coin_pair):
         """
