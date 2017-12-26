@@ -4,7 +4,7 @@ import datetime
 from src.directory_utilities import validate_or_make_directory
 
 date = "{:%Y-%m-%d}".format(datetime.datetime.now())
-log_file_string = "logs/{}.log".format(date)
+log_file_string = "../logs/{}.log".format(date)
 
 validate_or_make_directory(log_file_string)
 

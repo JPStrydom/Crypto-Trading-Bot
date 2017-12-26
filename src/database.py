@@ -16,8 +16,8 @@ class Database(object):
         default_trades = {"trackedCoinPairs": [], "trades": []}
         default_app_data = {"coinPairs": [], "pausedTrackedCoinPairs": [], "pauseTime": {"buy": None, "sell": None}}
 
-        self.trades_file_string = "database/trades.json"
-        self.app_data_file_string = "database/app-data.json"
+        self.trades_file_string = "../database/trades.json"
+        self.app_data_file_string = "../database/app-data.json"
 
         self.trades = get_json_from_file(self.trades_file_string, default_trades)
         self.app_data = get_json_from_file(self.app_data_file_string, default_app_data)

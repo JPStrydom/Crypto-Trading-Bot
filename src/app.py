@@ -9,7 +9,7 @@ from src.database import Database
 from src.logger import logger
 from src.directory_utilities import get_json_from_file
 
-secrets_file_directory = "database/secrets.json"
+secrets_file_directory = "../database/secrets.json"
 secrets_template = {
     "bittrex": {
         "bittrexKey": "BITTREX_API_KEY",

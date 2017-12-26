@@ -52,7 +52,7 @@ ACCOUNT_SET = {
 }
 
 
-def encrypt(api_key, api_secret, export=True, export_fn="database/secrets.json"):
+def encrypt(api_key, api_secret, export=True, export_fn="../database/secrets.json"):
     cipher = AES.new(getpass.getpass("Input encryption password (string will not show)"))
     api_key_n = cipher.encrypt(api_key)
     api_secret_n = cipher.encrypt(api_secret)
