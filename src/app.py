@@ -30,7 +30,8 @@ secrets_template = {
             "btcAmount": 0,
             "rsiThreshold": 0,
             "24HourVolumeThreshold": 0,
-            "minimumUnitPrice": 0
+            "minimumUnitPrice": 0,
+            "maxOpenTrades": 0
         },
         "sell": {
             "rsiThreshold": 0,
@@ -308,7 +309,8 @@ def check_sell_parameters(rsi, profit_margin):
 
 
 def buy_strategy(coin_pair):
-    if coin_pair in Database.trades["trackedCoinPairs"]:
+    if len(Database.trades["trackedCoinPairs"]) >=buy_trade_params["maxOpenTrades"] or \
+            coin_pair in Database.trades["trackedCoinPairs"]:
         return
     rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit=trade_params["tickerInterval"])
     day_volume = get_current_24hr_volume(coin_pair)
@@ -328,7 +330,8 @@ def buy_strategy(coin_pair):
 
 
 def sell_strategy(coin_pair):
-    if coin_pair not in Database.trades["trackedCoinPairs"]:
+    if coin_pair in Database.app_data["pausedTrackedCoinPairs"] or \
+            coin_pair not in Database.trades["trackedCoinPairs"]:
         return
     rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit=trade_params["tickerInterval"])
     current_sell_price = get_current_price(coin_pair, "bid")
@@ -356,17 +359,20 @@ if __name__ == "__main__":
             Messenger.print_resume_pause(Database.app_data["pausedTrackedCoinPairs"], "sell")
             Database.resume_sells()
 
+
     def analyse_buys():
         trade_len = len(Database.trades["trackedCoinPairs"])
         pause_trade_len = len(Database.app_data["pausedTrackedCoinPairs"])
-        if trade_len < 1 or pause_trade_len == trade_len:
+        if (trade_len < 1 or pause_trade_len == trade_len) and trade_len < buy_trade_params["maxOpenTrades"]:
             for coin_pair in Database.app_data["coinPairs"]:
                 buy_strategy(coin_pair)
+
 
     def analyse_sells():
         for coin_pair in Database.trades["trackedCoinPairs"]:
             if coin_pair not in Database.app_data["pausedTrackedCoinPairs"]:
                 sell_strategy(coin_pair)
+
 
     try:
         if len(Database.app_data["coinPairs"]) < 1:

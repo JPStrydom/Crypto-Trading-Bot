@@ -61,7 +61,8 @@ The contents of the file should mirror the following:
             "btcAmount": 0,
             "rsiThreshold": 0,
             "24HourVolumeThreshold": 0,
-            "minimumUnitPrice": 0
+            "minimumUnitPrice": 0,
+            "maxOpenTrades": 0
         },
         "sell": {
             "rsiThreshold": 0,
