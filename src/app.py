@@ -397,7 +397,7 @@ if __name__ == "__main__":
         except SSLError as exception:
             Messenger.print_exception_error("SSL")
             logger.exception(exception)
-            time.sleep(30)
+            time.sleep(10)
         except json.decoder.JSONDecodeError as exception:
             Messenger.print_exception_error("JSONDecode")
             logger.exception(exception)
