@@ -289,7 +289,7 @@ def get_order(order_uuid, trade_time_limit):
     if order_data["result"]["IsOpen"]:
         error_str = Messenger.print_order_error(order_uuid, trade_time_limit, order_data["result"]["Exchange"])
         logger.error(error_str)
-        # TODO: Don't cancel sells. Perhaps just up the price?
+        # TODO: Handle partial/incomplete sales. Don't cancel sells. Perhaps just up the price?
         Bittrex.cancel(order_uuid)
         return order_data
 
@@ -309,7 +309,7 @@ def check_sell_parameters(rsi, profit_margin):
 
 
 def buy_strategy(coin_pair):
-    if len(Database.trades["trackedCoinPairs"]) >=buy_trade_params["maxOpenTrades"] or \
+    if len(Database.trades["trackedCoinPairs"]) >= buy_trade_params["maxOpenTrades"] or \
             coin_pair in Database.trades["trackedCoinPairs"]:
         return
     rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit=trade_params["tickerInterval"])

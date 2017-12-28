@@ -151,15 +151,10 @@ class Bittrex(object):
                                            headers={"apisign": hmac.new(self.api_secret.encode(), request_url.encode(),
                                                                         hashlib.sha512).hexdigest()}
                                            ).json()
-        except json.decoder.JSONDecodeError as exception:
+            return historical_data["result"][-period:]
+        except (json.decoder.JSONDecodeError, TypeError) as exception:
             logger.exception(exception)
             return []
-
-        if not historical_data["success"]:
-            if historical_data["message"] == "INVALID_MARKET":
-                logger.warning("The {} market is currently not available on Bittrex".format(market))
-            return []
-        return historical_data["result"][-period:]
 
     def get_markets(self):
         """
