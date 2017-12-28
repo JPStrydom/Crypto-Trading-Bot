@@ -70,6 +70,7 @@ class Database(object):
 
         write_json_to_file(self.trades_file_string, self.trades)
 
+
     def store_buy(self, bittrex_order, stats):
         """
         Used to place a buy trade in the database
@@ -112,6 +113,7 @@ class Database(object):
         trade["sell"] = order
         self.trades["trackedCoinPairs"].remove(bittrex_order["Exchange"])
 
+
         write_json_to_file(self.trades_file_string, self.trades)
 
     def get_open_trade(self, coin_pair):
@@ -127,6 +129,7 @@ class Database(object):
         trade_index = py_.find_index(self.trades["trades"],
                                      lambda trade: trade["coinPair"] == coin_pair and "sell" not in trade)
 
+
         if trade_index == -1:
             logger.error("Could not find open trade for {} coin pair".format(coin_pair))
             return None
@@ -134,6 +137,7 @@ class Database(object):
         return self.trades["trades"][trade_index]
 
     def get_profit_margin(self, coin_pair, current_price, trade=None):
+
         """
         Used to get the profit margin for a coin pair"s trade
 
@@ -143,6 +147,7 @@ class Database(object):
         :type current_price: float
         :param trade: The trade to calculate the profit margin on
             Not required. If not passed in the function will go find it
+
         :type trade: dict
 
         :return: Profit margin

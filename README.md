@@ -21,6 +21,7 @@ Users can add their own algorithms and trading strategies based on technical ana
 and Unit Price.
 
 #### Coming Soon:
+* Live Trading (alpha on `dev/live-trading` branch)
 * Bollinger Bands
 
 #### Shoutouts:
