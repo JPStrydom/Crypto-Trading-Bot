@@ -39,11 +39,11 @@ The contents of the file should mirror the following:
 ```json
 {
     "bittrex": {
-        "bittrex_key": "BITTREX_API_KEY",
-        "bittrex_secret": "BITTREX_SECRET"
+        "bittrexKey": "BITTREX_API_KEY",
+        "bittrexSecret": "BITTREX_SECRET"
     },
     "gmail": {
-        "address_list": [
+        "addressList": [
             "EXAMPLE_RECIPIENT_1@GMAIL.COM",
             "EXAMPLE_RECIPIENT_2@GMAIL.COM",
             "ETC..."
@@ -53,10 +53,6 @@ The contents of the file should mirror the following:
     },
     "tradeParameters": {
         "tickerInterval": "TICKER_INTERVAL",
-        "pause": {
-            "rsiThreshold": 0,
-            "pauseTime": 0
-        },
         "buy": {
             "btcAmount": 0,
             "rsiThreshold": 0,
@@ -66,8 +62,17 @@ The contents of the file should mirror the following:
         },
         "sell": {
             "rsiThreshold": 0,
-            "minProfitMarginThreshold": 0,
             "profitMarginThreshold": 0
+        }
+    },
+    "pauseParameters": {
+        "buy": {
+            "rsiThreshold": 0,
+            "pauseTime": 0
+        },
+        "sell": {
+            "profitMarginThreshold": 0,
+            "pauseTime": 0
         }
     }
 }
@@ -83,30 +88,36 @@ The contents of the file should mirror the following:
      * **`username`** is your gmail account's username (usually your account's email address)
      * **`password`** is your gmail account's password
      * **`address_list`** is the list of recipients you'd like to send emails to
+     
+    If you don't want to use the email notifications, you can leave out the `gmail` code.
 
-5) To use the **Trade** functionality, you need to setup the following:
+6) To use the **Trade** functionality, you need to setup the following:
      * **`tickerInterval`** is the exchange ticker interval you want to use. It should be one of the following: `oneMin`,
      `fiveMin`, `thirtyMin`, `hour`, `week`, `day`, `month`
-     * **`pause`**: 
-        * `rsiThreshold` is the minimum RSI threshold to track coin pairs on. An RSI greater than this will result the 
-        coin pair being paused for `pauseTime` minutes.
-        * `pauseTime`: The amount of minutes to wait before re-checking paused coin pairs.
      * **`buy`**: 
         * `btcAmount` is the amount of BTC you want the bot to spend per buy
-        * `rsiThreshold` is the upper RSI threshold. An RSI lower than this will result in a buy signal
-        * `24HourVolumeThreshold` 
-        * `minimumUnitPrice`
+        * `rsiThreshold` is the upper RSI buy threshold. An RSI lower than this will result in a buy signal
+        * `24HourVolumeThreshold` is the lower 24 hour volume buy threshold. Coin pairs with a 24 hour volume lower than this will not be considered for buying
+        * `minimumUnitPrice` is the lower unit price buy threshold. Coin pairs with a unit price lower than this will not be considered for buying 
+        * `maxOpenTrades` is the maximum amount of open trades the bot is allowed to have at one time 
      * **`sell`**: 
-        * `rsiThreshold`
-        * `minProfitMarginThreshold`
-        * `profitMarginThreshold`
+        * `rsiThreshold` is the lower RSI sell threshold. An RSI higher than this will result in a sell signal
+        * `minProfitMarginThreshold` is the upper minimum profit margin sell threshold. Coin pairs with a profit margin lower than this will not be sold
+        * `profitMarginThreshold` is the upper profit margin sell threshold. Coin pairs with a profit margin higher than this will be sold regardless of its RSI
 
-If you don't want to use the email notifications, you can leave out the `gmail` code.
+7) To use the **Pause** functionality, you need to setup the following:
+     * **`buy`**: 
+        * `rsiThreshold` is the lower RSI pause threshold. An RSI higher than this will result in the coin pair not being tracked for `pauseTime` minutes
+        * `pauseTime` is the amount of minutes to pause coin pair tracking by
+     * **`sell`**: 
+        * `profitMarginThreshold` is the upper profit margin pause threshold. A profit margin lower than this will result in the coin pair not being tracked for `pauseTime` minutes
+        * `pauseTime` is the amount of minutes to pause coin pair tracking by
+
 
 ## How to run
-Navigate to your file directory in terminal, and run with the command `python app.py`
+Navigate to the `src` file directory in terminal, and run the command `python app.py` to start the trading bot
 
-## Simulated Trading
+## Trading
 This system allows you to simulate and track crypto currency trades in order to test out different trading strategy. It uses a local database strategy to ensure data is not lost.
 
 To use this functionality, first set the `number_of_strategies` variable, in the `app.py` file, to the number of strategies you wish to test.
