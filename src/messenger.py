@@ -97,10 +97,10 @@ class Messenger(object):
         if recipient_name is None:
             recipient_name = self.recipient_name
         subject = "Crypto Bot: Low RSI on {} Market".format(coin_pair)
-        message = "Howdy {},\n\nI've detected a low RSI of {} on the {} market. " \
-                  "The current 24 hour market volume is {}\n\nHere's a Bittrex URL: {}" \
-                  "\n\nRegards,\nCrypto Bot".format(recipient_name, ceil(rsi), coin_pair, floor(day_volume),
-                                                    self.generate_bittrex_URL(coin_pair))
+        message = (
+            "Howdy {},\n\nI've detected a low RSI of {} on the {} market. The current 24 hour market volume is {}\n\n"
+            "Here's a Bittrex URL: {}\n\nRegards,\nCrypto Bot"
+        ).format(recipient_name, ceil(rsi), coin_pair, floor(day_volume), self.generate_bittrex_URL(coin_pair))
         self.send_email(subject, message)
 
     def send_buy_email(self, order, stats, recipient_name=None):
@@ -119,12 +119,13 @@ class Messenger(object):
             recipient_name = self.recipient_name
         main_market, coin = order["Exchange"].split("-")
         subject = "Crypto Bot: Buy on {} Market".format(order["Exchange"])
-        message = "Howdy {},\n\nI've just bought {} {} on the {} market - which is currently valued at {} {}.\n\n" \
-                  "The market currently has an RSI of {} and a 24 hour market volume of {} {}.\n\n" \
-                  "Here's a Bittrex URL: {}\n\nRegards,\n" \
-                  "Crypto Bot".format(recipient_name, round(order["Quantity"], 4), coin, order["Exchange"],
-                                      order["Price"], main_market, ceil(stats["rsi"]), floor(stats["24HrVolume"]),
-                                      main_market, self.generate_bittrex_URL(order["Quantity"]))
+        message = (
+            "Howdy {},\n\nI've just bought {} {} on the {} market - which is currently valued at {} {}.\n\n"
+            "The market currently has an RSI of {} and a 24 hour market volume of {} {}.\n\n"
+            "Here's a Bittrex URL: {}\n\nRegards,\nCrypto Bot"
+        ).format(recipient_name, round(order["Quantity"], 4), coin, order["Exchange"], order["Price"], main_market,
+                 ceil(stats["rsi"]), floor(stats["24HrVolume"]), main_market,
+                 self.generate_bittrex_URL(order["Quantity"]))
         self.send_email(subject, message)
 
     def send_sell_email(self, order, stats, recipient_name=None):
@@ -143,12 +144,12 @@ class Messenger(object):
             recipient_name = self.recipient_name
         main_market, coin = order["Exchange"].split("-")
         subject = "Crypto Bot: Sell on {} Market".format(order["Exchange"])
-        message = "Howdy {},\n\nI've just sold {} {} on the {} market - which is currently valued at {} {}.\n\n" \
-                  "The market currently has an RSI of {} and a profit of {}% was made.\n\n" \
-                  "Here's a Bittrex URL: {}\n\nRegards,\n" \
-                  "Crypto Bot".format(recipient_name, round(order["Quantity"], 4), coin, order["Exchange"],
-                                      order["Price"], main_market, floor(stats["rsi"]), round(stats["profitMargin"], 2),
-                                      self.generate_bittrex_URL(order["Exchange"]))
+        message = (
+            "Howdy {},\n\nI've just sold {} {} on the {} market - which is currently valued at {} {}.\n\n"
+            "The market currently has an RSI of {} and a profit of {}% was made.\n\n"
+            "Here's a Bittrex URL: {}\n\nRegards,\nCrypto Bot"
+        ).format(recipient_name, round(order["Quantity"], 4), coin, order["Exchange"], order["Price"], main_market,
+                 floor(stats["rsi"]), round(stats["profitMargin"], 2), self.generate_bittrex_URL(order["Exchange"]))
         self.send_email(subject, message)
 
     def print_header(self, num_of_coin_pairs):
