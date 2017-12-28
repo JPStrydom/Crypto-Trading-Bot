@@ -1,5 +1,7 @@
 # Crypto Trading Bot
 
+![](https://static01.nyt.com/images/2015/03/08/sunday-review/08ROBOT/08ROBOT-master1050.gif)
+
 ## Introduction
 
 Use Crypto Trading Bot to autonomously trade and monitor over 250 crypto currencies on Bittrex. Users can configure their
@@ -211,3 +213,6 @@ See the source code for a more detailed description.
 ## Liability
 I am not your financial adviser, nor is this tool. Use this program cautiously as it will trade with your crypto-currencies. 
 None of the contributors to this project are liable for any loses you may incur. Be wise and always do your own research.
+
+
+![](https://cdn-images-1.medium.com/max/1600/1*SKlPuk4vscYs3bl1bFdT5g.gif)
