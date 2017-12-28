@@ -297,20 +297,50 @@ def get_order(order_uuid, trade_time_limit):
 
 
 def check_buy_parameters(rsi, day_volume, current_buy_price):
-    return rsi is not None and rsi <= buy_trade_params["rsiThreshold"] and \
-           day_volume >= buy_trade_params["24HourVolumeThreshold"] and \
-           current_buy_price > buy_trade_params["minimumUnitPrice"]
+    """
+    Used to check if the buy conditions have been met
+
+    :param rsi: The coin pair's current RSI
+    :type rsi: float
+    :param day_volume: The coin pair's current 24 hour volume
+    :type day_volume: float
+    :param current_buy_price: The coin pair's current price
+    :type current_buy_price: float
+
+    :return: Boolean indicating if the buy conditions have been met
+    :rtype : bool
+    """
+    return (rsi is not None and rsi <= buy_trade_params["rsiThreshold"] and
+            day_volume >= buy_trade_params["24HourVolumeThreshold"] and
+            current_buy_price > buy_trade_params["minimumUnitPrice"])
 
 
 def check_sell_parameters(rsi, profit_margin):
-    return (rsi is not None and rsi >= sell_trade_params["rsiThreshold"] and
-            profit_margin > sell_trade_params["minProfitMarginThreshold"]) or \
-           profit_margin > sell_trade_params["profitMarginThreshold"]
+    """
+    Used to check if the sell conditions have been met
+
+    :param rsi: The coin pair's current RSI
+    :type rsi: float
+    :param profit_margin: The coin pair's current profit margin
+    :type profit_margin: float
+
+    :return: Boolean indicating if the sell conditions have been met
+    :rtype : bool
+    """
+    return ((rsi is not None and rsi >= sell_trade_params["rsiThreshold"] and
+             profit_margin > sell_trade_params["minProfitMarginThreshold"]) or
+            profit_margin > sell_trade_params["profitMarginThreshold"])
 
 
 def buy_strategy(coin_pair):
-    if len(Database.trades["trackedCoinPairs"]) >= buy_trade_params["maxOpenTrades"] or \
-            coin_pair in Database.trades["trackedCoinPairs"]:
+    """
+    Applies the buy checks on the coin pair and handles the results appropriately
+
+    :param coin_pair: Coin pair market to check (ex: BTC-ETH, BTC-FCT)
+    :type coin_pair: str
+    """
+    if (len(Database.trades["trackedCoinPairs"]) >= buy_trade_params["maxOpenTrades"] or
+            coin_pair in Database.trades["trackedCoinPairs"]):
         return
     rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit=trade_params["tickerInterval"])
     day_volume = get_current_24hr_volume(coin_pair)
@@ -330,8 +360,14 @@ def buy_strategy(coin_pair):
 
 
 def sell_strategy(coin_pair):
-    if coin_pair in Database.app_data["pausedTrackedCoinPairs"] or \
-            coin_pair not in Database.trades["trackedCoinPairs"]:
+    """
+    Applies the sell checks on the coin pair and handles the results appropriately
+
+    :param coin_pair: Coin pair market to check (ex: BTC-ETH, BTC-FCT)
+    :type coin_pair: str
+    """
+    if (coin_pair in Database.app_data["pausedTrackedCoinPairs"] or
+            coin_pair not in Database.trades["trackedCoinPairs"]):
         return
     rsi = calculate_RSI(coin_pair=coin_pair, period=14, unit=trade_params["tickerInterval"])
     current_sell_price = get_current_price(coin_pair, "bid")
