@@ -354,7 +354,7 @@ def buy_strategy(coin_pair):
         buy(coin_pair, buy_trade_params["btcAmount"], current_buy_price, buy_stats)
     elif rsi is not None and rsi <= buy_pause_params["rsiThreshold"]:
         Messenger.print_no_buy(coin_pair, rsi, day_volume, current_buy_price)
-    else:
+    elif rsi is not None:
         Messenger.print_pause(coin_pair, rsi, buy_pause_params["pauseTime"], "buy")
         Database.pause_buy(coin_pair)
 
@@ -381,7 +381,7 @@ def sell_strategy(coin_pair):
         sell(coin_pair, current_sell_price, sell_stats)
     elif rsi is not None and profit_margin >= sell_pause_params["profitMarginThreshold"]:
         Messenger.print_no_sell(coin_pair, rsi, profit_margin, current_sell_price)
-    else:
+    elif rsi is not None:
         Messenger.print_pause(coin_pair, profit_margin, sell_pause_params["pauseTime"], "sell")
         Database.pause_sell(coin_pair)
 
