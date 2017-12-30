@@ -37,7 +37,7 @@ class Messenger(object):
 
         self.previous_no_sell_str = ""
 
-        self.error_str = {
+        self.exception_error_str = {
             "connection": "Unable to connect to the internet. Please check your connection and try again.",
             "SSL": "An SSL error occurred. Waiting 30 seconds and then retrying.",
             "JSONDecode": "Failed to decode JSON.",
@@ -276,7 +276,7 @@ class Messenger(object):
             (one of: 'connection', 'SSL', 'JSONDecode', 'keyError', 'valueError', 'typeError', 'unknown')
         :type error_type: str
         """
-        cprint("\n" + self.error_str[error_type] + "\n", "red", attrs=["bold"])
+        cprint("\n" + self.exception_error_str[error_type] + "\n", "red", attrs=["bold"])
         self.play_beep()
 
     def print_order_error(self, order_uuid, trade_time_limit, coin_pair):
@@ -314,28 +314,28 @@ class Messenger(object):
         """
         Used to play the Star Wars theme song
         """
-        winsound.Beep(1046, 800)
-        winsound.Beep(1567, 800)
-        winsound.Beep(1396, 50)
-        winsound.Beep(1318, 50)
-        winsound.Beep(1174, 50)
-        winsound.Beep(2093, 800)
+        winsound.Beep(1046, 880)
+        winsound.Beep(1567, 880)
+        winsound.Beep(1396, 55)
+        winsound.Beep(1318, 55)
+        winsound.Beep(1174, 55)
+        winsound.Beep(2093, 880)
 
         time.sleep(0.3)
 
         winsound.Beep(1567, 600)
-        winsound.Beep(1396, 50)
-        winsound.Beep(1318, 50)
-        winsound.Beep(1174, 50)
-        winsound.Beep(2093, 800)
+        winsound.Beep(1396, 55)
+        winsound.Beep(1318, 55)
+        winsound.Beep(1174, 55)
+        winsound.Beep(2093, 880)
 
         time.sleep(0.3)
 
         winsound.Beep(1567, 600)
-        winsound.Beep(1396, 50)
-        winsound.Beep(1318, 50)
-        winsound.Beep(1396, 50)
-        winsound.Beep(1174, 800)
+        winsound.Beep(1396, 55)
+        winsound.Beep(1318, 55)
+        winsound.Beep(1396, 55)
+        winsound.Beep(1174, 880)
 
     @staticmethod
     def play_sw_imperial_march():

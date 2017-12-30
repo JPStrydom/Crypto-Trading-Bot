@@ -255,7 +255,9 @@ def sell(coin_pair, price, stats, trade_time_limit=2):
     trade = Database.get_open_trade(coin_pair)
     sell_data = Bittrex.sell_limit(coin_pair, trade["quantity"], price)
     if not sell_data["success"]:
-        return logger.error("Failed to sell on {} market.".format(coin_pair))
+        return logger.error(
+            "Failed to sell on {} market. Bittrex error message: {}".format(coin_pair, sell_data["message"])
+        )
 
     sell_order_data = get_order(sell_data["result"]["uuid"], trade_time_limit * 60)
     # TODO: Handle partial/incomplete sales
