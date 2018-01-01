@@ -90,14 +90,14 @@ if __name__ == "__main__":
             logger.exception(exception)
             time.sleep(10)
         except KeyError as exception:
-            Messenger.print_exception_error("keyError")
+            Messenger.print_exception_error("keyError", True)
             logger.exception(exception)
             exit()
         except ValueError as exception:
-            Messenger.print_exception_error("valueError")
+            Messenger.print_exception_error("valueError", True)
             logger.exception(exception)
             exit()
         except Exception:
-            Messenger.print_exception_error("unknown")
+            Messenger.print_exception_error("unknown", True)
             logger.exception(Exception)
             exit()
