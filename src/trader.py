@@ -198,7 +198,7 @@ class Trader(object):
             )
 
         sell_order_data = self.get_order(sell_data["result"]["uuid"], trade_time_limit * 60)
-        # TODO: Handle partial/incomplete sales
+        # TODO: Handle partial/incomplete sales.
         self.Database.store_sell(sell_order_data["result"], stats)
 
         self.Messenger.send_sell_email(sell_order_data["result"], stats)
@@ -308,8 +308,8 @@ class Trader(object):
         if order_data["result"]["IsOpen"]:
             error_str = self.Messenger.print_order_error(order_uuid, trade_time_limit, order_data["result"]["Exchange"])
             logger.error(error_str)
-            # TODO: Handle partial/incomplete sales. Don't cancel sells. Perhaps just up the price?
-            self.Bittrex.cancel(order_uuid)
+            if order_data["result"]["Type"] == "LIMIT_BUY":
+                self.Bittrex.cancel(order_uuid)
             return order_data
 
         return order_data
