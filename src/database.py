@@ -22,29 +22,6 @@ class Database(object):
         self.trades = get_json_from_file(self.trades_file_string, default_trades)
         self.app_data = get_json_from_file(self.app_data_file_string, default_app_data)
 
-    @staticmethod
-    def convert_bittrex_order_object(bittrex_order, stats=None):
-        """
-        Used to convert a Bittrex order object to a database buy object
-        and add stats to it of they are provided.
-
-        :param bittrex_order: Bittrex buy order object
-        :type bittrex_order: dict
-        :param stats: The buy stats to store
-        :type stats: dict
-        """
-        database_order = {
-            "orderUuid": bittrex_order["OrderUuid"],
-            "dateOpened": bittrex_order["Opened"],
-            "dateClosed": bittrex_order["Closed"],
-            "price": bittrex_order["Price"],
-            "unitPrice": bittrex_order["PricePerUnit"],
-            "commissionPaid": bittrex_order["CommissionPaid"]
-        }
-        if stats is not None:
-            database_order["stats"] = stats
-        return database_order
-
     def store_initial_buy(self, coin_pair, buy_order_uuid):
         """
         Used to place an initial trade in the database
@@ -114,6 +91,69 @@ class Database(object):
 
         write_json_to_file(self.trades_file_string, self.trades)
 
+    def pause_buy(self, coin_pair):
+        """
+        Used to pause buy tracking on the coin pair
+
+        :param coin_pair: String literal for the market (ex: BTC-LTC)
+        :type coin_pair: str
+        """
+        self.app_data["coinPairs"].remove(coin_pair)
+
+        write_json_to_file(self.app_data_file_string, self.app_data)
+
+    def pause_sell(self, coin_pair):
+        """
+        Used to pause sell tracking on the coin pair and set the sell pause time
+
+        :param coin_pair: String literal for the market (ex: BTC-LTC)
+        :type coin_pair: str
+        """
+        if coin_pair in self.app_data["pausedTrackedCoinPairs"]:
+            return
+        self.app_data["pausedTrackedCoinPairs"].append(coin_pair)
+        if self.app_data["pauseTime"]["sell"] is None:
+            self.app_data["pauseTime"]["sell"] = time.time()
+
+        write_json_to_file(self.app_data_file_string, self.app_data)
+
+    def store_coin_pairs(self, btc_coin_pairs):
+        """
+        Used to store the latest Bittrex available markets and update the buy pause time
+
+        :param btc_coin_pairs: String list of market pairs
+        :type btc_coin_pairs: list
+        """
+        self.app_data["coinPairs"] = btc_coin_pairs
+        self.app_data["pauseTime"]["buy"] = time.time()
+
+        write_json_to_file(self.app_data_file_string, self.app_data)
+
+    def resume_sells(self):
+        """
+        Used to resume all paused sells and reset the sell pause time
+        """
+        if len(self.app_data["pausedTrackedCoinPairs"]) < 1:
+            return
+
+        self.app_data["pausedTrackedCoinPairs"] = []
+        self.app_data["pauseTime"]["sell"] = None
+
+        write_json_to_file(self.app_data_file_string, self.app_data)
+
+    def check_resume(self, pause_time, pause_type):
+        """
+        Used to check if the pause type cen be un-paused
+
+        :param pause_time: The amount of minutes tracking should be paused
+        :type pause_time: int
+        :param pause_type: The pause type to check (one of: 'buy', 'sell')
+        :type pause_type: str
+        """
+        if self.app_data["pauseTime"][pause_type] is None:
+            return False
+        return time.time() - self.app_data["pauseTime"][pause_type] >= pause_time * 60
+
     def get_open_trade(self, coin_pair):
         """
         Used to get the coin pair's unsold trade in the database
@@ -158,65 +198,25 @@ class Database(object):
 
         return profit_margin
 
-    def store_coin_pairs(self, btc_coin_pairs):
+    @staticmethod
+    def convert_bittrex_order_object(bittrex_order, stats=None):
         """
-        Used to store the latest Bittrex available markets and update the buy pause time
+        Used to convert a Bittrex order object to a database buy object
+        and add stats to it of they are provided.
 
-        :param btc_coin_pairs: String list of market pairs
-        :type btc_coin_pairs: list
+        :param bittrex_order: Bittrex buy order object
+        :type bittrex_order: dict
+        :param stats: The buy stats to store
+        :type stats: dict
         """
-        self.app_data["coinPairs"] = btc_coin_pairs
-        self.app_data["pauseTime"]["buy"] = time.time()
-
-        write_json_to_file(self.app_data_file_string, self.app_data)
-
-    def resume_sells(self):
-        """
-        Used to resume all paused sells and reset the sell pause time
-        """
-        if len(self.app_data["pausedTrackedCoinPairs"]) < 1:
-            return
-
-        self.app_data["pausedTrackedCoinPairs"] = []
-        self.app_data["pauseTime"]["sell"] = None
-
-        write_json_to_file(self.app_data_file_string, self.app_data)
-
-    def pause_buy(self, coin_pair):
-        """
-        Used to pause buy tracking on the coin pair
-
-        :param coin_pair: String literal for the market (ex: BTC-LTC)
-        :type coin_pair: str
-        """
-        self.app_data["coinPairs"].remove(coin_pair)
-
-        write_json_to_file(self.app_data_file_string, self.app_data)
-
-    def pause_sell(self, coin_pair):
-        """
-        Used to pause sell tracking on the coin pair and set the sell pause time
-
-        :param coin_pair: String literal for the market (ex: BTC-LTC)
-        :type coin_pair: str
-        """
-        if coin_pair in self.app_data["pausedTrackedCoinPairs"]:
-            return
-        self.app_data["pausedTrackedCoinPairs"].append(coin_pair)
-        if self.app_data["pauseTime"]["sell"] is None:
-            self.app_data["pauseTime"]["sell"] = time.time()
-
-        write_json_to_file(self.app_data_file_string, self.app_data)
-
-    def check_resume(self, pause_time, pause_type):
-        """
-        Used to check if the pause type cen be un-paused
-
-        :param pause_time: The amount of minutes tracking should be paused
-        :type pause_time: int
-        :param pause_type: The pause type to check (one of: 'buy', 'sell')
-        :type pause_type: str
-        """
-        if self.app_data["pauseTime"][pause_type] is None:
-            return False
-        return time.time() - self.app_data["pauseTime"][pause_type] >= pause_time * 60
+        database_order = {
+            "orderUuid": bittrex_order["OrderUuid"],
+            "dateOpened": bittrex_order["Opened"],
+            "dateClosed": bittrex_order["Closed"],
+            "price": bittrex_order["Price"],
+            "unitPrice": bittrex_order["PricePerUnit"],
+            "commissionPaid": bittrex_order["CommissionPaid"]
+        }
+        if stats is not None:
+            database_order["stats"] = stats
+        return database_order
