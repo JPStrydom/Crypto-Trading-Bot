@@ -48,12 +48,6 @@ class Messenger(object):
 
         self.order_error_str = "Failed to complete order with UUID {} within {} seconds on {} market. URL: {}"
 
-    def generate_bittrex_URL(self, coin_pair):
-        """
-        Generates the URL string for the coin pairs Bittrex page
-        """
-        return self.bittrex_url.format(coin_pair)
-
     def send_email(self, subject, message):
         """
         Used to send an email from the account specified in the secrets.json file to the entire
@@ -79,29 +73,6 @@ class Messenger(object):
         server.quit()
 
         return errors
-
-    def send_RSI_email(self, coin_pair, rsi, day_volume, recipient_name=None):
-        """
-        Used to send a low RSI specific email from the account specified in the secrets.json file to the entire
-        address list specified in the secrets.json file
-
-        :param coin_pair: Coin pair the low RSI occurred on (ex: BTC-ETH)
-        :type coin_pair: str
-        :param rsi: Low RSI
-        :type rsi: float
-        :param day_volume: Coin pair's current 24 hour volume
-        :type day_volume: float
-        :param recipient_name: Name of the email's recipient (ex: John)
-        :type recipient_name: str
-        """
-        if recipient_name is None:
-            recipient_name = self.recipient_name
-        subject = "Crypto Bot: Low RSI on {} Market".format(coin_pair)
-        message = (
-            "Howdy {},\n\nI've detected a low RSI of {} on the {} market. The current 24 hour market volume is {}\n\n"
-            "Here's a Bittrex URL: {}\n\nRegards,\nCrypto Bot"
-        ).format(recipient_name, ceil(rsi), coin_pair, floor(day_volume), self.generate_bittrex_URL(coin_pair))
-        self.send_email(subject, message)
 
     def send_buy_email(self, order, stats, recipient_name=None):
         """
@@ -297,6 +268,12 @@ class Messenger(object):
                                                 self.generate_bittrex_URL(coin_pair))
         cprint("\n" + error_str + "\n", "red", attrs=["bold"])
         return error_str
+
+    def generate_bittrex_URL(self, coin_pair):
+        """
+        Generates the URL string for the coin pairs Bittrex page
+        """
+        return self.bittrex_url.format(coin_pair)
 
     @staticmethod
     def play_beep(frequency=1000, duration=1000):
