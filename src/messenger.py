@@ -37,12 +37,12 @@ class Messenger(object):
         self.previous_no_sell_str = ""
 
         self.exception_error_str = {
-            "connection": "Unable to connect to the internet. Please check your connection and try again.",
-            "SSL": "An SSL error occurred. Waiting 30 seconds and then retrying.",
+            "SSL": "An SSL error occurred.",
+            "connection": "Unable to connect to the internet.",
             "JSONDecode": "Failed to decode JSON.",
+            "typeError": "Type error occurred.",
             "keyError": "Invalid key provided to obj/dict.",
             "valueError": "Value error occurred.",
-            "typeError": "Type error occurred.",
             "unknown": "An unknown exception occurred."
         }
 
@@ -239,15 +239,20 @@ class Messenger(object):
         print_str = self.resume_str[pause_type].format(value)
         cprint(print_str, "yellow", attrs=["bold"])
 
-    def print_exception_error(self, error_type):
+    def print_exception_error(self, error_type, will_exit=False):
         """
         Prints the error type message to the console
 
         :param error_type: The error type
             (one of: 'connection', 'SSL', 'JSONDecode', 'keyError', 'valueError', 'typeError', 'unknown')
         :type error_type: str
+        :param will_exit: Whether the program is exiting or not
+        :type will_exit: bool
         """
-        cprint("\n" + self.exception_error_str[error_type] + "\n", "red", attrs=["bold"])
+        suffix = " Waiting 10 seconds and then retrying."
+        if will_exit:
+            suffix = " Exiting program."
+        cprint("\n" + self.exception_error_str[error_type] + suffix + "\n", "red", attrs=["bold"])
         self.play_beep()
 
     def print_order_error(self, order_uuid, trade_time_limit, coin_pair):
