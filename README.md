@@ -163,7 +163,7 @@ The `analyse_buys()` and
 valid coin pair on Bittrex. These functions will check each coin pair for buy/sell signals by utilising the the following 
 two functions:
 ```python
-from src.directory_utilities import get_json_from_file
+from directory_utilities import get_json_from_file
 
 secrets_file_directory = "../database/secrets.json"
 secrets = get_json_from_file(secrets_file_directory)

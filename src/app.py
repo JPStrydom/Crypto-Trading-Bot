@@ -3,11 +3,11 @@ import time
 import json
 from requests.exceptions import SSLError
 
-from src.bittrex import Bittrex
-from src.messenger import Messenger
-from src.database import Database
-from src.logger import logger
-from src.directory_utilities import get_json_from_file
+from bittrex import Bittrex
+from messenger import Messenger
+from database import Database
+from logger import logger
+from directory_utilities import get_json_from_file
 
 secrets_file_directory = "../database/secrets.json"
 secrets_template = {

@@ -1,7 +1,7 @@
 import logging
 import datetime
 
-from src.directory_utilities import validate_or_make_directory
+from directory_utilities import validate_or_make_directory
 
 date = "{:%Y-%m-%d}".format(datetime.datetime.now())
 log_file_string = "../logs/{}.log".format(date)

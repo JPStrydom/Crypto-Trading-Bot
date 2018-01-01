@@ -7,8 +7,8 @@ import hashlib
 import requests
 import json
 
-from src.logger import logger
-from src.directory_utilities import write_json_to_file
+from logger import logger
+from directory_utilities import write_json_to_file
 
 try:
     from urllib import urlencode
