@@ -7,9 +7,6 @@ import hashlib
 import requests
 import json
 
-from logger import logger
-from directory_utilities import write_json_to_file
-
 try:
     from urllib import urlencode
     from urlparse import urljoin
@@ -20,10 +17,12 @@ except ImportError:
 try:
     from Crypto.Cipher import AES
     import getpass, ast
-
     encrypted = True
 except ImportError:
     encrypted = False
+
+from logger import logger
+from directory_utilities import write_json_to_file
 
 BUY_ORDERBOOK = "buy"
 SELL_ORDERBOOK = "sell"
