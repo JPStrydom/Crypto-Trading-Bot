@@ -45,6 +45,7 @@ The contents of the file should mirror the following:
         "bittrexSecret": "BITTREX_SECRET"
     },
     "gmail": {
+        "recipientName": "Folks",
         "addressList": [
             "EXAMPLE_RECIPIENT_1@GMAIL.COM",
             "EXAMPLE_RECIPIENT_2@GMAIL.COM",

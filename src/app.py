@@ -16,7 +16,7 @@ secrets_template = {
         "bittrexSecret": "BITTREX_SECRET"
     },
     "gmail": {
-        "recipientName": "CASPER",
+        "recipientName": "Folks",
         "addressList": [
             "EXAMPLE_RECIPIENT_1@GMAIL.COM",
             "EXAMPLE_RECIPIENT_2@GMAIL.COM",
