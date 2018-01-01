@@ -15,8 +15,8 @@ class Messenger(object):
         self.to_address_list = secrets["gmail"]["addressList"]
         self.login = secrets["gmail"]["username"]
         self.password = secrets["gmail"]["password"]
-        self.smtp_server = smtplib.SMTP("smtp.gmail.com:587")
         self.recipient_name = secrets["gmail"]["recipientName"]
+        self.smtp_server_address = "smtp.gmail.com:587"
 
         self.header_str = "\nTracking {} Bittrex Markets\n"
 
@@ -72,10 +72,11 @@ class Messenger(object):
         header += "Subject: %s\n\n" % subject
         message = header + message
 
-        self.smtp_server.starttls()
-        self.smtp_server.login(self.login, self.password)
-        errors = self.smtp_server.sendmail(self.from_address, self.to_address_list, message)
-        self.smtp_server.quit()
+        server = smtplib.SMTP(self.smtp_server_address)
+        server.starttls()
+        server.login(self.login, self.password)
+        errors = server.sendmail(self.from_address, self.to_address_list, message)
+        server.quit()
 
         return errors
 
