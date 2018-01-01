@@ -15,11 +15,10 @@ class Messenger(object):
         self.to_address_list = secrets["gmail"]["addressList"]
         self.login = secrets["gmail"]["username"]
         self.password = secrets["gmail"]["password"]
-        self.smtp_server = "smtp.gmail.com:587"
+        self.smtp_server = smtplib.SMTP("smtp.gmail.com:587")
+        self.recipient_name = secrets["gmail"]["recipientName"]
 
         self.header_str = "\nTracking {} Bittrex Markets\n"
-
-        self.recipient_name = secrets["gmail"]["recipientName"]
 
         self.bittrex_url = "https://bittrex.com/Market/Index?MarketName={}"
 
@@ -47,7 +46,7 @@ class Messenger(object):
             "unknown": "An unknown exception occurred."
         }
 
-        self.order_error_str = "Failed to complete order with UUID {} within {} seconds on {} market."
+        self.order_error_str = "Failed to complete order with UUID {} within {} seconds on {} market. URL: {}"
 
     def generate_bittrex_URL(self, coin_pair):
         """
@@ -73,11 +72,11 @@ class Messenger(object):
         header += "Subject: %s\n\n" % subject
         message = header + message
 
-        server = smtplib.SMTP(self.smtp_server)
-        server.starttls()
-        server.login(self.login, self.password)
-        errors = server.sendmail(self.from_address, self.to_address_list, message)
-        server.quit()
+        self.smtp_server.starttls()
+        self.smtp_server.login(self.login, self.password)
+        errors = self.smtp_server.sendmail(self.from_address, self.to_address_list, message)
+        self.smtp_server.quit()
+
         return errors
 
     def send_RSI_email(self, coin_pair, rsi, day_volume, recipient_name=None):
@@ -293,7 +292,8 @@ class Messenger(object):
         :return: Error string
         :rtype : str
         """
-        error_str = self.order_error_str.format(order_uuid, trade_time_limit, coin_pair)
+        error_str = self.order_error_str.format(order_uuid, trade_time_limit, coin_pair,
+                                                self.generate_bittrex_URL(coin_pair))
         cprint("\n" + error_str + "\n", "red", attrs=["bold"])
         return error_str
 
