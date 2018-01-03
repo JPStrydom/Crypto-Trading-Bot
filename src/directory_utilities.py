@@ -27,7 +27,7 @@ def get_json_from_file(directory_string, default_json_content=None):
     :param directory_string: The relative directory string (ex: database/secrets.json)
     :type directory_string: str
     :param default_json_content: The content to populate a non-existing JSON file with
-    :type default_json_content: dict
+    :type default_json_content: dict, list
     """
     validate_or_make_directory(directory_string)
     try:

@@ -32,27 +32,21 @@ class Messenger(object):
         }
 
         self.buy_str = "Buy on {:<10}\t->\t\tRSI: {:>2}\t\t24 Hour Volume: {:>5} {}\t\tBuy Price: {:.8f}\t\tURL: {}"
-        self.sell_str = "Sell on {:<10}\t->\t\tRSI: {:>2}\t\tProfit Margin: {:>4} %\t\tSell Price: {:.8f}\t\tURL: {}"
+        self.sell_str = "Sell on {:<10}\t->\t\tRSI: {:>2}\t\tProfit Margin: {:>4}%\t\tSell Price: {:.8f}\t\tURL: {}"
 
         self.previous_no_sell_str = ""
 
         self.exception_error_str = {
-            "connection": "Unable to connect to the internet. Please check your connection and try again.",
-            "SSL": "An SSL error occurred. Waiting 30 seconds and then retrying.",
+            "SSL": "An SSL error occurred.",
+            "connection": "Unable to connect to the internet.",
             "JSONDecode": "Failed to decode JSON.",
+            "typeError": "Type error occurred.",
             "keyError": "Invalid key provided to obj/dict.",
             "valueError": "Value error occurred.",
-            "typeError": "Type error occurred.",
             "unknown": "An unknown exception occurred."
         }
 
         self.order_error_str = "Failed to complete order with UUID {} within {} seconds on {} market. URL: {}"
-
-    def generate_bittrex_URL(self, coin_pair):
-        """
-        Generates the URL string for the coin pairs Bittrex page
-        """
-        return self.bittrex_url.format(coin_pair)
 
     def send_email(self, subject, message):
         """
@@ -79,29 +73,6 @@ class Messenger(object):
         server.quit()
 
         return errors
-
-    def send_RSI_email(self, coin_pair, rsi, day_volume, recipient_name=None):
-        """
-        Used to send a low RSI specific email from the account specified in the secrets.json file to the entire
-        address list specified in the secrets.json file
-
-        :param coin_pair: Coin pair the low RSI occurred on (ex: BTC-ETH)
-        :type coin_pair: str
-        :param rsi: Low RSI
-        :type rsi: float
-        :param day_volume: Coin pair's current 24 hour volume
-        :type day_volume: float
-        :param recipient_name: Name of the email's recipient (ex: John)
-        :type recipient_name: str
-        """
-        if recipient_name is None:
-            recipient_name = self.recipient_name
-        subject = "Crypto Bot: Low RSI on {} Market".format(coin_pair)
-        message = (
-            "Howdy {},\n\nI've detected a low RSI of {} on the {} market. The current 24 hour market volume is {}\n\n"
-            "Here's a Bittrex URL: {}\n\nRegards,\nCrypto Bot"
-        ).format(recipient_name, ceil(rsi), coin_pair, floor(day_volume), self.generate_bittrex_URL(coin_pair))
-        self.send_email(subject, message)
 
     def send_buy_email(self, order, stats, recipient_name=None):
         """
@@ -268,15 +239,20 @@ class Messenger(object):
         print_str = self.resume_str[pause_type].format(value)
         cprint(print_str, "yellow", attrs=["bold"])
 
-    def print_exception_error(self, error_type):
+    def print_exception_error(self, error_type, will_exit=False):
         """
         Prints the error type message to the console
 
         :param error_type: The error type
             (one of: 'connection', 'SSL', 'JSONDecode', 'keyError', 'valueError', 'typeError', 'unknown')
         :type error_type: str
+        :param will_exit: Whether the program is exiting or not
+        :type will_exit: bool
         """
-        cprint("\n" + self.exception_error_str[error_type] + "\n", "red", attrs=["bold"])
+        suffix = " Waiting 10 seconds and then retrying."
+        if will_exit:
+            suffix = " Exiting program."
+        cprint("\n" + self.exception_error_str[error_type] + suffix + "\n", "red", attrs=["bold"])
         self.play_beep()
 
     def print_order_error(self, order_uuid, trade_time_limit, coin_pair):
@@ -297,6 +273,12 @@ class Messenger(object):
                                                 self.generate_bittrex_URL(coin_pair))
         cprint("\n" + error_str + "\n", "red", attrs=["bold"])
         return error_str
+
+    def generate_bittrex_URL(self, coin_pair):
+        """
+        Generates the URL string for the coin pairs Bittrex page
+        """
+        return self.bittrex_url.format(coin_pair)
 
     @staticmethod
     def play_beep(frequency=1000, duration=1000):
