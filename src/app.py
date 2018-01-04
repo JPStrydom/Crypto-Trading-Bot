@@ -25,6 +25,10 @@ def get_secrets():
             "username": "EXAMPLE_EMAIL@GMAIL.COM",
             "password": "GMAIL_PASSWORD"
         },
+        "slack": {
+            "channel": "SLACK_CHANNEL",
+            "token": "SLACK_TOKEN"
+        },
         "tradeParameters": {
             "tickerInterval": "TICKER_INTERVAL",
             "buy": {

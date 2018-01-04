@@ -13,6 +13,7 @@ own custom trading parameters which will control when the bot buys and sells.
 * Automated technical analysis (TA)
 * Trade analysis and tracking
 * Email alerts for trades and signals
+* Slack notifications for trades and signals
 * Informative console outputs for user monitoring
 * Logging to track and document errors on the Bittrex API
 * Well documented script
@@ -54,6 +55,10 @@ The contents of the file should mirror the following:
         "username": "EXAMPLE_EMAIL@GMAIL.COM",
         "password": "GMAIL_PASSWORD"
     },
+    "slack": {
+        "channel": "SLACK_CHANNEL",
+        "token": "SLACK_TOKEN"
+    },
     "tradeParameters": {
         "tickerInterval": "TICKER_INTERVAL",
         "buy": {
@@ -88,13 +93,20 @@ The contents of the file should mirror the following:
         order for the trade functionality to be available
 
 5) To use the **Gmail** functionality, you need to setup the following:
-     * **`username`** is your gmail account's username (usually your account's email address)
-     * **`password`** is your gmail account's password
+     * **`username`** is your Gmail account's username (*usually your account's email address*)
+     * **`password`** is your Gmail account's password
      * **`address_list`** is the list of recipients you'd like to send emails to
      
     If you don't want to use the email notifications, you can leave out the `gmail` code.
 
-6) To use the **Trade** functionality, you need to setup the following:
+6) To use the **Slack** functionality, you need to setup the following:
+     * **`channel`** is your Slack groups's channel (*usually starts with a '#' character*)
+     * **`token`** is your Slack account's authentication token (*you need to create a Slack app on the Slack API website 
+     for your group - from which you can generate this authentication token*)
+     
+    If you don't want to use the Slack notifications, you can leave out the `slack` code.
+
+7) To use the **Trade** functionality, you need to setup the following:
      * **`tickerInterval`** is the exchange ticker interval you want to use. It should be one of the following: `oneMin`,
      `fiveMin`, `thirtyMin`, `hour`, `week`, `day`, `month`
      * **`buy`**: 
@@ -112,7 +124,7 @@ The contents of the file should mirror the following:
         * `profitMarginThreshold` is the upper profit margin sell threshold. Coin pairs with a profit margin higher than 
         this will be sold regardless of its RSI
 
-7) To use the **Pause** functionality, you need to setup the following:
+8) To use the **Pause** functionality, you need to setup the following:
      * **`buy`**: 
         * `rsiThreshold` is the lower RSI pause threshold. An RSI higher than this will result in the coin pair not being 
         tracked for `pauseTime` minutes

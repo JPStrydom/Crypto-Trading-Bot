@@ -1,6 +1,7 @@
 import smtplib
 import winsound
 import time
+from slackclient import SlackClient
 from termcolor import cprint
 from math import floor, ceil
 
@@ -17,6 +18,9 @@ class Messenger(object):
         self.password = secrets["gmail"]["password"]
         self.recipient_name = secrets["gmail"]["recipientName"]
         self.smtp_server_address = "smtp.gmail.com:587"
+
+        self.slack_channel = secrets["slack"]["channel"]
+        self.slack_client = SlackClient(secrets["slack"]["token"])
 
         self.header_str = "\nTracking {} Bittrex Markets\n"
 
@@ -73,6 +77,19 @@ class Messenger(object):
         server.quit()
 
         return errors
+
+    def send_slack(self, message):
+        """
+        Send slack message to notify users
+
+        :param message: The message to send on the slack channel
+        :type message: str
+        """
+        self.slack_client.api_call(
+            "chat.postMessage",
+            channel=self.slack_channel,
+            text=message
+        )
 
     def send_buy_email(self, order, stats, recipient_name=None):
         """
@@ -146,8 +163,10 @@ class Messenger(object):
         :type day_volume: float
         """
         main_market, coin = coin_pair.split("-")
-        cprint(self.buy_str.format(coin_pair, ceil(rsi), floor(day_volume), main_market, current_buy_price,
-                                   self.generate_bittrex_URL(coin_pair)), "blue", attrs=["bold"])
+        message = self.buy_str.format(coin_pair, ceil(rsi), floor(day_volume), main_market, current_buy_price,
+                                      self.generate_bittrex_URL(coin_pair))
+        cprint(message, "blue", attrs=["bold"])
+        self.send_slack(":money_with_wings: " + message)
 
     def print_sell(self, coin_pair, current_sell_price, rsi, profit_margin):
         """
@@ -162,8 +181,10 @@ class Messenger(object):
         :param profit_margin: Profit made on the trade
         :type profit_margin: float
         """
-        cprint(self.sell_str.format(coin_pair, floor(rsi), round(profit_margin, 2), current_sell_price,
-                                    self.generate_bittrex_URL(coin_pair)), "green", attrs=["bold"])
+        message = self.sell_str.format(coin_pair, floor(rsi), round(profit_margin, 2), current_sell_price,
+                                       self.generate_bittrex_URL(coin_pair))
+        cprint(message, "green", attrs=["bold"])
+        self.send_slack(":moneybag: " + message)
 
     def print_pause(self, coin_pair, value, pause_time, pause_type):
         """
