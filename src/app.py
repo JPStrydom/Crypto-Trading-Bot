@@ -25,6 +25,7 @@ def get_secrets():
             "username": "EXAMPLE_EMAIL@GMAIL.COM",
             "password": "GMAIL_PASSWORD"
         },
+        "sound": False,
         "slack": {
             "channel": "SLACK_CHANNEL",
             "token": "SLACK_TOKEN"

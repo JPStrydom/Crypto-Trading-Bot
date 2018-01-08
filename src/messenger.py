@@ -1,9 +1,13 @@
 import smtplib
-import winsound
 import time
 from slackclient import SlackClient
 from termcolor import cprint
 from math import floor, ceil
+
+try:
+    import winsound
+except ImportError:
+    winsound = None
 
 
 class Messenger(object):
@@ -12,15 +16,25 @@ class Messenger(object):
     """
 
     def __init__(self, secrets):
-        self.from_address = secrets["gmail"]["username"]
-        self.to_address_list = secrets["gmail"]["addressList"]
-        self.login = secrets["gmail"]["username"]
-        self.password = secrets["gmail"]["password"]
-        self.recipient_name = secrets["gmail"]["recipientName"]
-        self.smtp_server_address = "smtp.gmail.com:587"
+        self.gmail = False
+        if "gmail" in secrets:
+            self.gmail = True
+            self.from_address = secrets["gmail"]["username"]
+            self.to_address_list = secrets["gmail"]["addressList"]
+            self.login = secrets["gmail"]["username"]
+            self.password = secrets["gmail"]["password"]
+            self.recipient_name = secrets["gmail"]["recipientName"]
+            self.smtp_server_address = "smtp.gmail.com:587"
 
-        self.slack_channel = secrets["slack"]["channel"]
-        self.slack_client = SlackClient(secrets["slack"]["token"])
+        self.slack = False
+        if "slack" in secrets:
+            self.slack = True
+            self.slack_channel = secrets["slack"]["channel"]
+            self.slack_client = SlackClient(secrets["slack"]["token"])
+
+        self.sound = False
+        if "sound" in secrets:
+            self.sound = secrets["sound"]
 
         self.header_str = "\nTracking {} Bittrex Markets\n"
 
@@ -37,6 +51,15 @@ class Messenger(object):
 
         self.buy_str = "Buy on {:<10}\t->\t\tRSI: {:>2}\t\t24 Hour Volume: {:>5} {}\t\tBuy Price: {:.8f}\t\tURL: {}"
         self.sell_str = "Sell on {:<10}\t->\t\tRSI: {:>2}\t\tProfit Margin: {:>4}%\t\tSell Price: {:.8f}\t\tURL: {}"
+
+        self.slack_buy_str = {
+            "emoji": ":money_with_wings:",
+            "message": "*Buy on {}*\n>>>\n_RSI: *{}*_\n_24 Hour Volume: *{} {}*_"
+        }
+        self.slack_sell_str = {
+            "emoji": ":moneybag:",
+            "message": "*Sell on {}*\n>>>\n_RSI: *{}*_\n_Profit Margin: *{}%*_"
+        }
 
         self.previous_no_sell_str = ""
 
@@ -65,6 +88,9 @@ class Messenger(object):
         :return: Errors received from the smtp server (if any)
         :rtype : dict
         """
+        if not self.gmail:
+            return
+
         header = "From: %s\n" % self.from_address
         header += "To: %s\n" % ",".join(self.to_address_list)
         header += "Subject: %s\n\n" % subject
@@ -85,6 +111,9 @@ class Messenger(object):
         :param message: The message to send on the slack channel
         :type message: str
         """
+        if not self.slack:
+            return
+
         self.slack_client.api_call(
             "chat.postMessage",
             channel=self.slack_channel,
@@ -165,8 +194,12 @@ class Messenger(object):
         main_market, coin = coin_pair.split("-")
         message = self.buy_str.format(coin_pair, ceil(rsi), floor(day_volume), main_market, current_buy_price,
                                       self.generate_bittrex_URL(coin_pair))
+        slack_emoji = self.slack_buy_str["emoji"] * 8 + "\n"
+        slack_message = slack_emoji + self.slack_buy_str["message"].format(coin_pair, ceil(rsi), floor(day_volume),
+                                                                           main_market)
+
         cprint(message, "blue", attrs=["bold"])
-        self.send_slack(":money_with_wings: " + message)
+        self.send_slack(slack_message)
 
     def print_sell(self, coin_pair, current_sell_price, rsi, profit_margin):
         """
@@ -183,8 +216,12 @@ class Messenger(object):
         """
         message = self.sell_str.format(coin_pair, floor(rsi), round(profit_margin, 2), current_sell_price,
                                        self.generate_bittrex_URL(coin_pair))
+        slack_emoji = self.slack_sell_str["emoji"] * 8 + "\n"
+        slack_message = slack_emoji + self.slack_sell_str["message"].format(coin_pair, floor(rsi),
+                                                                            round(profit_margin, 2))
+
         cprint(message, "green", attrs=["bold"])
-        self.send_slack(":moneybag: " + message)
+        self.send_slack(slack_message)
 
     def print_pause(self, coin_pair, value, pause_time, pause_type):
         """
@@ -301,8 +338,7 @@ class Messenger(object):
         """
         return self.bittrex_url.format(coin_pair)
 
-    @staticmethod
-    def play_beep(frequency=1000, duration=1000):
+    def play_beep(self, frequency=1000, duration=1000):
         """
         Used to play a beep sound
 
@@ -311,63 +347,63 @@ class Messenger(object):
         :param duration: The duration of the beep
         :type duration: int
         """
+        if not self.sound or winsound is None:
+            return
         winsound.Beep(frequency, duration)
 
-    @staticmethod
-    def play_sw_theme():
+    def play_sw_theme(self):
         """
         Used to play the Star Wars theme song
         """
-        winsound.Beep(1046, 880)
-        winsound.Beep(1567, 880)
-        winsound.Beep(1396, 55)
-        winsound.Beep(1318, 55)
-        winsound.Beep(1174, 55)
-        winsound.Beep(2093, 880)
+        self.play_beep(1046, 880)
+        self.play_beep(1567, 880)
+        self.play_beep(1396, 55)
+        self.play_beep(1318, 55)
+        self.play_beep(1174, 55)
+        self.play_beep(2093, 880)
 
         time.sleep(0.3)
 
-        winsound.Beep(1567, 600)
-        winsound.Beep(1396, 55)
-        winsound.Beep(1318, 55)
-        winsound.Beep(1174, 55)
-        winsound.Beep(2093, 880)
+        self.play_beep(1567, 600)
+        self.play_beep(1396, 55)
+        self.play_beep(1318, 55)
+        self.play_beep(1174, 55)
+        self.play_beep(2093, 880)
 
         time.sleep(0.3)
 
-        winsound.Beep(1567, 600)
-        winsound.Beep(1396, 55)
-        winsound.Beep(1318, 55)
-        winsound.Beep(1396, 55)
-        winsound.Beep(1174, 880)
+        self.play_beep(1567, 600)
+        self.play_beep(1396, 55)
+        self.play_beep(1318, 55)
+        self.play_beep(1396, 55)
+        self.play_beep(1174, 880)
 
-    @staticmethod
-    def play_sw_imperial_march():
+    def play_sw_imperial_march(self):
         """
         Used to play the Star Wars Imperial March song
         """
-        winsound.Beep(440, 500)
-        winsound.Beep(440, 500)
-        winsound.Beep(440, 500)
+        self.play_beep(440, 500)
+        self.play_beep(440, 500)
+        self.play_beep(440, 500)
 
-        winsound.Beep(349, 375)
-        winsound.Beep(523, 150)
-        winsound.Beep(440, 600)
+        self.play_beep(349, 375)
+        self.play_beep(523, 150)
+        self.play_beep(440, 600)
 
-        winsound.Beep(349, 375)
-        winsound.Beep(523, 150)
-        winsound.Beep(440, 1000)
+        self.play_beep(349, 375)
+        self.play_beep(523, 150)
+        self.play_beep(440, 1000)
 
         time.sleep(0.2)
 
-        winsound.Beep(659, 500)
-        winsound.Beep(659, 500)
-        winsound.Beep(659, 500)
+        self.play_beep(659, 500)
+        self.play_beep(659, 500)
+        self.play_beep(659, 500)
 
-        winsound.Beep(698, 375)
-        winsound.Beep(523, 150)
-        winsound.Beep(415, 600)
+        self.play_beep(698, 375)
+        self.play_beep(523, 150)
+        self.play_beep(415, 600)
 
-        winsound.Beep(349, 375)
-        winsound.Beep(523, 150)
-        winsound.Beep(440, 1000)
+        self.play_beep(349, 375)
+        self.play_beep(523, 150)
+        self.play_beep(440, 1000)

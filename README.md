@@ -59,6 +59,7 @@ The contents of the file should mirror the following:
         "channel": "SLACK_CHANNEL",
         "token": "SLACK_TOKEN"
     },
+    "sound": false,
     "tradeParameters": {
         "tickerInterval": "TICKER_INTERVAL",
         "buy": {
@@ -106,7 +107,12 @@ The contents of the file should mirror the following:
      
     If you don't want to use the Slack notifications, you can leave out the `slack` code.
 
-7) To use the **Trade** functionality, you need to setup the following:
+7) To use the **Sound** functionality, you need to setup the following:
+     * **`sound`** is a boolean that determines whether audio notifications should be played
+     
+    If you don't want to receive audio notifications, you can leave out the `sound` code or set it to `false`.
+
+8) To use the **Trade** functionality, you need to setup the following:
      * **`tickerInterval`** is the exchange ticker interval you want to use. It should be one of the following: `oneMin`,
      `fiveMin`, `thirtyMin`, `hour`, `week`, `day`, `month`
      * **`buy`**: 
@@ -124,7 +130,7 @@ The contents of the file should mirror the following:
         * `profitMarginThreshold` is the upper profit margin sell threshold. Coin pairs with a profit margin higher than 
         this will be sold regardless of its RSI
 
-8) To use the **Pause** functionality, you need to setup the following:
+9) To use the **Pause** functionality, you need to setup the following:
      * **`buy`**: 
         * `rsiThreshold` is the lower RSI pause threshold. An RSI higher than this will result in the coin pair not being 
         tracked for `pauseTime` minutes
