@@ -1,5 +1,6 @@
 import pydash as py_
 import time
+from math import floor
 
 from directory_utilities import get_json_from_file, write_json_to_file
 from logger import logger
@@ -72,7 +73,7 @@ class Database(object):
             order = self.convert_bittrex_order_object(bittrex_order, stats)
 
             trade = self.get_open_trade(bittrex_order["Exchange"])
-            trade["quantity"] = bittrex_order["Quantity"] - bittrex_order["QuantityRemaining"]
+            trade["quantity"] = floor(bittrex_order["Quantity"] - bittrex_order["QuantityRemaining"])
             trade["buy"] = order
 
             write_json_to_file(self.trades_file_string, self.trades)
