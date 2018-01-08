@@ -120,7 +120,7 @@ class Messenger(object):
             text=message
         )
 
-    def send_buy_email(self, order, stats, recipient_name=None):
+    def send_buy_gmail(self, order, stats, recipient_name=None):
         """
         Used to send a buy specific email from the account specified in the secrets.json file to the entire
         address list specified in the secrets.json file
@@ -145,7 +145,7 @@ class Messenger(object):
                  self.generate_bittrex_URL(order["Quantity"]))
         self.send_email(subject, message)
 
-    def send_sell_email(self, order, stats, recipient_name=None):
+    def send_sell_gmail(self, order, stats, recipient_name=None):
         """
         Used to send a sell specific email from the account specified in the secrets.json file to the entire
         address list specified in the secrets.json file
@@ -168,6 +168,39 @@ class Messenger(object):
         ).format(recipient_name, round(order["Quantity"], 4), coin, order["Exchange"], order["Price"], main_market,
                  floor(stats["rsi"]), round(stats["profitMargin"], 2), self.generate_bittrex_URL(order["Exchange"]))
         self.send_email(subject, message)
+
+    def send_buy_slack(self, coin_pair, rsi, day_volume):
+        """
+        Used to send a buy's Slack message
+
+        :param coin_pair: String literal for the market (ex: BTC-LTC)
+        :type coin_pair: str
+        :param rsi: The coin pair's RSI
+        :type rsi: float
+        :param day_volume: Coin pair's current 24 hour volume
+        :type day_volume: float
+        """
+        main_market, coin = coin_pair.split("-")
+        slack_emoji = self.slack_buy_str["emoji"] * 8 + "\n"
+        slack_message = slack_emoji + self.slack_buy_str["message"].format(coin_pair, ceil(rsi), floor(day_volume),
+                                                                           main_market)
+        self.send_slack(slack_message)
+
+    def send_sell_slack(self, coin_pair, rsi, profit_margin):
+        """
+        Used to send a sale's Slack message
+
+        :param coin_pair: String literal for the market (ex: BTC-LTC)
+        :type coin_pair: str
+        :param rsi: The coin pair's RSI
+        :type rsi: float
+        :param profit_margin: Profit made on the trade
+        :type profit_margin: float
+        """
+        slack_emoji = self.slack_sell_str["emoji"] * 8 + "\n"
+        slack_message = slack_emoji + self.slack_sell_str["message"].format(coin_pair, floor(rsi),
+                                                                            round(profit_margin, 2))
+        self.send_slack(slack_message)
 
     def print_header(self, num_of_coin_pairs):
         """
@@ -194,12 +227,7 @@ class Messenger(object):
         main_market, coin = coin_pair.split("-")
         message = self.buy_str.format(coin_pair, ceil(rsi), floor(day_volume), main_market, current_buy_price,
                                       self.generate_bittrex_URL(coin_pair))
-        slack_emoji = self.slack_buy_str["emoji"] * 8 + "\n"
-        slack_message = slack_emoji + self.slack_buy_str["message"].format(coin_pair, ceil(rsi), floor(day_volume),
-                                                                           main_market)
-
         cprint(message, "blue", attrs=["bold"])
-        self.send_slack(slack_message)
 
     def print_sell(self, coin_pair, current_sell_price, rsi, profit_margin):
         """
@@ -216,12 +244,7 @@ class Messenger(object):
         """
         message = self.sell_str.format(coin_pair, floor(rsi), round(profit_margin, 2), current_sell_price,
                                        self.generate_bittrex_URL(coin_pair))
-        slack_emoji = self.slack_sell_str["emoji"] * 8 + "\n"
-        slack_message = slack_emoji + self.slack_sell_str["message"].format(coin_pair, floor(rsi),
-                                                                            round(profit_margin, 2))
-
         cprint(message, "green", attrs=["bold"])
-        self.send_slack(slack_message)
 
     def print_pause(self, coin_pair, value, pause_time, pause_type):
         """

@@ -172,8 +172,9 @@ class Trader(object):
         buy_order_data = self.get_order(buy_data["result"]["uuid"], trade_time_limit * 60)
         self.Database.store_buy(buy_order_data["result"], stats)
 
-        self.Messenger.send_buy_email(buy_order_data["result"], stats)
         self.Messenger.print_buy(coin_pair, price, stats["rsi"], stats["24HrVolume"])
+        self.Messenger.send_buy_slack(coin_pair, stats["rsi"], stats["24HrVolume"])
+        self.Messenger.send_buy_gmail(buy_order_data["result"], stats)
         self.Messenger.play_sw_imperial_march()
 
     def sell(self, coin_pair, price, stats, trade_time_limit=2):
@@ -201,8 +202,9 @@ class Trader(object):
         # TODO: Handle partial/incomplete sales.
         self.Database.store_sell(sell_order_data["result"], stats)
 
-        self.Messenger.send_sell_email(sell_order_data["result"], stats)
         self.Messenger.print_sell(coin_pair, price, stats["rsi"], stats["profitMargin"])
+        self.Messenger.send_sell_slack(coin_pair, stats["rsi"], stats["profitMargin"])
+        self.Messenger.send_sell_gmail(sell_order_data["result"], stats)
         self.Messenger.play_sw_theme()
 
     def get_markets(self, main_market_filter=None):
