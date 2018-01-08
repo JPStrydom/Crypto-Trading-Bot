@@ -158,6 +158,7 @@ successful trading parameters can be found below:
 {
     "bittrex": {},
     "gmail": {},
+    "sound": false,
     "tradeParameters": {
         "tickerInterval": "fiveMin",
         "buy": {
