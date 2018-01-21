@@ -164,7 +164,8 @@ class Trader(object):
         :param trade_time_limit: The time in minutes to wait fot the order before cancelling it
         :type trade_time_limit: float
         """
-        buy_data = self.Bittrex.buy_limit(coin_pair, btc_quantity / price, price)
+        buy_quantity = round(btc_quantity / price, 8)
+        buy_data = self.Bittrex.buy_limit(coin_pair, buy_quantity, price)
         if not buy_data["success"]:
             return logger.error("Failed to buy on {} market.".format(coin_pair))
         self.Database.store_initial_buy(coin_pair, buy_data["result"]["uuid"])

@@ -12,6 +12,6 @@ Bittrex = Bittrex(secrets)
 Database = Database()
 
 order = Bittrex.get_order(order_uuid)
-my_oder = Database.convert_bittrex_order_object(order["result"])
+my_order = Database.convert_bittrex_order_object(order["result"])
 
-print(my_oder)
+print(my_order)
