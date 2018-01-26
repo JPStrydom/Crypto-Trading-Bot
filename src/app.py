@@ -41,6 +41,7 @@ def get_secrets():
             },
             "sell": {
                 "rsiThreshold": 0,
+                "minProfitMarginThreshold": 0,
                 "profitMarginThreshold": 0
             }
         },
