@@ -71,6 +71,7 @@ The contents of the file should mirror the following:
         },
         "sell": {
             "rsiThreshold": 0,
+            "minProfitMarginThreshold": 0,
             "profitMarginThreshold": 0
         }
     },
