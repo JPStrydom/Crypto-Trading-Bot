@@ -39,107 +39,113 @@ recognized as an internal or external command` error, you need to add `pip` to y
 3) Add a directory named `database` to the root directory of your project and add a `secrets.json` file to it. If you 
 run the project without adding this file, the program will create it for you and populate it with the template values.
 The contents of the file should mirror the following:
-```json
-{
-    "bittrex": {
-        "bittrexKey": "BITTREX_API_KEY",
-        "bittrexSecret": "BITTREX_SECRET"
-    },
-    "gmail": {
-        "recipientName": "Folks",
-        "addressList": [
-            "EXAMPLE_RECIPIENT_1@GMAIL.COM",
-            "EXAMPLE_RECIPIENT_2@GMAIL.COM",
-            "ETC..."
-        ],
-        "username": "EXAMPLE_EMAIL@GMAIL.COM",
-        "password": "GMAIL_PASSWORD"
-    },
-    "slack": {
-        "channel": "SLACK_CHANNEL",
-        "token": "SLACK_TOKEN"
-    },
-    "sound": false,
-    "tradeParameters": {
-        "tickerInterval": "TICKER_INTERVAL",
-        "buy": {
-            "btcAmount": 0,
-            "rsiThreshold": 0,
-            "24HourVolumeThreshold": 0,
-            "minimumUnitPrice": 0,
-            "maxOpenTrades": 0
+    ```json
+    {
+        "bittrex": {
+            "bittrexKey": "BITTREX_API_KEY",
+            "bittrexSecret": "BITTREX_SECRET"
         },
-        "sell": {
-            "rsiThreshold": 0,
-            "minProfitMarginThreshold": 0,
-            "profitMarginThreshold": 0
-        }
-    },
-    "pauseParameters": {
-        "buy": {
-            "rsiThreshold": 0,
-            "pauseTime": 0
+        "gmail": {
+            "recipientName": "Folks",
+            "addressList": [
+                "EXAMPLE_RECIPIENT_1@GMAIL.COM",
+                "EXAMPLE_RECIPIENT_2@GMAIL.COM",
+                "ETC..."
+            ],
+            "username": "EXAMPLE_EMAIL@GMAIL.COM",
+            "password": "GMAIL_PASSWORD"
         },
-        "sell": {
-            "profitMarginThreshold": 0,
-            "pauseTime": 0
+        "slack": {
+            "channel": "SLACK_CHANNEL",
+            "token": "SLACK_TOKEN"
         }
     }
-}
-```
+    ```
+    1) To use the **Bittrex** functionality, you need to setup the following:
+        * **`bittrex_key`** is your Bittrex API key you can get from [here](https://bittrex.com/Manage#sectionApi)
+        * **`bittrex_secret`** is your Bittrex API secret key
+            * _NOTE:_ The `READ INFO`, `TRADE LIMIT`, and `TRADE MARKET` permissions need to be enabled on your API key in
+            order for the trade functionality to be available
+        
+    2) To use the **Gmail** functionality, you need to setup the following:
+        * **`username`** is your Gmail account's username (*usually your account's email address*)
+        * **`password`** is your Gmail account's password
+        * **`address_list`** is the list of recipients you'd like to send emails to
+         
+        If you don't want to use the email notifications, you can leave out the `gmail` code.
+    
+    3) To use the **Slack** functionality, you need to setup the following:
+        * **`channel`** is your Slack groups's channel (*usually starts with a '#' character*)
+        * **`token`** is your Slack account's authentication token (*you need to create a Slack app on the Slack API website 
+        for your group - from which you can generate this authentication token*)
+         
+        If you don't want to use the Slack notifications, you can leave out the `slack` code.
 
-4) To use the **Bittrex** functionality, you need to setup the following:
-     * **`bittrex_key`** is your Bittrex API key you can get from [here](https://bittrex.com/Manage#sectionApi)
-     * **`bittrex_secret`** is your Bittrex API secret key
-        * _NOTE:_ The `READ INFO`, `TRADE LIMIT`, and `TRADE MARKET` permissions need to be enabled on your API key in
-        order for the trade functionality to be available
-
-5) To use the **Gmail** functionality, you need to setup the following:
-     * **`username`** is your Gmail account's username (*usually your account's email address*)
-     * **`password`** is your Gmail account's password
-     * **`address_list`** is the list of recipients you'd like to send emails to
-     
-    If you don't want to use the email notifications, you can leave out the `gmail` code.
-
-6) To use the **Slack** functionality, you need to setup the following:
-     * **`channel`** is your Slack groups's channel (*usually starts with a '#' character*)
-     * **`token`** is your Slack account's authentication token (*you need to create a Slack app on the Slack API website 
-     for your group - from which you can generate this authentication token*)
-     
-    If you don't want to use the Slack notifications, you can leave out the `slack` code.
-
-7) To use the **Sound** functionality, you need to setup the following:
-     * **`sound`** is a boolean that determines whether audio notifications should be played
-     
-    If you don't want to receive audio notifications, you can leave out the `sound` code or set it to `false`.
-
-8) To use the **Trade** functionality, you need to setup the following:
-     * **`tickerInterval`** is the exchange ticker interval you want to use. It should be one of the following: `oneMin`,
-     `fiveMin`, `thirtyMin`, `hour`, `week`, `day`, `month`
-     * **`buy`**: 
-        * `btcAmount` is the amount of BTC you want the bot to spend per buy
-        * `rsiThreshold` is the upper RSI buy threshold. An RSI lower than this will result in a buy signal
-        * `24HourVolumeThreshold` is the lower 24 hour volume buy threshold. Coin pairs with a 24 hour volume lower than 
-        this will not be considered for buying
-        * `minimumUnitPrice` is the lower unit price buy threshold. Coin pairs with a unit price lower than this will not 
-        be considered for buying 
-        * `maxOpenTrades` is the maximum amount of open trades the bot is allowed to have at one time 
-     * **`sell`**: 
-        * `rsiThreshold` is the lower RSI sell threshold. An RSI higher than this will result in a sell signal
-        * `minProfitMarginThreshold` is the upper minimum profit margin sell threshold. Coin pairs with a profit margin 
-        lower than this will not be sold
-        * `profitMarginThreshold` is the upper profit margin sell threshold. Coin pairs with a profit margin higher than 
-        this will be sold regardless of its RSI
-
-9) To use the **Pause** functionality, you need to setup the following:
-     * **`buy`**: 
-        * `rsiThreshold` is the lower RSI pause threshold. An RSI higher than this will result in the coin pair not being 
-        tracked for `pauseTime` minutes
-        * `pauseTime` is the amount of minutes to pause coin pair tracking by
-     * **`sell`**: 
-        * `profitMarginThreshold` is the upper profit margin pause threshold. A profit margin lower than this will result 
-        in the coin pair not being tracked for `pauseTime` minutes
-        * `pauseTime` is the amount of minutes to pause coin pair tracking by
+4) Add a directory named `database` to the root directory of your project and add a `settings.json` file to it. If you 
+run the project without adding this file, the program will create it for you and populate it with the template values.
+The contents of the file should mirror the following:
+    ```json
+    {
+        "sound": false,
+        "tradeParameters": {
+            "tickerInterval": "TICKER_INTERVAL",
+            "buy": {
+                "btcAmount": 0,
+                "rsiThreshold": 0,
+                "24HourVolumeThreshold": 0,
+                "minimumUnitPrice": 0,
+                "maxOpenTrades": 0
+            },
+            "sell": {
+                "rsiThreshold": 0,
+                "minProfitMarginThreshold": 0,
+                "profitMarginThreshold": 0
+            }
+        },
+        "pauseParameters": {
+            "buy": {
+                "rsiThreshold": 0,
+                "pauseTime": 0
+            },
+            "sell": {
+                "profitMarginThreshold": 0,
+                "pauseTime": 0
+            }
+        }
+    }
+    ```
+    1) To use the **Sound** functionality, you need to setup the following:
+         * **`sound`** is a boolean that determines whether audio notifications should be played
+         
+        If you don't want to receive audio notifications, you can leave out the `sound` code or set it to `false`.
+    
+    2) To use the **Trade** functionality, you need to setup the following:
+        * **`tickerInterval`** is the exchange ticker interval you want to use. It should be one of the following: `oneMin`,
+        `fiveMin`, `thirtyMin`, `hour`, `week`, `day`, `month`
+        * **`buy`**: 
+            * `btcAmount` is the amount of BTC you want the bot to spend per buy
+            * `rsiThreshold` is the upper RSI buy threshold. An RSI lower than this will result in a buy signal
+            * `24HourVolumeThreshold` is the lower 24 hour volume buy threshold. Coin pairs with a 24 hour volume lower than 
+            this will not be considered for buying
+            * `minimumUnitPrice` is the lower unit price buy threshold. Coin pairs with a unit price lower than this will not 
+            be considered for buying 
+    3) `maxOpenTrades` is the maximum amount of open trades the bot is allowed to have at one time 
+        * **`sell`**: 
+            * `rsiThreshold` is the lower RSI sell threshold. An RSI higher than this will result in a sell signal
+            * `minProfitMarginThreshold` is the upper minimum profit margin sell threshold. Coin pairs with a profit margin 
+            lower than this will not be sold
+            * `profitMarginThreshold` is the upper profit margin sell threshold. Coin pairs with a profit margin higher than 
+            this will be sold regardless of its RSI
+    
+    4) To use the **Pause** functionality, you need to setup the following:
+        * **`buy`**: 
+            * `rsiThreshold` is the lower RSI pause threshold. An RSI higher than this will result in the coin pair not being 
+            tracked for `pauseTime` minutes
+            * `pauseTime` is the amount of minutes to pause coin pair tracking by
+        * **`sell`**: 
+            * `profitMarginThreshold` is the upper profit margin pause threshold. A profit margin lower than this will result 
+            in the coin pair not being tracked for `pauseTime` minutes
+            * `pauseTime` is the amount of minutes to pause coin pair tracking by
 
 
 ## How to run
@@ -153,12 +159,10 @@ running and debugging this project a breeze. A free community edition can be fou
 This system allows you to autonomously make and track crypto currency trades on Bittrex. It uses a local database strategy 
 to ensure data is not lost.
 
-To use this functionality, first set the desired trade parameters in the `secrets.json` file. An example of reasonably 
+To use this functionality, first set the desired trade parameters in the `settings.json` file. An example of reasonably 
 successful trading parameters can be found below:
 ```json
 {
-    "bittrex": {},
-    "gmail": {},
     "sound": false,
     "tradeParameters": {
         "tickerInterval": "fiveMin",
@@ -179,18 +183,17 @@ successful trading parameters can be found below:
 }
 ```
 
-The `analyse_buys()` and 
-`analyse_sells()` functions will then apply the `buy_strategy(coin_pair)` and `sell_strategy(coin_pair)` functions to each 
-valid coin pair on Bittrex. These functions will check each coin pair for buy/sell signals by utilising the the following 
-two functions:
+The `analyse_buys()` and `analyse_sells()` functions will then apply the `buy_strategy(coin_pair)` and 
+`sell_strategy(coin_pair)` functions to each valid coin pair on Bittrex. These functions will check each coin pair for 
+buy/sell signals by utilising the the following two functions:
 ```python
 from directory_utilities import get_json_from_file
 
-secrets_file_directory = "../database/secrets.json"
-secrets = get_json_from_file(secrets_file_directory)
+settings_file_directory = "../database/settings.json"
+settings = get_json_from_file(settings_file_directory)
 
-buy_trade_params = secrets["tradeParameters"]["buy"]
-sell_trade_params = secrets["tradeParameters"]["sell"]
+buy_trade_params = settings["tradeParameters"]["buy"]
+sell_trade_params = settings["tradeParameters"]["sell"]
 
 def check_buy_parameters(rsi, day_volume, current_buy_price):
     """

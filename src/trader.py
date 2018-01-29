@@ -12,12 +12,12 @@ class Trader(object):
     Used for handling all trade functionality
     """
 
-    def __init__(self, secrets):
-        self.trade_params = secrets["tradeParameters"]
-        self.pause_params = secrets["pauseParameters"]
+    def __init__(self, secrets, settings):
+        self.trade_params = settings["tradeParameters"]
+        self.pause_params = settings["pauseParameters"]
 
         self.Bittrex = Bittrex(secrets)
-        self.Messenger = Messenger(secrets)
+        self.Messenger = Messenger(secrets, settings)
         self.Database = Database()
 
     def initialise(self):

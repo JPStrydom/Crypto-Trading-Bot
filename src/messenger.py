@@ -15,7 +15,7 @@ class Messenger(object):
     Used for handling messaging functionality
     """
 
-    def __init__(self, secrets):
+    def __init__(self, secrets, settings):
         self.gmail = False
         if "gmail" in secrets:
             self.gmail = True
@@ -33,8 +33,8 @@ class Messenger(object):
             self.slack_client = SlackClient(secrets["slack"]["token"])
 
         self.sound = False
-        if "sound" in secrets:
-            self.sound = secrets["sound"]
+        if "sound" in settings:
+            self.sound = settings["sound"]
 
         self.header_str = "\nTracking {} Bittrex Markets\n"
 

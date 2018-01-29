@@ -25,11 +25,23 @@ def get_secrets():
             "username": "EXAMPLE_EMAIL@GMAIL.COM",
             "password": "GMAIL_PASSWORD"
         },
-        "sound": False,
         "slack": {
             "channel": "SLACK_CHANNEL",
             "token": "SLACK_TOKEN"
-        },
+        }
+    }
+    secrets_content = get_json_from_file(secrets_file_directory, secrets_template)
+    if secrets_content == secrets_template:
+        print("Please completed the `secrets.json` file in your `database` directory")
+        exit()
+
+    return secrets_content
+
+
+def get_settings():
+    settings_file_directory = "../database/settings.json"
+    settings_template = {
+        "sound": False,
         "tradeParameters": {
             "tickerInterval": "TICKER_INTERVAL",
             "buy": {
@@ -56,19 +68,20 @@ def get_secrets():
             }
         }
     }
-    secrets_content = get_json_from_file(secrets_file_directory, secrets_template)
-    if secrets_content == secrets_template:
-        print("Please completed the `secrets.json` file in your `database` directory")
+    settings_content = get_json_from_file(settings_file_directory, settings_template)
+    if settings_content == settings_template:
+        print("Please completed the `settings.json` file in your `database` directory")
         exit()
 
-    return secrets_content
+    return settings_content
 
 
 if __name__ == "__main__":
     secrets = get_secrets()
+    settings = get_settings()
 
-    Messenger = Messenger(secrets)
-    Trader = Trader(secrets)
+    Messenger = Messenger(secrets, settings)
+    Trader = Trader(secrets, settings)
 
     Trader.initialise()
 
