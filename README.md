@@ -64,8 +64,9 @@ The contents of the file should mirror the following:
     1) To use the **Bittrex** functionality, you need to setup the following:
         * **`bittrex_key`** is your Bittrex API key you can get from [here](https://bittrex.com/Manage#sectionApi)
         * **`bittrex_secret`** is your Bittrex API secret key
-            * _NOTE:_ The `READ INFO`, `TRADE LIMIT`, and `TRADE MARKET` permissions need to be enabled on your API key in
-            order for the trade functionality to be available
+        
+        _NOTE:_ The `READ INFO`, `TRADE LIMIT`, and `TRADE MARKET` permissions need to be enabled on your API key in
+        order for the trade functionality to be available
         
     2) To use the **Gmail** functionality, you need to setup the following:
         * **`username`** is your Gmail account's username (*usually your account's email address*)
