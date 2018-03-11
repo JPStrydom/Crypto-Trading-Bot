@@ -105,17 +105,20 @@ class Trader(object):
         current_sell_price = self.get_current_price(coin_pair, "bid")
         profit_margin = self.Database.get_profit_margin(coin_pair, current_sell_price)
 
+        if rsi is None:
+            return
+
         if self.check_sell_parameters(rsi, profit_margin):
             sell_stats = {
                 "rsi": rsi,
                 "profitMargin": profit_margin
             }
             self.sell(coin_pair, current_sell_price, sell_stats)
-        elif rsi is not None and profit_margin >= self.pause_params["sell"]["profitMarginThreshold"]:
-            self.Messenger.print_no_sell(coin_pair, rsi, profit_margin, current_sell_price)
-        elif rsi is not None:
+        elif "sell" in self.pause_params and profit_margin <= self.pause_params["sell"]["profitMarginThreshold"]:
             self.Messenger.print_pause(coin_pair, profit_margin, self.pause_params["sell"]["pauseTime"], "sell")
             self.Database.pause_sell(coin_pair)
+        else:
+            self.Messenger.print_no_sell(coin_pair, rsi, profit_margin, current_sell_price)
 
     def check_buy_parameters(self, rsi, day_volume, current_buy_price):
         """
