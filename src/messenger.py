@@ -66,10 +66,8 @@ class Messenger(object):
                 "emoji": ":heavy_minus_sign:",
                 "message": "*Buy on {}*\n>>>\n_RSI: *{}*_\n_24 Hour Volume: *{} {}*_"},
             "sell": {
-                "emoji": {
-                    "profit": ":heavy_check_mark:",
-                    "loss": ":x:"
-                },
+                "profit_emoji": ":heavy_check_mark:",
+                "loss_emoji": ":x:",
                 "message": "*Sell on {}*\n>>>\n_RSI: *{}*_\n_Profit Margin: *{}%*_"
             }
         }
@@ -212,11 +210,11 @@ class Messenger(object):
         :param profit_margin: Profit made on the trade
         :type profit_margin: float
         """
-        emoji = self.slack_str["sell"]["emoji"]["profit"]
+        emoji_type = "profit_emoji"
         if profit_margin <= 0:
-            emoji_type = "loss"
+            emoji_type = "loss_emoji"
 
-        slack_emoji = self.slack_str["sell"]["emoji"][emoji_type] * 8 + "\n"
+        slack_emoji = self.slack_str["sell"][emoji_type] * 8 + "\n"
         slack_message = slack_emoji + self.slack_str["sell"]["message"].format(coin_pair, floor(rsi),
                                                                                round(profit_margin, 2))
         self.send_slack(slack_message)
