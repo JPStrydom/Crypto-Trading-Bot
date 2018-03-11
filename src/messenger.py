@@ -88,7 +88,8 @@ class Messenger(object):
             "typeError": "Type error occurred.",
             "keyError": "Invalid key provided to obj/dict.",
             "valueError": "Value error occurred.",
-            "unknown": "An unknown exception occurred."
+            "unknown": "An unknown exception occurred.",
+            "general": "See the latest log file for more information."
         }
 
         self.order_error_str = "Failed to complete order with UUID {} within {} seconds on {} market. URL: {}"
@@ -356,6 +357,7 @@ class Messenger(object):
         if will_exit:
             suffix = " Exiting program."
         cprint("\n" + self.exception_error_str[error_type] + suffix + "\n", "red", attrs=["bold"])
+        cprint("\n" + self.exception_error_str["general"] + "\n", "grey", attrs=["bold"])
         self.play_beep()
 
     def print_order_error(self, order_uuid, trade_time_limit, coin_pair):
