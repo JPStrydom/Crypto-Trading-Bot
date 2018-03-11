@@ -40,6 +40,40 @@ class Messenger(object):
 
         self.bittrex_url = "https://bittrex.com/Market/Index?MarketName={}"
 
+        self.console_str = {
+            "buy": "Buy on {:<10}\t->\t\tRSI: {:>2}\t\t24 Hour Volume: {:>5} {}\t\tBuy Price: {:.8f}\t\tURL: {}",
+            "sell": "Sell on {:<10}\t->\t\tRSI: {:>2}\t\tProfit Margin: {:>4}%\t\tSell Price: {:.8f}\t\tURL: {}",
+            "previousSell": ""
+        }
+
+        self.email_str = {
+            "buy": {
+                "subject": "Crypto Bot: Buy on {} Market",
+                "message": ("Howdy {},\n\nI've just bought {} {} on the {} market - which is currently valued at {} {}."
+                            "\n\nThe market currently has an RSI of {} and a 24 hour market volume of {} {}."
+                            "\n\nHere's a Bittrex URL: {}\n\nRegards,\nCrypto Bot")
+            },
+            "sell": {
+                "subject": "Crypto Bot: Sell on {} Market",
+                "message": ("Howdy {},\n\nI've just sold {} {} on the {} market - which is currently valued at {} {}."
+                            "\n\nThe market currently has an RSI of {} and a profit of {}% was made.\n\n"
+                            "Here's a Bittrex URL: {}\n\nRegards,\nCrypto Bot")
+            }
+        }
+
+        self.slack_str = {
+            "buy": {
+                "emoji": ":heavy_minus_sign:",
+                "message": "*Buy on {}*\n>>>\n_RSI: *{}*_\n_24 Hour Volume: *{} {}*_"},
+            "sell": {
+                "emoji": {
+                    "profit": ":heavy_check_mark:",
+                    "loss": ":x:"
+                },
+                "message": "*Sell on {}*\n>>>\n_RSI: *{}*_\n_Profit Margin: *{}%*_"
+            }
+        }
+
         self.pause_str = {
             "buy": "Pause buy tracking on {} with a high RSI of {} for {} minutes.",
             "sell": "Pause sell tracking on {} with a low profit margin of {}% for {} minutes."
@@ -48,20 +82,6 @@ class Messenger(object):
             "buy": "Resuming tracking on all {} markets.",
             "sell": "Resume sell tracking on {}."
         }
-
-        self.buy_str = "Buy on {:<10}\t->\t\tRSI: {:>2}\t\t24 Hour Volume: {:>5} {}\t\tBuy Price: {:.8f}\t\tURL: {}"
-        self.sell_str = "Sell on {:<10}\t->\t\tRSI: {:>2}\t\tProfit Margin: {:>4}%\t\tSell Price: {:.8f}\t\tURL: {}"
-
-        self.slack_buy_str = {
-            "emoji": ":money_with_wings:",
-            "message": "*Buy on {}*\n>>>\n_RSI: *{}*_\n_24 Hour Volume: *{} {}*_"
-        }
-        self.slack_sell_str = {
-            "emoji": ":moneybag:",
-            "message": "*Sell on {}*\n>>>\n_RSI: *{}*_\n_Profit Margin: *{}%*_"
-        }
-
-        self.previous_no_sell_str = ""
 
         self.exception_error_str = {
             "SSL": "An SSL error occurred.",
@@ -135,14 +155,11 @@ class Messenger(object):
         if recipient_name is None:
             recipient_name = self.recipient_name
         main_market, coin = order["Exchange"].split("-")
-        subject = "Crypto Bot: Buy on {} Market".format(order["Exchange"])
-        message = (
-            "Howdy {},\n\nI've just bought {} {} on the {} market - which is currently valued at {} {}.\n\n"
-            "The market currently has an RSI of {} and a 24 hour market volume of {} {}.\n\n"
-            "Here's a Bittrex URL: {}\n\nRegards,\nCrypto Bot"
-        ).format(recipient_name, round(order["Quantity"], 4), coin, order["Exchange"], order["Price"], main_market,
-                 ceil(stats["rsi"]), floor(stats["24HrVolume"]), main_market,
-                 self.generate_bittrex_URL(order["Quantity"]))
+        subject = self.email_str["buy"]["subject"].format(order["Exchange"])
+        message = self.email_str["buy"]["message"].format(
+            recipient_name, round(order["Quantity"], 4), coin, order["Exchange"], order["Price"], main_market,
+            ceil(stats["rsi"]), floor(stats["24HrVolume"]), main_market, self.generate_bittrex_URL(order["Quantity"])
+        )
         self.send_email(subject, message)
 
     def send_sell_gmail(self, order, stats, recipient_name=None):
@@ -160,13 +177,11 @@ class Messenger(object):
         if recipient_name is None:
             recipient_name = self.recipient_name
         main_market, coin = order["Exchange"].split("-")
-        subject = "Crypto Bot: Sell on {} Market".format(order["Exchange"])
-        message = (
-            "Howdy {},\n\nI've just sold {} {} on the {} market - which is currently valued at {} {}.\n\n"
-            "The market currently has an RSI of {} and a profit of {}% was made.\n\n"
-            "Here's a Bittrex URL: {}\n\nRegards,\nCrypto Bot"
-        ).format(recipient_name, round(order["Quantity"], 4), coin, order["Exchange"], order["Price"], main_market,
-                 floor(stats["rsi"]), round(stats["profitMargin"], 2), self.generate_bittrex_URL(order["Exchange"]))
+        subject = self.email_str["sell"]["subject"].format(order["Exchange"])
+        message = self.email_str["sell"]["message"].format(
+            recipient_name, round(order["Quantity"], 4), coin, order["Exchange"], order["Price"], main_market,
+            floor(stats["rsi"]), round(stats["profitMargin"], 2), self.generate_bittrex_URL(order["Exchange"])
+        )
         self.send_email(subject, message)
 
     def send_buy_slack(self, coin_pair, rsi, day_volume):
@@ -181,9 +196,9 @@ class Messenger(object):
         :type day_volume: float
         """
         main_market, coin = coin_pair.split("-")
-        slack_emoji = self.slack_buy_str["emoji"] * 8 + "\n"
-        slack_message = slack_emoji + self.slack_buy_str["message"].format(coin_pair, ceil(rsi), floor(day_volume),
-                                                                           main_market)
+        slack_emoji = self.slack_str["buy"]["emoji"] * 8 + "\n"
+        slack_message = slack_emoji + self.slack_str["buy"]["message"].format(coin_pair, ceil(rsi), floor(day_volume),
+                                                                              main_market)
         self.send_slack(slack_message)
 
     def send_sell_slack(self, coin_pair, rsi, profit_margin):
@@ -197,9 +212,13 @@ class Messenger(object):
         :param profit_margin: Profit made on the trade
         :type profit_margin: float
         """
-        slack_emoji = self.slack_sell_str["emoji"] * 8 + "\n"
-        slack_message = slack_emoji + self.slack_sell_str["message"].format(coin_pair, floor(rsi),
-                                                                            round(profit_margin, 2))
+        emoji = self.slack_str["sell"]["emoji"]["profit"]
+        if profit_margin <= 0:
+            emoji_type = "loss"
+
+        slack_emoji = self.slack_str["sell"]["emoji"][emoji_type] * 8 + "\n"
+        slack_message = slack_emoji + self.slack_str["sell"]["message"].format(coin_pair, floor(rsi),
+                                                                               round(profit_margin, 2))
         self.send_slack(slack_message)
 
     def print_header(self, num_of_coin_pairs):
@@ -225,8 +244,9 @@ class Messenger(object):
         :type day_volume: float
         """
         main_market, coin = coin_pair.split("-")
-        message = self.buy_str.format(coin_pair, ceil(rsi), floor(day_volume), main_market, current_buy_price,
-                                      self.generate_bittrex_URL(coin_pair))
+        message = self.console_str["buy"].format(coin_pair, ceil(rsi), floor(day_volume), main_market,
+                                                 current_buy_price,
+                                                 self.generate_bittrex_URL(coin_pair))
         cprint(message, "blue", attrs=["bold"])
 
     def print_sell(self, coin_pair, current_sell_price, rsi, profit_margin):
@@ -242,9 +262,12 @@ class Messenger(object):
         :param profit_margin: Profit made on the trade
         :type profit_margin: float
         """
-        message = self.sell_str.format(coin_pair, floor(rsi), round(profit_margin, 2), current_sell_price,
-                                       self.generate_bittrex_URL(coin_pair))
-        cprint(message, "green", attrs=["bold"])
+        message = self.console_str["sell"].format(coin_pair, floor(rsi), round(profit_margin, 2), current_sell_price,
+                                                  self.generate_bittrex_URL(coin_pair))
+        color = "green"
+        if profit_margin <= 0:
+            color = "red"
+        cprint(message, color, attrs=["bold"])
 
     def print_pause(self, coin_pair, value, pause_time, pause_type):
         """
@@ -282,8 +305,8 @@ class Messenger(object):
         :type current_buy_price: float
         """
         main_market, coin = coin_pair.split("-")
-        print_str = "No " + self.buy_str.format(coin_pair, ceil(rsi), floor(day_volume), main_market,
-                                                current_buy_price, self.generate_bittrex_URL(coin_pair))
+        print_str = "No " + self.console_str["buy"].format(coin_pair, ceil(rsi), floor(day_volume), main_market,
+                                                           current_buy_price, self.generate_bittrex_URL(coin_pair))
         cprint(print_str, "grey")
 
     def print_no_sell(self, coin_pair, rsi, profit_margin, current_sell_price):
@@ -299,13 +322,14 @@ class Messenger(object):
         :param current_sell_price: Market's current price
         :type current_sell_price: float
         """
-        print_str = "No " + self.sell_str.format(coin_pair, floor(rsi), round(profit_margin, 2), current_sell_price,
-                                                 self.generate_bittrex_URL(coin_pair))
-        if print_str != self.previous_no_sell_str:
+        print_str = "No " + self.console_str["sell"].format(coin_pair, floor(rsi), round(profit_margin, 2),
+                                                            current_sell_price,
+                                                            self.generate_bittrex_URL(coin_pair))
+        if print_str != self.console_str["previousSell"]:
             color = "magenta"
             if profit_margin <= 0:
                 color = "red"
-            self.previous_no_sell_str = print_str
+            self.console_str["previousSell"] = print_str
             cprint(print_str, color)
 
     def print_resume_pause(self, value, pause_type):
