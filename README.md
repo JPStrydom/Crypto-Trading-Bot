@@ -23,6 +23,7 @@ and Unit Price.
 
 #### Coming Soon:
 * Bollinger Bands
+* Moving Average
 
 #### Shoutouts:
 * Bittrex for an awesome API
