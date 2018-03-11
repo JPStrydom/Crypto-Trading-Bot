@@ -155,7 +155,7 @@ class Trader(object):
         rsi_check = rsi >= self.trade_params["sell"]["rsiThreshold"]
         lower_profit_check = profit_margin >= self.trade_params["sell"]["minProfitMarginThreshold"]
         upper_profit_check = profit_margin >= self.trade_params["sell"]["profitMarginThreshold"]
-        loss_check = ("sell" in self.trade_params and self.trade_params["sell"]["lossMarginThreshold"] is not None and
+        loss_check = ("lossMarginThreshold" in self.trade_params["sell"] and
                       0 > self.trade_params["sell"]["lossMarginThreshold"] >= profit_margin)
 
         return (rsi_check and lower_profit_check) or upper_profit_check or loss_check
