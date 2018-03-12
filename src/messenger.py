@@ -157,7 +157,7 @@ class Messenger(object):
         subject = self.email_str["buy"]["subject"].format(order["Exchange"])
         message = self.email_str["buy"]["message"].format(
             recipient_name, round(order["Quantity"], 4), coin, order["Exchange"], order["Price"], main_market,
-            ceil(stats["rsi"]), floor(stats["24HrVolume"]), main_market, self.get_bittrex_URL(order["Quantity"])
+            ceil(stats["rsi"]), floor(stats["24HrVolume"]), main_market, self.get_bittrex_URL(order["Exchange"])
         )
         self.send_email(subject, message)
 
