@@ -40,7 +40,7 @@ class Trader(object):
         if self.Database.check_resume(self.pause_params["buy"]["pauseTime"], "buy"):
             self.Database.store_coin_pairs(self.get_markets("BTC"))
             self.Messenger.print_resume_pause(len(self.Database.app_data["coinPairs"]), "buy")
-        if self.Database.check_resume(self.pause_params["sell"]["pauseTime"], "sell"):
+        if "sell" in self.pause_params and self.Database.check_resume(self.pause_params["sell"]["pauseTime"], "sell"):
             self.Messenger.print_resume_pause(self.Database.app_data["pausedTrackedCoinPairs"], "sell")
             self.Database.resume_sells()
 
@@ -76,15 +76,18 @@ class Trader(object):
         day_volume = self.get_current_24hr_volume(coin_pair)
         current_buy_price = self.get_current_price(coin_pair, "ask")
 
+        if rsi is None:
+            return
+
         if self.check_buy_parameters(rsi, day_volume, current_buy_price):
             buy_stats = {
                 "rsi": rsi,
                 "24HrVolume": day_volume
             }
             self.buy(coin_pair, self.trade_params["buy"]["btcAmount"], current_buy_price, buy_stats)
-        elif rsi is not None and rsi <= self.pause_params["buy"]["rsiThreshold"]:
+        elif rsi <= self.pause_params["buy"]["rsiThreshold"]:
             self.Messenger.print_no_buy(coin_pair, rsi, day_volume, current_buy_price)
-        elif rsi is not None:
+        else:
             self.Messenger.print_pause(coin_pair, rsi, self.pause_params["buy"]["pauseTime"], "buy")
             self.Database.pause_buy(coin_pair)
 
@@ -102,17 +105,20 @@ class Trader(object):
         current_sell_price = self.get_current_price(coin_pair, "bid")
         profit_margin = self.Database.get_profit_margin(coin_pair, current_sell_price)
 
+        if rsi is None:
+            return
+
         if self.check_sell_parameters(rsi, profit_margin):
             sell_stats = {
                 "rsi": rsi,
                 "profitMargin": profit_margin
             }
             self.sell(coin_pair, current_sell_price, sell_stats)
-        elif rsi is not None and profit_margin >= self.pause_params["sell"]["profitMarginThreshold"]:
-            self.Messenger.print_no_sell(coin_pair, rsi, profit_margin, current_sell_price)
-        elif rsi is not None:
+        elif "sell" in self.pause_params and profit_margin <= self.pause_params["sell"]["profitMarginThreshold"]:
             self.Messenger.print_pause(coin_pair, profit_margin, self.pause_params["sell"]["pauseTime"], "sell")
             self.Database.pause_sell(coin_pair)
+        else:
+            self.Messenger.print_no_sell(coin_pair, rsi, profit_margin, current_sell_price)
 
     def check_buy_parameters(self, rsi, day_volume, current_buy_price):
         """
@@ -128,9 +134,11 @@ class Trader(object):
         :return: Boolean indicating if the buy conditions have been met
         :rtype : bool
         """
-        return (rsi is not None and rsi <= self.trade_params["buy"]["rsiThreshold"] and
-                day_volume >= self.trade_params["buy"]["24HourVolumeThreshold"] and
-                current_buy_price > self.trade_params["buy"]["minimumUnitPrice"])
+        rsi_check = rsi <= self.trade_params["buy"]["rsiThreshold"]
+        day_volume_check = day_volume >= self.trade_params["buy"]["24HourVolumeThreshold"]
+        current_buy_price_check = current_buy_price >= self.trade_params["buy"]["minimumUnitPrice"]
+
+        return rsi_check and day_volume_check and current_buy_price_check
 
     def check_sell_parameters(self, rsi, profit_margin):
         """
@@ -144,9 +152,13 @@ class Trader(object):
         :return: Boolean indicating if the sell conditions have been met
         :rtype : bool
         """
-        return ((rsi is not None and rsi >= self.trade_params["sell"]["rsiThreshold"] and
-                 profit_margin > self.trade_params["sell"]["minProfitMarginThreshold"]) or
-                profit_margin > self.trade_params["sell"]["profitMarginThreshold"])
+        rsi_check = rsi >= self.trade_params["sell"]["rsiThreshold"]
+        lower_profit_check = profit_margin >= self.trade_params["sell"]["minProfitMarginThreshold"]
+        upper_profit_check = profit_margin >= self.trade_params["sell"]["profitMarginThreshold"]
+        loss_check = ("lossMarginThreshold" in self.trade_params["sell"] and
+                      0 > self.trade_params["sell"]["lossMarginThreshold"] >= profit_margin)
+
+        return (rsi_check and lower_profit_check) or upper_profit_check or loss_check
 
     def buy(self, coin_pair, btc_quantity, price, stats, trade_time_limit=2):
         """

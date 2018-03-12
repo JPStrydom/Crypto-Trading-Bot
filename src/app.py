@@ -52,6 +52,7 @@ def get_settings():
                 "maxOpenTrades": 0
             },
             "sell": {
+                "lossMarginThreshold": 0,
                 "rsiThreshold": 0,
                 "minProfitMarginThreshold": 0,
                 "profitMarginThreshold": 0

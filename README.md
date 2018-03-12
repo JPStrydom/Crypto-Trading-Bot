@@ -23,6 +23,7 @@ and Unit Price.
 
 #### Coming Soon:
 * Bollinger Bands
+* Moving Average
 
 #### Shoutouts:
 * Bittrex for an awesome API
@@ -98,6 +99,7 @@ The contents of the file should mirror the following:
                 "maxOpenTrades": 0
             },
             "sell": {
+                "lossMarginThreshold": 0,
                 "rsiThreshold": 0,
                 "minProfitMarginThreshold": 0,
                 "profitMarginThreshold": 0
@@ -130,15 +132,18 @@ The contents of the file should mirror the following:
             this will not be considered for buying
             * `minimumUnitPrice` is the lower unit price buy threshold. Coin pairs with a unit price lower than this will not 
             be considered for buying 
-    3) `maxOpenTrades` is the maximum amount of open trades the bot is allowed to have at one time 
+            * `maxOpenTrades` is the maximum amount of open trades the bot is allowed to have at one time 
         * **`sell`**: 
+            * `lossMarginThreshold` is the lower loss margin threshold. Coin pairs with a profit margin lower than this 
+            will be sold regardless of its RSI. If this value is omitted or set to zero (`0`), this parameter will be ignored 
+            and coin pairs will not be sold at a loss
             * `rsiThreshold` is the lower RSI sell threshold. An RSI higher than this will result in a sell signal
             * `minProfitMarginThreshold` is the upper minimum profit margin sell threshold. Coin pairs with a profit margin 
             lower than this will not be sold
             * `profitMarginThreshold` is the upper profit margin sell threshold. Coin pairs with a profit margin higher than 
             this will be sold regardless of its RSI
     
-    4) To use the **Pause** functionality, you need to setup the following:
+    3) To use the **Pause** functionality, you need to setup the following:
         * **`buy`**: 
             * `rsiThreshold` is the lower RSI pause threshold. An RSI higher than this will result in the coin pair not being 
             tracked for `pauseTime` minutes
@@ -147,6 +152,8 @@ The contents of the file should mirror the following:
             * `profitMarginThreshold` is the upper profit margin pause threshold. A profit margin lower than this will result 
             in the coin pair not being tracked for `pauseTime` minutes
             * `pauseTime` is the amount of minutes to pause coin pair tracking by
+            If you prefer to sell at a small loss rather than holding onto (pausing) sell coin pairs, the `lossMarginThreshold` 
+            **trade** parameter should be set appropriately and then the `sell` **pause** parameter may be omitted.
 
 
 ## How to run
@@ -175,6 +182,7 @@ successful trading parameters can be found below:
             "maxOpenTrades": 3
         },
         "sell": {
+            "lossMarginThreshold": -1.5,
             "rsiThreshold": 50,
             "minProfitMarginThreshold": 0.5,
             "profitMarginThreshold": 2.5
@@ -210,9 +218,11 @@ def check_buy_parameters(rsi, day_volume, current_buy_price):
     :return: Boolean indicating if the buy conditions have been met
     :rtype : bool
     """
-    return (rsi is not None and rsi <= buy_trade_params["rsiThreshold"] and
-            day_volume >= buy_trade_params["24HourVolumeThreshold"] and
-            current_buy_price > buy_trade_params["minimumUnitPrice"])
+    rsi_check = rsi is not None and rsi <= buy_trade_params["buy"]["rsiThreshold"]
+    day_volume_check = day_volume >= buy_trade_params["buy"]["24HourVolumeThreshold"]
+    current_buy_price_check = current_buy_price >= buy_trade_params["buy"]["minimumUnitPrice"]
+    
+    return rsi_check and day_volume_check and current_buy_price_check
 
 
 def check_sell_parameters(rsi, profit_margin):
@@ -227,9 +237,13 @@ def check_sell_parameters(rsi, profit_margin):
     :return: Boolean indicating if the sell conditions have been met
     :rtype : bool
     """
-    return ((rsi is not None and rsi >= sell_trade_params["rsiThreshold"] and
-             profit_margin > sell_trade_params["minProfitMarginThreshold"]) or
-            profit_margin > sell_trade_params["profitMarginThreshold"])
+    rsi_check = rsi is not None and rsi >= sell_trade_params["sell"]["rsiThreshold"]
+    lower_profit_check = profit_margin >= sell_trade_params["sell"]["minProfitMarginThreshold"]        
+    upper_profit_check = profit_margin >= sell_trade_params["sell"]["profitMarginThreshold"]
+    loss_check = (sell_trade_params["lossMarginThreshold"] is not None and
+                  0 > sell_trade_params["lossMarginThreshold"] >= profit_margin)
+
+    return (rsi_check and lower_profit_check) or upper_profit_check or loss_check
 ```
 
 See the source code for a more detailed description.
