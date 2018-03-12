@@ -182,7 +182,7 @@ successful trading parameters can be found below:
             "maxOpenTrades": 3
         },
         "sell": {
-            "lossMarginThreshold": -1.5,
+            "lossMarginThreshold": -2.5,
             "rsiThreshold": 50,
             "minProfitMarginThreshold": 0.5,
             "profitMarginThreshold": 2.5
