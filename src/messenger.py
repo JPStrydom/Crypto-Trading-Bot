@@ -176,15 +176,15 @@ class Messenger(object):
         if recipient_name is None:
             recipient_name = self.recipient_name
 
-        type = "profit"
+        type_str = "profit"
         if stats["profitMargin"] <= 0:
-            type = "loss"
+            type_str = "loss"
 
         main_market, coin = order["Exchange"].split("-")
         subject = self.email_str["sell"]["subject"].format(order["Exchange"])
         message = self.email_str["sell"]["message"].format(
             recipient_name, round(order["Quantity"], 4), coin, order["Exchange"], order["Price"], main_market,
-            floor(stats["rsi"]), type, abs(round(stats["profitMargin"], 2)), self.get_bittrex_URL(order["Exchange"])
+            floor(stats["rsi"]), type_str, abs(round(stats["profitMargin"], 2)), self.get_bittrex_URL(order["Exchange"])
         )
         self.send_email(subject, message)
 
