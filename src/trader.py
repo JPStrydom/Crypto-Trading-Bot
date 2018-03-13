@@ -114,7 +114,7 @@ class Trader(object):
                 "profitMargin": profit_margin
             }
             self.sell(coin_pair, current_sell_price, sell_stats)
-        elif "sell" in self.pause_params and profit_margin <= self.pause_params["sell"]["profitMarginThreshold"]:
+        elif "sell" in self.pause_params and profit_margin <= self.pause_params["sell"]["profitMarginThreshold"] < 0:
             self.Messenger.print_pause(coin_pair, profit_margin, self.pause_params["sell"]["pauseTime"], "sell")
             self.Database.pause_sell(coin_pair)
         else:
@@ -155,6 +155,7 @@ class Trader(object):
         rsi_check = rsi >= self.trade_params["sell"]["rsiThreshold"]
         lower_profit_check = profit_margin >= self.trade_params["sell"]["minProfitMarginThreshold"]
         upper_profit_check = profit_margin >= self.trade_params["sell"]["profitMarginThreshold"]
+        # TODO: Add timeout check to only check loss margin after trade has been open for a certain amount of minutes
         loss_check = ("lossMarginThreshold" in self.trade_params["sell"] and
                       0 > self.trade_params["sell"]["lossMarginThreshold"] >= profit_margin)
 
