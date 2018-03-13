@@ -248,6 +248,13 @@ def check_sell_parameters(rsi, profit_margin):
 
 See the source code for a more detailed description.
 
+## Donations
+
+If you found this project helpful and would like to support me, you can donate to one of the following crypto addresses:
+
+* **BTC**: 1E3xMaoFfuk52HaCb7KRbHmezeUumcyRjy
+* **ETH**: 0x6D5f8775Dc844D8B1E6f2359abF9939E75A7A225
+
 
 ## Liability
 I am not your financial adviser, nor is this tool. Use this program cautiously as it will trade with your crypto-currencies. 
