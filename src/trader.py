@@ -85,11 +85,11 @@ class Trader(object):
                 "24HrVolume": day_volume
             }
             self.buy(coin_pair, self.trade_params["buy"]["btcAmount"], current_buy_price, buy_stats)
-        elif rsi <= self.pause_params["buy"]["rsiThreshold"]:
-            self.Messenger.print_no_buy(coin_pair, rsi, day_volume, current_buy_price)
-        else:
+        elif "buy" in self.pause_params and rsi >= self.pause_params["buy"]["rsiThreshold"] > 0:
             self.Messenger.print_pause(coin_pair, rsi, self.pause_params["buy"]["pauseTime"], "buy")
             self.Database.pause_buy(coin_pair)
+        else:
+            self.Messenger.print_no_buy(coin_pair, rsi, day_volume, current_buy_price)
 
     def sell_strategy(self, coin_pair):
         """
