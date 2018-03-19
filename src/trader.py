@@ -155,11 +155,10 @@ class Trader(object):
         rsi_check = rsi >= self.trade_params["sell"]["rsiThreshold"]
         lower_profit_check = profit_margin >= self.trade_params["sell"]["minProfitMarginThreshold"]
         upper_profit_check = profit_margin >= self.trade_params["sell"]["profitMarginThreshold"]
-        # TODO: Add timeout check to only check loss margin after trade has been open for a certain amount of minutes
         loss_check = ("lossMarginThreshold" in self.trade_params["sell"] and
                       0 > self.trade_params["sell"]["lossMarginThreshold"] >= profit_margin)
 
-        return (rsi_check and lower_profit_check) or upper_profit_check or loss_check
+        return (rsi_check and lower_profit_check) or upper_profit_check or (rsi_check and loss_check)
 
     def buy(self, coin_pair, btc_quantity, price, stats, trade_time_limit=2):
         """

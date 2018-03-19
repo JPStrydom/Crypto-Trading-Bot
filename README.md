@@ -135,8 +135,8 @@ The contents of the file should mirror the following:
             * `maxOpenTrades` is the maximum amount of open trades the bot is allowed to have at one time 
         * **`sell`**: 
             * `lossMarginThreshold` is the lower loss margin threshold. Coin pairs with a profit margin lower than this 
-            will be sold regardless of its RSI. If this value is omitted or set to zero (`0`), this parameter will be ignored 
-            and coin pairs will not be sold at a loss
+            will be sold if their RSI is above the `sell` `rsiThreshold`. If this value is omitted or set to zero (`0`), 
+            this parameter will be ignored and coin pairs will not be sold at a loss
             * `rsiThreshold` is the lower RSI sell threshold. An RSI higher than this will result in a sell signal
             * `minProfitMarginThreshold` is the upper minimum profit margin sell threshold. Coin pairs with a profit margin 
             lower than this will not be sold
