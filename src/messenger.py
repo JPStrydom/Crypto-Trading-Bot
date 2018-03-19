@@ -41,9 +41,17 @@ class Messenger(object):
         self.bittrex_url = "https://bittrex.com/Market/Index?MarketName={}"
 
         self.console_str = {
-            "buy": "Buy on {:<10}\t->\t\tRSI: {:>2}\t\t24 Hour Volume: {:>5} {}\t\tBuy Price: {:.8f}\t\tURL: {}",
-            "sell": "Sell on {:<10}\t->\t\tRSI: {:>2}\t\tProfit Margin: {:>4}%\t\tSell Price: {:.8f}\t\tURL: {}",
-            "previousSell": ""
+            "buy": {
+                "pause": "Pause buy tracking on {} with a high RSI of {} and a 24 hour volume of {} {} for {} minutes.",
+                "resume": "Resuming tracking on all {} markets.",
+                "message": "Buy on {:<10}\t->\t\tRSI: {:>2}\t\t24 Hour Volume: {:>5} {}\t\tBuy Price: {:.8f}\t\tURL: {}"
+            },
+            "sell": {
+                "pause": "Pause sell tracking on {} with a low profit margin of {}% and an RSI of {} for {} minutes.",
+                "resume": "Resume sell tracking on {}.",
+                "message": "Sell on {:<10}\t->\t\tRSI: {:>2}\t\tProfit Margin: {:>4}%\t\tSell Price: {:.8f}\t\tURL: {}",
+                "previousMessage": ""
+            }
         }
 
         self.email_str = {
@@ -70,15 +78,6 @@ class Messenger(object):
                 "loss_emoji": ":x:",
                 "message": "*Sell on {}*\n>>>\n_RSI: *{}*_\n_Profit Margin: *{}%*_"
             }
-        }
-
-        self.pause_str = {
-            "buy": "Pause buy tracking on {} with a high RSI of {} for {} minutes.",
-            "sell": "Pause sell tracking on {} with a low profit margin of {}% for {} minutes."
-        }
-        self.resume_str = {
-            "buy": "Resuming tracking on all {} markets.",
-            "sell": "Resume sell tracking on {}."
         }
 
         self.exception_error_str = {
@@ -248,9 +247,9 @@ class Messenger(object):
         :type day_volume: float
         """
         main_market, coin = coin_pair.split("-")
-        message = self.console_str["buy"].format(coin_pair, ceil(rsi), floor(day_volume), main_market,
-                                                 current_buy_price,
-                                                 self.get_bittrex_URL(coin_pair))
+        message = self.console_str["buy"]["message"].format(
+            coin_pair, ceil(rsi), floor(day_volume), main_market, current_buy_price, self.get_bittrex_URL(coin_pair)
+        )
         cprint(message, "blue", attrs=["bold"])
 
     def print_sell(self, coin_pair, current_sell_price, rsi, profit_margin):
@@ -266,34 +265,40 @@ class Messenger(object):
         :param profit_margin: Profit made on the trade
         :type profit_margin: float
         """
-        message = self.console_str["sell"].format(coin_pair, floor(rsi), round(profit_margin, 2), current_sell_price,
-                                                  self.get_bittrex_URL(coin_pair))
+        message = self.console_str["sell"]["message"].format(
+            coin_pair, floor(rsi), round(profit_margin, 2), current_sell_price, self.get_bittrex_URL(coin_pair)
+        )
         color = "green"
         if profit_margin <= 0:
             color = "red"
         cprint(message, color, attrs=["bold"])
 
-    def print_pause(self, coin_pair, value, pause_time, pause_type):
+    def print_pause(self, coin_pair, data, pause_time, pause_type):
         """
         Used to print coin pause info to the console
 
         :param coin_pair: String literal for the market (ex: BTC-LTC)
         :type coin_pair: str
-        :param value: Relevant resume value
-        :type value: float
+        :param data: Relevant pause values
+        :type data: list
         :param pause_time: The amount of minutes to tracking will be paused on the coin pair
         :type pause_time: float
         :param pause_type: Type of pause (one of: 'buy', 'sell')
         :type pause_type: str
         """
-        if value is None:
-            value = 'N/A'
-        elif value < 0:
-            value = round(value, 2)
-        else:
-            value = floor(value)
-        print_str = self.pause_str[pause_type].format(coin_pair, value, round(pause_time))
-        cprint(print_str, "yellow")
+        if pause_time == "buy":
+            main_market, coin = coin_pair.split("-")
+            data[0] = floor(data[0])
+            data[1] = floor(data[1])
+            print_str = self.console_str[pause_type]["pause"].format(
+                coin_pair, data[0], data[1], main_market, round(pause_time)
+            )
+            cprint(print_str, "yellow")
+        if pause_time == "sell":
+            data[0] = round(data[0], 2)
+            data[1] = floor(data[1])
+            print_str = self.console_str[pause_type]["pause"].format(coin_pair, data[0], data[1], round(pause_time))
+            cprint(print_str, "yellow")
 
     def print_no_buy(self, coin_pair, rsi, day_volume, current_buy_price):
         """
@@ -326,26 +331,26 @@ class Messenger(object):
         :param current_sell_price: Market's current price
         :type current_sell_price: float
         """
-        print_str = "No " + self.console_str["sell"].format(coin_pair, floor(rsi), round(profit_margin, 2),
-                                                            current_sell_price,
-                                                            self.get_bittrex_URL(coin_pair))
-        if print_str != self.console_str["previousSell"]:
+        print_str = "No " + self.console_str["sell"]["message"].format(
+            coin_pair, floor(rsi), round(profit_margin, 2), current_sell_price, self.get_bittrex_URL(coin_pair)
+        )
+        if print_str != self.console_str["sell"]["previousMessage"]:
             color = "magenta"
             if profit_margin <= 0:
                 color = "red"
-            self.console_str["previousSell"] = print_str
+            self.console_str["sell"]["previousMessage"] = print_str
             cprint(print_str, color)
 
-    def print_resume_pause(self, value, pause_type):
+    def print_resume_pause(self, data, pause_type):
         """
         Used to print coin pause resume info to the console
 
-        :param value: Relevant resume value
-        :type value: float
+        :param data: Relevant resume value
+        :type data: float
         :param pause_type: Type of pause (one of: 'buy', 'sell')
         :type pause_type: str
         """
-        print_str = self.resume_str[pause_type].format(value)
+        print_str = self.console_str[pause_type]["resume"].format(data)
         cprint(print_str, "yellow", attrs=["bold"])
 
     def print_exception_error(self, error_type, will_exit=False):

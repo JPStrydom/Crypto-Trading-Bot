@@ -86,7 +86,7 @@ class Trader(object):
             }
             self.buy(coin_pair, self.trade_params["buy"]["btcAmount"], current_buy_price, buy_stats)
         elif "buy" in self.pause_params and rsi >= self.pause_params["buy"]["rsiThreshold"] > 0:
-            self.Messenger.print_pause(coin_pair, rsi, self.pause_params["buy"]["pauseTime"], "buy")
+            self.Messenger.print_pause(coin_pair, [rsi, day_volume], self.pause_params["buy"]["pauseTime"], "buy")
             self.Database.pause_buy(coin_pair)
         else:
             self.Messenger.print_no_buy(coin_pair, rsi, day_volume, current_buy_price)
@@ -115,7 +115,7 @@ class Trader(object):
             }
             self.sell(coin_pair, current_sell_price, sell_stats)
         elif "sell" in self.pause_params and profit_margin <= self.pause_params["sell"]["profitMarginThreshold"] < 0:
-            self.Messenger.print_pause(coin_pair, profit_margin, self.pause_params["sell"]["pauseTime"], "sell")
+            self.Messenger.print_pause(coin_pair, [profit_margin, rsi], self.pause_params["sell"]["pauseTime"], "sell")
             self.Database.pause_sell(coin_pair)
         else:
             self.Messenger.print_no_sell(coin_pair, rsi, profit_margin, current_sell_price)
