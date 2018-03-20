@@ -94,30 +94,30 @@ if __name__ == "__main__":
             time.sleep(10)
 
         except SSLError as exception:
-            Messenger.print_exception_error("SSL")
+            Messenger.print_error("SSL")
             logger.exception(exception)
             time.sleep(10)
         except ConnectionError as exception:
-            Messenger.print_exception_error("connection")
+            Messenger.print_error("connection")
             logger.exception(exception)
             time.sleep(10)
         except json.decoder.JSONDecodeError as exception:
-            Messenger.print_exception_error("JSONDecode")
+            Messenger.print_error("JSONDecode")
             logger.exception(exception)
             time.sleep(10)
         except TypeError as exception:
-            Messenger.print_exception_error("typeError")
+            Messenger.print_error("typeError")
             logger.exception(exception)
             time.sleep(10)
         except KeyError as exception:
-            Messenger.print_exception_error("keyError", True)
+            Messenger.print_error("keyError", [], True)
             logger.exception(exception)
             exit()
         except ValueError as exception:
-            Messenger.print_exception_error("valueError", True)
+            Messenger.print_error("valueError", [], True)
             logger.exception(exception)
             exit()
         except Exception:
-            Messenger.print_exception_error("unknown", True)
+            Messenger.print_error("unknown", [], True)
             logger.exception(Exception)
             exit()

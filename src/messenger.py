@@ -80,7 +80,13 @@ class Messenger(object):
             }
         }
 
-        self.exception_error_str = {
+        self.error_str = {
+            "market": "Failed to fetch Bittrex markets.",
+            "coinMarket": "Failed to fetch Bittrex market summary for the {} market.",
+            "sell": "Failed to sell on {} market. Bittrex error message: {}",
+            "buy": "Failed to buy on {} market. Bittrex error message: {}",
+            "order": "Failed to complete order with UUID {} within {} seconds on {} market. URL: {}",
+
             "SSL": "An SSL error occurred.",
             "connection": "Unable to connect to the internet.",
             "JSONDecode": "Failed to decode JSON.",
@@ -88,10 +94,9 @@ class Messenger(object):
             "keyError": "Invalid key provided to obj/dict.",
             "valueError": "Value error occurred.",
             "unknown": "An unknown exception occurred.",
+
             "general": "See the latest log file for more information."
         }
-
-        self.order_error_str = "Failed to complete order with UUID {} within {} seconds on {} market. URL: {}"
 
     def send_email(self, subject, message):
         """
@@ -353,40 +358,40 @@ class Messenger(object):
         print_str = self.console_str[pause_type]["resume"].format(data)
         cprint(print_str, "yellow", attrs=["bold"])
 
-    def print_exception_error(self, error_type, will_exit=False):
+    def print_error(self, error_type, data=None, will_exit=False):
         """
         Prints the error type message to the console
 
         :param error_type: The error type
-            (one of: 'connection', 'SSL', 'JSONDecode', 'keyError', 'valueError', 'typeError', 'unknown')
+            (one of: 'market', 'coinMarket', 'sell', 'buy', 'order', 'connection', 'SSL', 'JSONDecode', 'keyError',
+            'valueError', 'typeError', 'unknown')
         :type error_type: str
+        :param data: Relevant error information
+        :type data: list
         :param will_exit: Whether the program is exiting or not
         :type will_exit: bool
-        """
-        suffix = " Waiting 10 seconds and then retrying."
-        if will_exit:
-            suffix = " Exiting program."
-        cprint("\n" + self.exception_error_str[error_type] + suffix + "\n", "red", attrs=["bold"])
-        cprint("\n" + self.exception_error_str["general"] + "\n", "grey", attrs=["bold"])
-        self.play_beep()
-
-    def print_order_error(self, order_uuid, trade_time_limit, coin_pair):
-        """
-        Prints an order error message to the console
-
-        :param order_uuid: The order UUID
-        :type order_uuid: str
-        :param trade_time_limit: The trade time limit in seconds
-        :type trade_time_limit: float
-        :param coin_pair: String literal for the market (ex: BTC-LTC)
-        :type coin_pair: str
 
         :return: Error string
         :rtype : str
         """
-        error_str = self.order_error_str.format(order_uuid, trade_time_limit, coin_pair,
-                                                self.get_bittrex_URL(coin_pair))
-        cprint("\n" + error_str + "\n", "red", attrs=["bold"])
+        suffix = ""
+        if will_exit:
+            suffix = " Exiting program."
+        elif error_type in ['connection', 'SSL', 'JSONDecode', 'keyError', 'valueError', 'typeError', 'unknown']:
+            suffix = " Waiting 10 seconds and then retrying."
+
+        error_str = self.error_str[error_type]
+        if error_type == "coinMarket":
+            error_str = error_str.format(data[0])
+        elif error_type in ["sell", "buy"]:
+            error_str = error_str.format(data[0], data[1])
+        elif error_type == "order":
+            error_str = error_str.format(data[0], data[1], data[2], self.get_bittrex_URL(data[2]))
+
+        cprint("\n" + error_str + suffix + "\n", "red", attrs=["bold"])
+        cprint("\n" + self.error_str["general"] + "\n", "grey", attrs=["bold"])
+        self.play_beep()
+
         return error_str
 
     def get_bittrex_URL(self, coin_pair):

@@ -29,7 +29,7 @@ class Trader(object):
                 self.Database.store_coin_pairs(self.get_markets("BTC"))
             self.Messenger.print_header(len(self.Database.app_data["coinPairs"]))
         except ConnectionError as exception:
-            self.Messenger.print_exception_error("connection")
+            self.Messenger.print_error("connection", [], True)
             logger.exception(exception)
             exit()
 
@@ -179,7 +179,9 @@ class Trader(object):
         buy_quantity = round(btc_quantity / price, 8)
         buy_data = self.Bittrex.buy_limit(coin_pair, buy_quantity, price)
         if not buy_data["success"]:
-            return logger.error("Failed to buy on {} market.".format(coin_pair))
+            error_str = self.Messenger.print_error("buy", [coin_pair, buy_data["message"]])
+            logger.error(error_str)
+            return
         self.Database.store_initial_buy(coin_pair, buy_data["result"]["uuid"])
 
         buy_order_data = self.get_order(buy_data["result"]["uuid"], trade_time_limit * 60)
@@ -207,9 +209,9 @@ class Trader(object):
         trade = self.Database.get_open_trade(coin_pair)
         sell_data = self.Bittrex.sell_limit(coin_pair, trade["quantity"], price)
         if not sell_data["success"]:
-            return logger.error(
-                "Failed to sell on {} market. Bittrex error message: {}".format(coin_pair, sell_data["message"])
-            )
+            error_str = self.Messenger.print_error("sell", [coin_pair, sell_data["message"]])
+            logger.error(error_str)
+            return
 
         sell_order_data = self.get_order(sell_data["result"]["uuid"], trade_time_limit * 60)
         # TODO: Handle partial/incomplete sales.
@@ -232,7 +234,8 @@ class Trader(object):
         """
         markets = self.Bittrex.get_markets()
         if not markets["success"]:
-            logger.error("Failed to fetch Bittrex markets")
+            error_str = self.Messenger.print_error("market", [], True)
+            logger.error(error_str)
             exit()
 
         markets = markets["result"]
@@ -256,7 +259,8 @@ class Trader(object):
         """
         coin_summary = self.Bittrex.get_market_summary(coin_pair)
         if not coin_summary["success"]:
-            logger.error("Failed to fetch Bittrex market summary for the {} market".format(coin_pair))
+            error_str = self.Messenger.print_error("coinMarket", [coin_pair])
+            logger.error(error_str)
             return None
         if price_type == "ask":
             return coin_summary["result"][0]["Ask"]
@@ -276,7 +280,8 @@ class Trader(object):
         """
         coin_summary = self.Bittrex.get_market_summary(coin_pair)
         if not coin_summary["success"]:
-            logger.error("Failed to fetch Bittrex market summary for the {} market".format(coin_pair))
+            error_str = self.Messenger.print_error("coinMarket", [coin_pair])
+            logger.error(error_str)
             return None
         return coin_summary["result"][0]["BaseVolume"]
 
@@ -321,11 +326,12 @@ class Trader(object):
             order_data = self.Bittrex.get_order(order_uuid)
 
         if order_data["result"]["IsOpen"]:
-            error_str = self.Messenger.print_order_error(order_uuid, trade_time_limit, order_data["result"]["Exchange"])
+            error_str = self.Messenger.print_error(
+                "order", [order_uuid, trade_time_limit, order_data["result"]["Exchange"]]
+            )
             logger.error(error_str)
             if order_data["result"]["Type"] == "LIMIT_BUY":
                 self.Bittrex.cancel(order_uuid)
-            return order_data
 
         return order_data
 
