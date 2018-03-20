@@ -291,7 +291,7 @@ class Messenger(object):
         :param pause_type: Type of pause (one of: 'buy', 'sell')
         :type pause_type: str
         """
-        if pause_time == "buy":
+        if pause_type == "buy":
             main_market, coin = coin_pair.split("-")
             data[0] = floor(data[0])
             data[1] = floor(data[1])
@@ -299,7 +299,7 @@ class Messenger(object):
                 coin_pair, data[0], data[1], main_market, round(pause_time)
             )
             cprint(print_str, "yellow")
-        if pause_time == "sell":
+        elif pause_type == "sell":
             data[0] = round(data[0], 2)
             data[1] = floor(data[1])
             print_str = self.console_str[pause_type]["pause"].format(coin_pair, data[0], data[1], round(pause_time))
@@ -319,8 +319,9 @@ class Messenger(object):
         :type current_buy_price: float
         """
         main_market, coin = coin_pair.split("-")
-        print_str = "No " + self.console_str["buy"].format(coin_pair, ceil(rsi), floor(day_volume), main_market,
-                                                           current_buy_price, self.get_bittrex_URL(coin_pair))
+        print_str = "No " + self.console_str["buy"]["message"].format(
+            coin_pair, ceil(rsi), floor(day_volume), main_market, current_buy_price, self.get_bittrex_URL(coin_pair)
+        )
         cprint(print_str, "grey")
 
     def print_no_sell(self, coin_pair, rsi, profit_margin, current_sell_price):
