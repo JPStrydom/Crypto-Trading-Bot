@@ -389,8 +389,8 @@ class Messenger(object):
         elif error_type == "order":
             error_str = error_str.format(data[0], data[1], data[2], self.get_bittrex_URL(data[2]))
 
-        cprint("\n" + error_str + suffix + "\n", "red", attrs=["bold"])
-        cprint("\n" + self.error_str["general"] + "\n", "grey", attrs=["bold"])
+        cprint("\n" + error_str + suffix, "red", attrs=["bold"])
+        cprint(self.error_str["general"] + "\n", "grey", attrs=["bold"])
         self.play_beep()
 
         return error_str
