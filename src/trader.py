@@ -35,38 +35,9 @@ class Trader(object):
             logger.exception(exception)
             exit()
 
-    def get_non_zero_balances(self):
-        """
-        Gets all non-zero user coin balances in the correct format
-        """
-        balances_data = self.Bittrex.get_balances()
-        if not balances_data["success"]:
-            error_str = self.Messenger.print_error("balance")
-            logger.error(error_str)
-            return
-        non_zero_balances = py_.filter_(balances_data["result"], lambda balance_item: balance_item["Balance"] > 0)
-        return py_.map_(non_zero_balances, lambda balance: self.create_balance_object(balance))
-
-    def create_balance_object(self, balance_item):
-        """
-        Creates a new balance object containing only the relevant values and the BTC value of the coin's balance
-
-        :param balance_item: The Bittrex user balance object for a coin
-        :type balance_item: dict
-        """
-        btc_price = 1
-        if balance_item["Currency"] != "BTC":
-            coin_pair = "BTC-" + balance_item["Currency"]
-            btc_price = self.get_current_price(coin_pair, "bid")
-
-        return py_.assign(
-            py_.pick(balance_item, "Currency", "Balance"),
-            {"BtcValue": round(btc_price * balance_item["Balance"], 8)}
-        )
-
     def analyse_pauses(self):
         """
-        Check all the paused buy and sell pairs and reactivate the necessary ones
+        Checks all the paused buy and sell pairs and the balance notification timer and reactivate the necessary ones
         """
         if self.Database.check_resume(self.pause_params["buy"]["pauseTime"], "buy"):
             self.Database.store_coin_pairs(self.get_markets("BTC"))
@@ -74,6 +45,9 @@ class Trader(object):
         if "sell" in self.pause_params and self.Database.check_resume(self.pause_params["sell"]["pauseTime"], "sell"):
             self.Messenger.print_resume_pause(self.Database.app_data["pausedTrackedCoinPairs"], "sell")
             self.Database.resume_sells()
+        if self.Database.check_resume(self.pause_params["balance"]["pauseTime"], "balance"):
+            self.Messenger.send_balance_slack(self.get_non_zero_balances())
+            self.Database.reset_balance_notifier()
 
     def analyse_buys(self):
         """
@@ -424,3 +398,32 @@ class Trader(object):
         rs = new_avg_gain / new_avg_loss
         new_rs = 100 - 100 / (1 + rs)
         return new_rs
+
+    def get_non_zero_balances(self):
+        """
+        Gets all non-zero user coin balances in the correct format
+        """
+        balances_data = self.Bittrex.get_balances()
+        if not balances_data["success"]:
+            error_str = self.Messenger.print_error("balance")
+            logger.error(error_str)
+            return
+        non_zero_balances = py_.filter_(balances_data["result"], lambda balance_item: balance_item["Balance"] > 0)
+        return py_.map_(non_zero_balances, lambda balance: self.create_balance_object(balance))
+
+    def create_balance_object(self, balance_item):
+        """
+        Creates a new balance object containing only the relevant values and the BTC value of the coin's balance
+
+        :param balance_item: The Bittrex user balance object for a coin
+        :type balance_item: dict
+        """
+        btc_price = 1
+        if balance_item["Currency"] != "BTC":
+            coin_pair = "BTC-" + balance_item["Currency"]
+            btc_price = self.get_current_price(coin_pair, "bid")
+
+        return py_.assign(
+            py_.pick(balance_item, "Currency", "Balance"),
+            {"BtcValue": round(btc_price * balance_item["Balance"], 8)}
+        )

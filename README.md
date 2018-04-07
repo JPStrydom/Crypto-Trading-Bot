@@ -113,7 +113,10 @@ The contents of the file should mirror the following:
             "sell": {
                 "profitMarginThreshold": 0,
                 "pauseTime": 0
-            }
+            },
+            "balance": {
+                "pauseTime": 0
+           }
         }
     }
     ```

@@ -22,7 +22,9 @@ class Database(object):
     class __Database:
         def __init__(self):
             default_trades = {"trackedCoinPairs": [], "trades": []}
-            default_app_data = {"coinPairs": [], "pausedTrackedCoinPairs": [], "pauseTime": {"buy": None, "sell": None}}
+            default_app_data = {
+                "coinPairs": [], "pausedTrackedCoinPairs": [], "pauseTime": {"buy": None, "sell": None, "balance": None}
+            }
 
             self.trades_file_string = "../database/trades.json"
             self.app_data_file_string = "../database/app-data.json"
@@ -149,16 +151,29 @@ class Database(object):
 
             write_json_to_file(self.app_data_file_string, self.app_data)
 
+        def reset_balance_notifier(self):
+            """
+            Used to reset the balance notifier pause time
+            """
+            self.app_data["pauseTime"]["balance"] = time.time()
+
+            write_json_to_file(self.app_data_file_string, self.app_data)
+
         def check_resume(self, pause_time, pause_type):
             """
             Used to check if the pause type cen be un-paused
 
             :param pause_time: The amount of minutes tracking should be paused
             :type pause_time: int
-            :param pause_type: The pause type to check (one of: 'buy', 'sell')
+            :param pause_type: The pause type to check (one of: 'buy', 'sell', 'balance)
             :type pause_type: str
             """
+            if pause_time == "balance" and "balance" not in self.app_data["pauseTime"]:
+                return False
+
             if self.app_data["pauseTime"][pause_type] is None:
+                if pause_time == "balance":
+                    self.reset_balance_notifier()
                 return False
             return time.time() - self.app_data["pauseTime"][pause_type] >= pause_time * 60
 

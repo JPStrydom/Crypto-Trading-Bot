@@ -66,6 +66,9 @@ def get_settings():
             "sell": {
                 "profitMarginThreshold": 0,
                 "pauseTime": 0
+            },
+            "balance": {
+                "pauseTime": 0
             }
         }
     }

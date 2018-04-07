@@ -70,11 +70,6 @@ class Messenger(object):
         }
 
         self.slack_str = {
-            "balance": {
-                "emoji": ":bell:",
-                "header": "*User Balances*\n>>>",
-                "line": "*{}*\n>_Balance_: *{} {}*\n>_BTC Value_: *{} BTC*\n"
-            },
             "buy": {
                 "emoji": ":heavy_minus_sign:",
                 "message": "*Buy on {}*\n>>>\n_RSI: *{}*_\n_24 Hour Volume: *{} {}*_"},
@@ -82,16 +77,21 @@ class Messenger(object):
                 "profit_emoji": ":heavy_check_mark:",
                 "loss_emoji": ":x:",
                 "message": "*Sell on {}*\n>>>\n_RSI: *{}*_\n_Profit Margin: *{}%*_"
+            },
+            "balance": {
+                "emoji": ":bell:",
+                "header": "*User Balances*\n>>>",
+                "line": "*{}*\n>_Balance_: *{} {}*\n>_BTC Value_: *{} BTC*\n"
             }
         }
 
         self.error_str = {
-            "balance": "Failed to fetch user Bittrex balances.",
             "market": "Failed to fetch Bittrex markets.",
             "coinMarket": "Failed to fetch Bittrex market summary for the {} market.",
             "sell": "Failed to sell on {} market. Bittrex error message: {}",
             "buy": "Failed to buy on {} market. Bittrex error message: {}",
             "order": "Failed to complete order with UUID {} within {} seconds on {} market. URL: {}",
+            "balance": "Failed to fetch user Bittrex balances.",
 
             "SSL": "An SSL error occurred.",
             "connection": "Unable to connect to the internet.",
