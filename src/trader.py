@@ -20,6 +20,8 @@ class Trader(object):
         self.Messenger = Messenger(secrets, settings)
         self.Database = Database()
 
+        self.Messenger.send_balance_slack(self.get_non_zero_balances())
+
     def initialise(self):
         """
         Fetch the initial coin pairs to track and to print the header line
@@ -32,6 +34,35 @@ class Trader(object):
             self.Messenger.print_error("connection", [], True)
             logger.exception(exception)
             exit()
+
+    def get_non_zero_balances(self):
+        """
+        Gets all non-zero user coin balances in the correct format
+        """
+        balances_data = self.Bittrex.get_balances()
+        if not balances_data["success"]:
+            error_str = self.Messenger.print_error("balance")
+            logger.error(error_str)
+            return
+        non_zero_balances = py_.filter_(balances_data["result"], lambda balance_item: balance_item["Balance"] > 0)
+        return py_.map_(non_zero_balances, lambda balance: self.create_balance_object(balance))
+
+    def create_balance_object(self, balance_item):
+        """
+        Creates a new balance object containing only the relevant values and the BTC value of the coin's balance
+
+        :param balance_item: The Bittrex user balance object for a coin
+        :type balance_item: dict
+        """
+        btc_price = 1
+        if balance_item["Currency"] != "BTC":
+            coin_pair = "BTC-" + balance_item["Currency"]
+            btc_price = self.get_current_price(coin_pair, "bid")
+
+        return py_.assign(
+            py_.pick(balance_item, "Currency", "Balance"),
+            {"BtcValue": round(btc_price * balance_item["Balance"], 8)}
+        )
 
     def analyse_pauses(self):
         """

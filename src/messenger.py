@@ -70,6 +70,11 @@ class Messenger(object):
         }
 
         self.slack_str = {
+            "balance": {
+                "emoji": ":bell:",
+                "header": "*User Balances*\n>>>",
+                "line": "*{}*\n>_Balance_: *{} {}*\n>_BTC Value_: *{} BTC*\n"
+            },
             "buy": {
                 "emoji": ":heavy_minus_sign:",
                 "message": "*Buy on {}*\n>>>\n_RSI: *{}*_\n_24 Hour Volume: *{} {}*_"},
@@ -81,6 +86,7 @@ class Messenger(object):
         }
 
         self.error_str = {
+            "balance": "Failed to fetch user Bittrex balances.",
             "market": "Failed to fetch Bittrex markets.",
             "coinMarket": "Failed to fetch Bittrex market summary for the {} market.",
             "sell": "Failed to sell on {} market. Bittrex error message: {}",
@@ -191,6 +197,23 @@ class Messenger(object):
             floor(stats["rsi"]), type_str, abs(round(stats["profitMargin"], 2)), self.get_bittrex_URL(order["Exchange"])
         )
         self.send_email(subject, message)
+
+    def send_balance_slack(self, balance_items):
+        """
+        Used to send a user balance Slack message
+
+        :param balance_items: A list containing all the user's correctly formatted coin balance objects
+        :type balance_items: list
+        """
+        slack_emoji = self.slack_str["balance"]["emoji"] * 8 + "\n"
+        slack_message = slack_emoji + self.slack_str["balance"]["header"]
+        for balance in balance_items:
+            slack_message += (
+                self.slack_str["balance"]["line"].format(
+                    balance["Currency"], balance["Balance"], balance["Currency"], balance["BtcValue"]
+                )
+            )
+        self.send_slack(slack_message)
 
     def send_buy_slack(self, coin_pair, rsi, day_volume):
         """
