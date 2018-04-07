@@ -81,7 +81,8 @@ class Messenger(object):
             "balance": {
                 "emoji": ":bell:",
                 "header": "*User Balances*\n>>>",
-                "line": "*{}*\n>_Balance_: *{} {}*\n>_BTC Value_: *{} BTC*\n"
+                "line": "*{}*\n>_Balance_: *{} {}*\n>_BTC Value_: *{} BTC*\n",
+                "btcLine": "*{}*\n>_Balance_: *{} {}*\n"
             }
         }
 
@@ -208,10 +209,11 @@ class Messenger(object):
         slack_emoji = self.slack_str["balance"]["emoji"] * 8 + "\n"
         slack_message = slack_emoji + self.slack_str["balance"]["header"]
         for balance in balance_items:
+            slack_str = self.slack_str["balance"]["line"]
+            if balance["Currency"] == "BTC":
+                slack_str = self.slack_str["balance"]["btcLine"]
             slack_message += (
-                self.slack_str["balance"]["line"].format(
-                    balance["Currency"], balance["Balance"], balance["Currency"], balance["BtcValue"]
-                )
+                slack_str.format(balance["Currency"], balance["Balance"], balance["Currency"], balance["BtcValue"])
             )
         self.send_slack(slack_message)
 
