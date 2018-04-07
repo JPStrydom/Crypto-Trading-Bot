@@ -23,7 +23,9 @@ class Database(object):
         def __init__(self):
             default_trades = {"trackedCoinPairs": [], "trades": []}
             default_app_data = {
-                "coinPairs": [], "pausedTrackedCoinPairs": [], "pauseTime": {"buy": None, "sell": None, "balance": None}
+                "coinPairs": [], "pausedTrackedCoinPairs": [],
+                "pauseTime": {"buy": None, "sell": None, "balance": None},
+                "previousBalance": None
             }
 
             self.trades_file_string = "../database/trades.json"
@@ -151,10 +153,15 @@ class Database(object):
 
             write_json_to_file(self.app_data_file_string, self.app_data)
 
-        def reset_balance_notifier(self):
+        def reset_balance_notifier(self, current_balance=None):
             """
             Used to reset the balance notifier pause time
+
+            :param current_balance: The current total balance's BTC value
+            :type current_balance: float
             """
+            if current_balance is not None:
+                self.app_data["previousBalance"] = current_balance
             self.app_data["pauseTime"]["balance"] = time.time()
 
             write_json_to_file(self.app_data_file_string, self.app_data)
@@ -168,12 +175,10 @@ class Database(object):
             :param pause_type: The pause type to check (one of: 'buy', 'sell', 'balance)
             :type pause_type: str
             """
-            if pause_time == "balance" and "balance" not in self.app_data["pauseTime"]:
-                return False
-
             if self.app_data["pauseTime"][pause_type] is None:
-                if pause_time == "balance":
+                if pause_type == "balance":
                     self.reset_balance_notifier()
+                    return True
                 return False
             return time.time() - self.app_data["pauseTime"][pause_type] >= pause_time * 60
 
@@ -220,6 +225,9 @@ class Database(object):
             profit_margin = 100 * (sell_btc_quantity - buy_btc_quantity) / buy_btc_quantity
 
             return profit_margin
+
+        def get_previous_total_balance(self):
+            return self.app_data["previousBalance"]
 
         @staticmethod
         def convert_bittrex_order_object(bittrex_order, stats=None):

@@ -83,7 +83,7 @@ class Messenger(object):
                 "header": "*User Balances*\n\n>>>",
                 "subHeader": "\n• *{}*\n",
                 "subHeaderUntracked": "\n• *{} _(Untracked)_*\n",
-                "subHeaderTotal": "\n*_{}_*\n",
+                "subHeaderTotal": "\n*_{}_* {}\n",
                 "balance": ">_Balance_: *{} {}*\n",
                 "btcValue": ">_BTC Value_: *{} BTC*\n"
             }
@@ -202,12 +202,17 @@ class Messenger(object):
         )
         self.send_email(subject, message)
 
-    def send_balance_slack(self, balance_items):
+    def send_balance_slack(self, balance_items, previous_total_balance):
         """
         Used to send a user balance Slack message
 
         :param balance_items: A list containing all the user's correctly formatted coin balance objects
         :type balance_items: list
+        :param previous_total_balance: The previous total balance's BTC value
+        :type previous_total_balance: float
+
+        :return: The current balance's total BTC value
+        :rtype : float
         """
         slack_emoji = self.slack_str["balance"]["emoji"] * 8 + "\n"
         slack_message = slack_emoji + self.slack_str["balance"]["header"]
@@ -226,11 +231,21 @@ class Messenger(object):
 
             total_balance += balance["BtcValue"]
 
-        slack_message += self.slack_str["balance"]["subHeaderTotal"].format("Total Balance") + (
+        total_balance = round(total_balance, 8)
+        percentage_change_str = ""
+        if previous_total_balance is not None:
+            percentage_change = round((total_balance - previous_total_balance) * 100 / previous_total_balance, 2)
+            if abs(percentage_change) > 0:
+                icon = "▲ "
+                if percentage_change < 0:
+                    icon = "▼ "
+                percentage_change_str = "_(" + icon + str(abs(percentage_change)) + "%)_"
+        slack_message += self.slack_str["balance"]["subHeaderTotal"].format("Total Balance", percentage_change_str) + (
             self.slack_str["balance"]["btcValue"].format(round(total_balance, 8))
         )
 
         self.send_slack(slack_message)
+        return total_balance
 
     def send_buy_slack(self, coin_pair, rsi, day_volume):
         """

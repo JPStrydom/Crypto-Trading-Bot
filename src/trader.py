@@ -20,8 +20,6 @@ class Trader(object):
         self.Messenger = Messenger(secrets, settings)
         self.Database = Database()
 
-        self.Messenger.send_balance_slack(self.get_non_zero_balances())
-
     def initialise(self):
         """
         Fetch the initial coin pairs to track and to print the header line
@@ -45,9 +43,11 @@ class Trader(object):
         if "sell" in self.pause_params and self.Database.check_resume(self.pause_params["sell"]["pauseTime"], "sell"):
             self.Messenger.print_resume_pause(self.Database.app_data["pausedTrackedCoinPairs"], "sell")
             self.Database.resume_sells()
-        if self.Database.check_resume(self.pause_params["balance"]["pauseTime"], "balance"):
-            self.Messenger.send_balance_slack(self.get_non_zero_balances())
-            self.Database.reset_balance_notifier()
+        if "balance" in self.pause_params and self.Database.check_resume(self.pause_params["balance"]["pauseTime"],
+                                                                         "balance"):
+            current_balance = self.Messenger.send_balance_slack(self.get_non_zero_balances(),
+                                                                self.Database.get_previous_total_balance())
+            self.Database.reset_balance_notifier(current_balance)
 
     def analyse_buys(self):
         """
