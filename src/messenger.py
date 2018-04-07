@@ -80,9 +80,12 @@ class Messenger(object):
             },
             "balance": {
                 "emoji": ":bell:",
-                "header": "*User Balances*\n>>>",
-                "line": "*{}*\n>_Balance_: *{} {}*\n>_BTC Value_: *{} BTC*\n",
-                "btcLine": "*{}*\n>_Balance_: *{} {}*\n"
+                "header": "*User Balances*\n\n>>>",
+                "subHeader": "\n• *{}*\n",
+                "subHeaderUntracked": "\n• *{} _(Untracked)_*\n",
+                "subHeaderTotal": "\n*_{}_*\n",
+                "balance": ">_Balance_: *{} {}*\n",
+                "btcValue": ">_BTC Value_: *{} BTC*\n"
             }
         }
 
@@ -208,13 +211,25 @@ class Messenger(object):
         """
         slack_emoji = self.slack_str["balance"]["emoji"] * 8 + "\n"
         slack_message = slack_emoji + self.slack_str["balance"]["header"]
+        total_balance = 0
+
         for balance in balance_items:
-            slack_str = self.slack_str["balance"]["line"]
-            if balance["Currency"] == "BTC":
-                slack_str = self.slack_str["balance"]["btcLine"]
-            slack_message += (
-                slack_str.format(balance["Currency"], balance["Balance"], balance["Currency"], balance["BtcValue"])
-            )
+            sub_header = self.slack_str["balance"]["subHeader"]
+            if not balance["IsTracked"] and balance["Currency"] != "BTC":
+                sub_header = self.slack_str["balance"]["subHeaderUntracked"]
+            slack_message += sub_header.format(balance["Currency"])
+
+            if balance["Currency"] != "BTC":
+                slack_message += self.slack_str["balance"]["balance"].format(balance["Balance"], balance["Currency"])
+
+            slack_message += self.slack_str["balance"]["btcValue"].format(balance["BtcValue"])
+
+            total_balance += balance["BtcValue"]
+
+        slack_message += self.slack_str["balance"]["subHeaderTotal"].format("Total Balance") + (
+            self.slack_str["balance"]["btcValue"].format(round(total_balance, 8))
+        )
+
         self.send_slack(slack_message)
 
     def send_buy_slack(self, coin_pair, rsi, day_volume):

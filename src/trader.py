@@ -419,11 +419,13 @@ class Trader(object):
         :type balance_item: dict
         """
         btc_price = 1
+        is_tracked = False
         if balance_item["Currency"] != "BTC":
             coin_pair = "BTC-" + balance_item["Currency"]
+            is_tracked = coin_pair in self.Database.trades["trackedCoinPairs"]
             btc_price = self.get_current_price(coin_pair, "bid")
 
         return py_.assign(
             py_.pick(balance_item, "Currency", "Balance"),
-            {"BtcValue": round(btc_price * balance_item["Balance"], 8)}
+            {"BtcValue": round(btc_price * balance_item["Balance"], 8), "IsTracked": is_tracked}
         )
