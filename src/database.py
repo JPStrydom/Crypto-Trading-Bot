@@ -168,7 +168,7 @@ class Database(object):
 
         def check_resume(self, pause_time, pause_type):
             """
-            Used to check if the pause type cen be un-paused
+            Used to check if the pause type can be un-paused
 
             :param pause_time: The amount of minutes tracking should be paused
             :type pause_time: int
