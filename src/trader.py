@@ -425,7 +425,13 @@ class Trader(object):
             is_tracked = coin_pair in self.Database.trades["trackedCoinPairs"]
             btc_price = self.get_current_price(coin_pair, "bid")
 
+        try:
+            btc_value = round(btc_price * balance_item["Balance"], 8)
+        except TypeError as exception:
+            logger.exception(exception)
+            btc_value = "unknown"
+
         return py_.assign(
             py_.pick(balance_item, "Currency", "Balance"),
-            {"BtcValue": round(btc_price * balance_item["Balance"], 8), "IsTracked": is_tracked}
+            {"BtcValue": btc_value, "IsTracked": is_tracked}
         )
