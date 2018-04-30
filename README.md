@@ -34,8 +34,13 @@ foundation for this project
 ## How to setup
 1) This project requires Python 3.X.X, which can be be found [here](https://www.python.org/ftp/python/3.6.3/python-3.6.3.exe).
 
-2) To install the dependencies for this project, run `pip install -r requirements.txt`. If you receive a `'pip' is not 
-recognized as an internal or external command` error, you need to add `pip` to your environmental `path` variable.
+2) To install the dependencies for this project, run one of the following commands:
+    * Windows: `pip3 install -r requirements.txt`
+    
+        *NOTE: If you receive a `'pip3' is not recognized as an internal or external command` error, you 
+        need to add `pip3` to your environmental `path` variable.*
+        
+    * Unix: `sudo pip3 install -r requirements.txt` 
 
 3) Add a directory named `database` to the root directory of your project and add a `secrets.json` file to it. If you 
 run the project without adding this file, the program will create it for you and populate it with the template values.
@@ -66,8 +71,8 @@ The contents of the file should mirror the following:
         * **`bittrex_key`** is your Bittrex API key you can get from [here](https://bittrex.com/Manage#sectionApi)
         * **`bittrex_secret`** is your Bittrex API secret key
         
-        _NOTE:_ The `READ INFO`, `TRADE LIMIT`, and `TRADE MARKET` permissions need to be enabled on your API key in
-        order for the trade functionality to be available
+        *NOTE: The `READ INFO`, `TRADE LIMIT`, and `TRADE MARKET` permissions need to be enabled on your API key in
+        order for the trade functionality to be available*
         
     2) To use the **Gmail** functionality, you need to setup the following:
         * **`username`** is your Gmail account's username (*usually your account's email address*)
@@ -83,9 +88,9 @@ The contents of the file should mirror the following:
          
         If you don't want to use the Slack notifications, you can leave out the `slack` code.
 
-4) Add a directory named `database` to the root directory of your project and add a `settings.json` file to it. If you 
-run the project without adding this file, the program will create it for you and populate it with the template values.
-The contents of the file should mirror the following:
+4) Add a `settings.json` file to the newly created `database` directory. If you run the project without adding this file, 
+the program will create it for you and populate it with the template values. The contents of the file should mirror the 
+following:
     ```json
     {
         "sound": false,
@@ -159,16 +164,16 @@ The contents of the file should mirror the following:
             **trade** parameter should be set appropriately and then the `sell` **pause** parameter may be omitted.
         * **`balance`**: 
             * `pauseTime` is the amount of minutes you would like to wait in between balance notification Slack messages 
-            (i.e. every _x_ minutes, you will receive a Slack message containing a breakdown of your exchange balance
+            (i.e. every *x* minutes, you will receive a Slack message containing a breakdown of your exchange balance
             and the percentage change since your last balance notification message). 
 
 
 ## How to run
 Navigate to the `src` file directory in terminal, and run the command `python app.py` to start the trading bot.
 
-*(None: I would highly recommend getting the python IDE **PyCharm** by JetBrains. Its a great development tool and makes 
+*NOTE: I would highly recommend getting the python IDE **PyCharm** by JetBrains. Its a great development tool and makes 
 running and debugging this project a breeze. A free community edition can be found 
-[here](https://www.jetbrains.com/pycharm/download).)*
+[here](https://www.jetbrains.com/pycharm/download).*
 
 ## Trading
 This system allows you to autonomously make and track crypto currency trades on Bittrex. It uses a local database strategy 
