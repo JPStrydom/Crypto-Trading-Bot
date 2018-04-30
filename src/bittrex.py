@@ -104,7 +104,7 @@ class Bittrex(object):
         :type options: dict
 
         :return: JSON response from Bittrex
-        :rtype : dict
+        :rtype: dict
         """
         if not options:
             options = {}
@@ -140,7 +140,7 @@ class Bittrex(object):
         :type unit: str
 
         :return: List adapted from Bittrex JSON response
-        :rtype : list
+        :rtype: list
         """
         request_url = "https://bittrex.com/Api/v2.0/pub/market/GetTicks?marketName={}&tickInterval={}".format(market,
                                                                                                               unit)
@@ -161,7 +161,7 @@ class Bittrex(object):
         at Bittrex along with other meta data.
 
         :return: Available market info in JSON
-        :rtype : dict
+        :rtype: dict
         """
         return self.api_query("getmarkets")
 
@@ -171,7 +171,7 @@ class Bittrex(object):
         along with other meta data.
 
         :return: Supported currencies info in JSON
-        :rtype : dict
+        :rtype: dict
         """
         return self.api_query("getcurrencies")
 
@@ -183,7 +183,7 @@ class Bittrex(object):
         :type market: str
 
         :return: Current values for given market in JSON
-        :rtype : dict
+        :rtype: dict
         """
         return self.api_query("getticker", {"market": market})
 
@@ -192,7 +192,7 @@ class Bittrex(object):
         Used to get the last 24 hour summary of all active exchanges
 
         :return: Summaries of active exchanges in JSON
-        :rtype : dict
+        :rtype: dict
         """
         return self.api_query("getmarketsummaries")
 
@@ -204,7 +204,7 @@ class Bittrex(object):
         :type market: str
 
         :return: Summaries of active exchanges of a coin in JSON
-        :rtype : dict
+        :rtype: dict
         """
         return self.api_query("getmarketsummary", {"market": market})
 
@@ -221,7 +221,7 @@ class Bittrex(object):
         :type depth: int
 
         :return: Orderbook of market in JSON
-        :rtype : dict
+        :rtype: dict
         """
         return self.api_query("getorderbook", {"market": market, "type": depth_type, "depth": depth})
 
@@ -236,7 +236,7 @@ class Bittrex(object):
         :type count: int
 
         :return: Market history in JSON
-        :rtype : dict
+        :rtype: dict
         """
         return self.api_query("getmarkethistory", {"market": market, "count": count})
 
@@ -256,7 +256,7 @@ class Bittrex(object):
         :type rate: float
 
         :return:
-        :rtype : dict
+        :rtype: dict
         """
         return self.api_query("buylimit", {"market": market, "quantity": quantity, "rate": rate})
 
@@ -276,7 +276,7 @@ class Bittrex(object):
         :type rate: float
 
         :return:
-        :rtype : dict
+        :rtype: dict
         """
         return self.api_query("selllimit", {"market": market, "quantity": quantity, "rate": rate})
 
@@ -289,7 +289,7 @@ class Bittrex(object):
         :type uuid: str
 
         :return:
-        :rtype : dict
+        :rtype: dict
         """
         return self.api_query("cancel", {"uuid": uuid})
 
@@ -302,7 +302,7 @@ class Bittrex(object):
         :type market: str
 
         :return: Open orders info in JSON
-        :rtype : dict
+        :rtype: dict
         """
         if market is None:
             return self.api_query("getopenorders")
@@ -315,7 +315,7 @@ class Bittrex(object):
         /account/getbalances
 
         :return: Balances info in JSON
-        :rtype : dict
+        :rtype: dict
         """
         return self.api_query("getbalances", {})
 
@@ -328,7 +328,7 @@ class Bittrex(object):
         :type currency: str
 
         :return: Balance info in JSON
-        :rtype : dict
+        :rtype: dict
         """
         return self.api_query("getbalance", {"currency": currency})
 
@@ -341,7 +341,7 @@ class Bittrex(object):
         :type currency: str
 
         :return: Address info in JSON
-        :rtype : dict
+        :rtype: dict
         """
         return self.api_query("getdepositaddress", {"currency": currency})
 
@@ -358,7 +358,7 @@ class Bittrex(object):
         :type address: str
 
         :return:
-        :rtype : dict
+        :rtype: dict
         """
         return self.api_query("withdraw", {"currency": currency, "quantity": quantity, "address": address})
 
@@ -371,7 +371,7 @@ class Bittrex(object):
         :type market: str
 
         :return: order history in JSON
-        :rtype : dict
+        :rtype: dict
         """
         if not market:
             return self.api_query("getorderhistory")
@@ -387,7 +387,7 @@ class Bittrex(object):
         :type uuid: str
 
         :return:
-        :rtype : dict
+        :rtype: dict
         """
         return self.api_query("getorder", {"uuid": uuid})
 
@@ -399,7 +399,7 @@ class Bittrex(object):
         :type currency: str
 
         :return:
-        :rtype : dict
+        :rtype: dict
         """
         if currency is None:
             params = {}
@@ -416,7 +416,7 @@ class Bittrex(object):
         :type currency: str
 
         :return:
-        :rtype : dict
+        :rtype: dict
         """
         if currency is None:
             params = {}

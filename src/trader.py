@@ -137,7 +137,7 @@ class Trader(object):
         :type current_buy_price: float
 
         :return: Boolean indicating if the buy conditions have been met
-        :rtype : bool
+        :rtype: bool
         """
         rsi_check = rsi <= self.trade_params["buy"]["rsiThreshold"]
         day_volume_check = day_volume >= self.trade_params["buy"]["24HourVolumeThreshold"]
@@ -155,7 +155,7 @@ class Trader(object):
         :type profit_margin: float
 
         :return: Boolean indicating if the sell conditions have been met
-        :rtype : bool
+        :rtype: bool
         """
         rsi_check = rsi >= self.trade_params["sell"]["rsiThreshold"]
         lower_profit_check = profit_margin >= self.trade_params["sell"]["minProfitMarginThreshold"]
@@ -235,7 +235,7 @@ class Trader(object):
         :type main_market_filter: str
 
         :return: All Bittrex markets (with filter applied, if any)
-        :rtype : list
+        :rtype: list
         """
         markets = self.Bittrex.get_markets()
         if not markets["success"]:
@@ -260,7 +260,7 @@ class Trader(object):
         :type price_type: str
 
         :return: Coin pair's current market price
-        :rtype : float
+        :rtype: float
         """
         coin_summary = self.Bittrex.get_market_summary(coin_pair)
         if not coin_summary["success"]:
@@ -281,7 +281,7 @@ class Trader(object):
         :type coin_pair: str
 
         :return: Coin pair's current 24 hour market volume
-        :rtype : float
+        :rtype: float
         """
         coin_summary = self.Bittrex.get_market_summary(coin_pair)
         if not coin_summary["success"]:
@@ -302,7 +302,7 @@ class Trader(object):
         :type unit: str
 
         :return: Array of closing prices
-        :rtype : list
+        :rtype: list
         """
         historical_data = self.Bittrex.get_historical_data(coin_pair, period, unit)
         closing_prices = []
@@ -322,7 +322,7 @@ class Trader(object):
         :type trade_time_limit: float
 
         :return: Order object
-        :rtype : dict
+        :rtype: dict
         """
         start_time = time.time()
         order_data = self.Bittrex.get_order(order_uuid)
@@ -354,7 +354,7 @@ class Trader(object):
         :type unit: str
 
         :return: RSI
-        :rtype : float
+        :rtype: float
         """
         closing_prices = self.get_closing_prices(coin_pair, period * 3, unit)
         count = 0

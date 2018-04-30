@@ -190,7 +190,7 @@ class Database(object):
             :type coin_pair: str
 
             :return: The open trade object
-            :rtype : dict
+            :rtype: dict
             """
             trade_index = py_.find_index(self.trades["trades"],
                                          lambda trade: trade["coinPair"] == coin_pair and "sell" not in trade)
@@ -214,7 +214,7 @@ class Database(object):
             :type trade: dict
 
             :return: Profit margin
-            :rtype : float
+            :rtype: float
             """
             if trade is None:
                 trade = self.get_open_trade(coin_pair)
@@ -227,6 +227,14 @@ class Database(object):
             return profit_margin
 
         def get_previous_total_balance(self):
+            """
+            Used to get the previous total balance
+
+            :return: Previous total balance
+            :rtype: float
+            """
+            if "previousBalance" not in self.app_data or self.app_data["previousBalance"] == 0:
+                return None
             return self.app_data["previousBalance"]
 
         @staticmethod

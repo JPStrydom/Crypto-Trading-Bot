@@ -119,7 +119,7 @@ class Messenger(object):
         :type message: str
 
         :return: Errors received from the smtp server (if any)
-        :rtype : dict
+        :rtype: dict
         """
         if not self.gmail:
             return
@@ -212,7 +212,7 @@ class Messenger(object):
         :type previous_total_balance: float
 
         :return: The current balance's total BTC value
-        :rtype : float
+        :rtype: float
         """
         slack_emoji = self.slack_str["balance"]["emoji"] * 8 + "\n"
         slack_message = slack_emoji + self.slack_str["balance"]["header"]
@@ -428,7 +428,7 @@ class Messenger(object):
         :type will_exit: bool
 
         :return: Error string
-        :rtype : str
+        :rtype: str
         """
         suffix = ""
         if will_exit:

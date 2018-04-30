@@ -157,6 +157,10 @@ The contents of the file should mirror the following:
             * `pauseTime` is the amount of minutes to pause coin pair tracking by
             If you prefer to sell at a small loss rather than holding onto (pausing) sell coin pairs, the `lossMarginThreshold` 
             **trade** parameter should be set appropriately and then the `sell` **pause** parameter may be omitted.
+        * **`balance`**: 
+            * `pauseTime` is the amount of minutes you would like to wait in between balance notification Slack messages 
+            (i.e. every _x_ minutes, you will receive a Slack message containing a breakdown of your exchange balance
+            and the percentage change since your last balance notification message). 
 
 
 ## How to run
@@ -219,7 +223,7 @@ def check_buy_parameters(rsi, day_volume, current_buy_price):
     :type current_buy_price: float
 
     :return: Boolean indicating if the buy conditions have been met
-    :rtype : bool
+    :rtype: bool
     """
     rsi_check = rsi is not None and rsi <= buy_trade_params["buy"]["rsiThreshold"]
     day_volume_check = day_volume >= buy_trade_params["buy"]["24HourVolumeThreshold"]
@@ -238,7 +242,7 @@ def check_sell_parameters(rsi, profit_margin):
     :type profit_margin: float
 
     :return: Boolean indicating if the sell conditions have been met
-    :rtype : bool
+    :rtype: bool
     """
     rsi_check = rsi is not None and rsi >= sell_trade_params["sell"]["rsiThreshold"]
     lower_profit_check = profit_margin >= sell_trade_params["sell"]["minProfitMarginThreshold"]        
