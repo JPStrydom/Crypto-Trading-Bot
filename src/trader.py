@@ -429,7 +429,7 @@ class Trader(object):
             btc_value = round(btc_price * balance_item["Balance"], 8)
         except TypeError as exception:
             logger.exception(exception)
-            btc_value = "unknown"
+            btc_value = 0
 
         return py_.assign(
             py_.pick(balance_item, "Currency", "Balance"),
