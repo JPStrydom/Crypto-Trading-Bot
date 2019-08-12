@@ -26,7 +26,7 @@ class Messenger(object):
 
         self.console_str = {
             "buy": {
-                "pause": "Pause buy tracking on {} with a high RSI of {} and a 24 hour volume of {} {} for {} minutes.",
+                "pause": "Pause buy tracking on {} with an RSI of {} and a 24 hour volume of {} {} for {} minutes.",
                 "resume": "Resuming tracking on all {} markets.",
                 "message": "Buy on {:<10}\t->"
                            "\t\tRSI: {:>2}"
