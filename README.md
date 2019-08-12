@@ -265,7 +265,7 @@ See the source code for a more detailed description.
 If you found this project helpful and would like to support me, you can donate to one of the following crypto addresses:
 
 * **BTC**: 1E3xMaoFfuk52HaCb7KRbHmezeUumcyRjy
-* **ETH**: 0x6D5f8775Dc844D8B1E6f2359abF9939E75A7A225
+* **ETH**: 0x2f647427313229E6AB320F826f759B9fCFd34658
 
 
 ## Liability
