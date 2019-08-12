@@ -69,7 +69,7 @@ class Trader(object):
             }
             self.buy(coin_pair, current_buy_price, buy_stats)
         elif "buy" in self.pause_params and rsi >= self.pause_params["buy"]["rsiThreshold"] > 0:
-            self.Messenger.print_pause(coin_pair, [rsi, day_volume], self.pause_params["buy"]["pauseTime"], "buy")
+            self.Messenger.print_pause(coin_pair, [rsi, day_volume], self.pause_params["buy"]["pauseTime"])
             self.Database.pause_buy(coin_pair)
         else:
             self.Messenger.print_no_buy(coin_pair, rsi, day_volume, current_buy_price)
