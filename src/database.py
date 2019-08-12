@@ -4,8 +4,6 @@ import time
 from directory_utilities import get_json_from_file, write_json_to_file
 from logger import logger
 
-bittrex_trade_commission = 0.0025
-
 
 class Database(object):
     """

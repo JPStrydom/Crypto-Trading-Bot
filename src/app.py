@@ -39,6 +39,7 @@ def get_settings():
         "pauseParameters": {
             "buy": {
                 "rsiThreshold": 0,
+                "24HourVolumeThreshold": 0,
                 "pauseTime": 0
             }
         }

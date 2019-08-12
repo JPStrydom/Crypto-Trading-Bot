@@ -103,6 +103,8 @@ following:
         * **`buy`**: 
             * `rsiThreshold` is the lower RSI pause threshold. An RSI higher than this will result in the coin pair not being 
             tracked for `pauseTime` minutes
+            * `24HourVolumeThreshold` is the upper 24 hour volume pause threshold. Coin pairs with a 24 hour volume lower 
+            than this will not be tracked for `pauseTime` minutes
             * `pauseTime` is the amount of minutes to pause coin pair tracking by
 
 

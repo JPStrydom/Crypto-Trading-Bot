@@ -6,6 +6,8 @@ from messenger import Messenger
 from database import Database
 from logger import logger
 
+bittrex_trade_commission = 0.0025
+
 
 class Trader(object):
     """
@@ -55,24 +57,26 @@ class Trader(object):
         :param coin_pair: Coin pair market to check (ex: BTC-ETH, BTC-FCT)
         :type coin_pair: str
         """
-        rsi = self.calculate_RSI(coin_pair=coin_pair, period=14, unit=self.trade_params["tickerInterval"])
+        rsi = self.calculate_rsi(coin_pair=coin_pair, period=14, unit=self.trade_params["tickerInterval"])
         day_volume = self.get_current_24hr_volume(coin_pair)
         current_buy_price = self.get_current_price(coin_pair, "ask")
+
+        pause_rsi = self.pause_params["buy"]["rsiThreshold"]
+        pause_day_volume = self.pause_params["buy"]["24HourVolumeThreshold"]
+        pause_time = self.pause_params["buy"]["pauseTime"]
 
         if rsi is None:
             return
 
+        break_even_sale_price = current_buy_price / (1 - 2 * bittrex_trade_commission)
         if self.check_buy_parameters(rsi, day_volume, current_buy_price):
-            buy_stats = {
-                "rsi": rsi,
-                "24HrVolume": day_volume
-            }
-            self.buy(coin_pair, current_buy_price, buy_stats)
-        elif "buy" in self.pause_params and rsi >= self.pause_params["buy"]["rsiThreshold"] > 0:
-            self.Messenger.print_pause(coin_pair, [rsi, day_volume], self.pause_params["buy"]["pauseTime"])
+            buy_stats = {"rsi": rsi, "24HrVolume": day_volume}
+            self.buy(coin_pair, current_buy_price, buy_stats, break_even_sale_price)
+        elif "buy" in self.pause_params and (rsi >= pause_rsi > 0 or day_volume <= pause_day_volume):
+            self.Messenger.print_pause(coin_pair, [rsi, day_volume], pause_time)
             self.Database.pause_buy(coin_pair)
         else:
-            self.Messenger.print_no_buy(coin_pair, rsi, day_volume, current_buy_price)
+            self.Messenger.print_no_buy(coin_pair, rsi, day_volume, current_buy_price, break_even_sale_price)
 
     def check_buy_parameters(self, rsi, day_volume, current_buy_price):
         """
@@ -94,7 +98,7 @@ class Trader(object):
 
         return rsi_check and day_volume_check and current_buy_price_check
 
-    def buy(self, coin_pair, price, stats):
+    def buy(self, coin_pair, price, stats, break_even_sale_price):
         """
         Used to place a buy order to Bittrex. Wait until the order is completed.
         If the order is not filled within trade_time_limit minutes cancel it.
@@ -105,9 +109,10 @@ class Trader(object):
         :type price: float
         :param stats: The buy stats object
         :type stats: dict
+        :param break_even_sale_price: The minimum sale price (including commission) to break even (ex: 0.005 BTC/LTC)
+        :type break_even_sale_price: float
         """
-
-        self.Messenger.print_buy(coin_pair, price, stats["rsi"], stats["24HrVolume"])
+        self.Messenger.print_buy(coin_pair, price, stats["rsi"], stats["24HrVolume"], break_even_sale_price)
         self.Messenger.play_sw_imperial_march()
 
     def get_markets(self, main_market_filter=None):
@@ -223,7 +228,7 @@ class Trader(object):
 
         return order_data
 
-    def calculate_RSI(self, coin_pair, period, unit):
+    def calculate_rsi(self, coin_pair, period, unit):
         """
         Calculates the Relative Strength Index for a coin_pair
         If the returned value is above 75, it's overbought (SELL IT!)

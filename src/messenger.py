@@ -28,7 +28,12 @@ class Messenger(object):
             "buy": {
                 "pause": "Pause buy tracking on {} with a high RSI of {} and a 24 hour volume of {} {} for {} minutes.",
                 "resume": "Resuming tracking on all {} markets.",
-                "message": "Buy on {:<10}\t->\t\tRSI: {:>2}\t\t24 Hour Volume: {:>5} {}\t\tBuy Price: {:.8f}\t\tURL: {}"
+                "message": "Buy on {:<10}\t->"
+                           "\t\tRSI: {:>2}"
+                           "\t\t24 Hour Volume: {:>5} {}"
+                           "\t\tBuy Price: {:.8f} {}"
+                           "\t\tBreak Even Price: {:.8f} {}"
+                           "\t\tURL: {}"
             }
         }
 
@@ -56,7 +61,7 @@ class Messenger(object):
         """
         cprint(self.header_str.format(num_of_coin_pairs), attrs=["bold", "underline"])
 
-    def print_buy(self, coin_pair, current_buy_price, rsi, day_volume):
+    def print_buy(self, coin_pair, current_buy_price, rsi, day_volume, break_even_sale_price):
         """
         Used to print a buy's info to the console
 
@@ -68,10 +73,19 @@ class Messenger(object):
         :type rsi: float
         :param day_volume: Coin pair's current 24 hour volume
         :type day_volume: float
+        :param break_even_sale_price: The minimum sale price (including commission) to break even (ex: 0.005 BTC/LTC)
+        :type break_even_sale_price: float
         """
         main_market, coin = coin_pair.split("-")
         message = self.console_str["buy"]["message"].format(
-            coin_pair, ceil(rsi), floor(day_volume), main_market, current_buy_price, self.get_bittrex_url(coin_pair)
+            coin_pair, ceil(rsi),
+            floor(day_volume),
+            main_market,
+            current_buy_price,
+            main_market,
+            break_even_sale_price,
+            main_market,
+            self.get_bittrex_url(coin_pair)
         )
         cprint(message, "blue", attrs=["bold"])
 
@@ -94,7 +108,7 @@ class Messenger(object):
         )
         cprint(print_str, "yellow")
 
-    def print_no_buy(self, coin_pair, rsi, day_volume, current_buy_price):
+    def print_no_buy(self, coin_pair, rsi, day_volume, current_buy_price, break_even_sale_price):
         """
         Used to print a no-buy's info to the console
 
@@ -106,10 +120,20 @@ class Messenger(object):
         :type day_volume: float
         :param current_buy_price: Market's current price
         :type current_buy_price: float
+        :param break_even_sale_price: The minimum sale price (including commission) to break even (ex: 0.005 BTC/LTC)
+        :type break_even_sale_price: float
         """
         main_market, coin = coin_pair.split("-")
         print_str = "No " + self.console_str["buy"]["message"].format(
-            coin_pair, ceil(rsi), floor(day_volume), main_market, current_buy_price, self.get_bittrex_url(coin_pair)
+            coin_pair,
+            ceil(rsi),
+            floor(day_volume),
+            main_market,
+            current_buy_price,
+            main_market,
+            break_even_sale_price,
+            main_market,
+            self.get_bittrex_url(coin_pair)
         )
         cprint(print_str, "grey")
 
@@ -127,9 +151,8 @@ class Messenger(object):
         """
         Prints the error type message to the console
 
-        :param error_type: The error type
-            (one of: 'market', 'coinMarket', 'connection', 'SSL', 'JSONDecode', 'keyError',
-            'valueError', 'typeError', 'unknown')
+        :param error_type: The error type (one of: 'market', 'coinMarket', 'connection', 'SSL', 'JSONDecode',
+            'keyError', 'valueError', 'typeError', 'unknown')
         :type error_type: str
         :param data: Relevant error information
         :type data: list
