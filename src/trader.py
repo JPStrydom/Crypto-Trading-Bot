@@ -69,14 +69,34 @@ class Trader(object):
             return
 
         break_even_sale_price = current_buy_price / (1 - 2 * bittrex_trade_commission)
+        desired_profit_percentage = 0
+        desired_profit_price = break_even_sale_price
+        if "sell" in self.trade_params and "desiredProfitPercentage" in self.trade_params["sell"]:
+            desired_profit_percentage = self.trade_params["sell"]["desiredProfitPercentage"]
+            desired_profit_price = break_even_sale_price * (1 + desired_profit_percentage / 100)
         if self.check_buy_parameters(rsi, day_volume, current_buy_price):
             buy_stats = {"rsi": rsi, "24HrVolume": day_volume}
-            self.buy(coin_pair, current_buy_price, buy_stats, break_even_sale_price)
+            self.buy(
+                coin_pair,
+                current_buy_price,
+                buy_stats,
+                break_even_sale_price,
+                desired_profit_percentage,
+                desired_profit_price
+            )
         elif "buy" in self.pause_params and (rsi >= pause_rsi > 0 or day_volume <= pause_day_volume):
             self.Messenger.print_pause(coin_pair, [rsi, day_volume], pause_time)
             self.Database.pause_buy(coin_pair)
         else:
-            self.Messenger.print_no_buy(coin_pair, rsi, day_volume, current_buy_price, break_even_sale_price)
+            self.Messenger.print_no_buy(
+                coin_pair,
+                rsi,
+                day_volume,
+                current_buy_price,
+                break_even_sale_price,
+                desired_profit_percentage,
+                desired_profit_price
+            )
 
     def check_buy_parameters(self, rsi, day_volume, current_buy_price):
         """
@@ -98,7 +118,7 @@ class Trader(object):
 
         return rsi_check and day_volume_check and current_buy_price_check
 
-    def buy(self, coin_pair, price, stats, break_even_sale_price):
+    def buy(self, coin_pair, price, stats, break_even_sale_price, desired_profit_percentage, desired_profit_price):
         """
         Used to place a buy order to Bittrex. Wait until the order is completed.
         If the order is not filled within trade_time_limit minutes cancel it.
@@ -111,8 +131,20 @@ class Trader(object):
         :type stats: dict
         :param break_even_sale_price: The minimum sale price (including commission) to break even (ex: 0.005 BTC/LTC)
         :type break_even_sale_price: float
+        :param desired_profit_percentage: The desired profit percentage
+        :type desired_profit_percentage: float
+        :param desired_profit_price: The sale price required to make the desired profit
+        :type desired_profit_price: float
         """
-        self.Messenger.print_buy(coin_pair, price, stats["rsi"], stats["24HrVolume"], break_even_sale_price)
+        self.Messenger.print_buy(
+            coin_pair,
+            price,
+            stats["rsi"],
+            stats["24HrVolume"],
+            break_even_sale_price,
+            desired_profit_percentage,
+            desired_profit_price
+        )
         self.Messenger.play_sw_imperial_march()
 
     def get_markets(self, main_market_filter=None):

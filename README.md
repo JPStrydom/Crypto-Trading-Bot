@@ -74,6 +74,9 @@ following:
                 "rsiThreshold": 0,
                 "24HourVolumeThreshold": 0,
                 "minimumUnitPrice": 0
+            },
+            "sell": {
+                "desiredProfitPercentage": 0
             }
         },
         "pauseParameters": {
@@ -98,6 +101,10 @@ following:
             this will not be considered for buying
             * `minimumUnitPrice` is the lower unit price buy threshold. Coin pairs with a unit price lower than this will not 
             be considered for buying
+        * **`sell`**: 
+            * `desiredProfitPercentage` is the percentage profit you would like to make on trades, the system will then 
+            calculate at what price you need to sell in order to make said profit. This takes Bittrex's commission into 
+            consideration
     
     3) To use the **Pause** functionality, you need to setup the following:
         * **`buy`**: 

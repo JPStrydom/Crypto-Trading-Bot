@@ -33,6 +33,7 @@ class Messenger(object):
                            "\t\t24 Hour Volume: {:>5} {}"
                            "\t\tBuy Price: {:.8f} {}"
                            "\t\tBreak Even Price: {:.8f} {}"
+                           "\t\tDesired Profit Price: {:.8f} {} ({}%)"
                            "\t\tURL: {}"
             }
         }
@@ -61,7 +62,16 @@ class Messenger(object):
         """
         cprint(self.header_str.format(num_of_coin_pairs), attrs=["bold", "underline"])
 
-    def print_buy(self, coin_pair, current_buy_price, rsi, day_volume, break_even_sale_price):
+    def print_buy(
+            self,
+            coin_pair,
+            current_buy_price,
+            rsi,
+            day_volume,
+            break_even_sale_price,
+            desired_profit_percentage,
+            desired_profit_price
+    ):
         """
         Used to print a buy's info to the console
 
@@ -75,6 +85,10 @@ class Messenger(object):
         :type day_volume: float
         :param break_even_sale_price: The minimum sale price (including commission) to break even (ex: 0.005 BTC/LTC)
         :type break_even_sale_price: float
+        :param desired_profit_percentage: The desired profit percentage
+        :type desired_profit_percentage: float
+        :param desired_profit_price: The sale price required to make the desired profit
+        :type desired_profit_price: float
         """
         main_market, coin = coin_pair.split("-")
         message = self.console_str["buy"]["message"].format(
@@ -85,6 +99,9 @@ class Messenger(object):
             main_market,
             break_even_sale_price,
             main_market,
+            desired_profit_price,
+            main_market,
+            desired_profit_percentage,
             self.get_bittrex_url(coin_pair)
         )
         cprint(message, "blue", attrs=["bold"])
@@ -108,7 +125,16 @@ class Messenger(object):
         )
         cprint(print_str, "yellow")
 
-    def print_no_buy(self, coin_pair, rsi, day_volume, current_buy_price, break_even_sale_price):
+    def print_no_buy(
+            self,
+            coin_pair,
+            rsi,
+            day_volume,
+            current_buy_price,
+            break_even_sale_price,
+            desired_profit_percentage,
+            desired_profit_price
+    ):
         """
         Used to print a no-buy's info to the console
 
@@ -122,6 +148,10 @@ class Messenger(object):
         :type current_buy_price: float
         :param break_even_sale_price: The minimum sale price (including commission) to break even (ex: 0.005 BTC/LTC)
         :type break_even_sale_price: float
+        :param desired_profit_percentage: The desired profit percentage
+        :type desired_profit_percentage: float
+        :param desired_profit_price: The sale price required to make the desired profit
+        :type desired_profit_price: float
         """
         main_market, coin = coin_pair.split("-")
         print_str = "No " + self.console_str["buy"]["message"].format(
@@ -133,6 +163,9 @@ class Messenger(object):
             main_market,
             break_even_sale_price,
             main_market,
+            desired_profit_price,
+            main_market,
+            desired_profit_percentage,
             self.get_bittrex_url(coin_pair)
         )
         cprint(print_str, "grey")
