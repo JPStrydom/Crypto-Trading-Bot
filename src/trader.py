@@ -28,7 +28,7 @@ class Trader(object):
         """
         try:
             if len(self.Database.app_data["coinPairs"]) < 1:
-                self.Database.store_coin_pairs(self.get_markets("BTC"))
+                self.Database.store_coin_pairs(self.get_markets(self.trade_params["market"]))
             self.Messenger.print_header(len(self.Database.app_data["coinPairs"]))
         except ConnectionError as exception:
             self.Messenger.print_error("connection", [], True)
@@ -40,7 +40,7 @@ class Trader(object):
         Checks all the paused buy pairs and the balance notification timer and reactivate the necessary ones
         """
         if self.Database.check_resume(self.pause_params["buy"]["pauseTime"], "buy"):
-            self.Database.store_coin_pairs(self.get_markets("BTC"))
+            self.Database.store_coin_pairs(self.get_markets(self.trade_params["market"]))
             self.Messenger.print_resume_pause(len(self.Database.app_data["coinPairs"]))
 
     def analyse_buys(self):

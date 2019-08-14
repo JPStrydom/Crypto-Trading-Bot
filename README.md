@@ -68,7 +68,8 @@ following:
     ```json
     {
         "sound": false,
-        "tradeParameters": {
+        "tradeParameters": {            
+            "market": "MARKET",
             "tickerInterval": "TICKER_INTERVAL",
             "buy": {
                 "rsiThreshold": 0,
@@ -93,6 +94,8 @@ following:
         If you don't want to receive audio notifications, you can leave out the `sound` code or set it to `false`.
     
     2) To use the **Trade** functionality, you need to setup the following:
+        * **`market`** is the exchange market you would like to monitor on (ex: "BTC", "USDT", "ETH", etc.). If it is 
+        omitted, all markets are considered.
         * **`tickerInterval`** is the exchange ticker interval you want to use. It should be one of the following: `oneMin`,
         `fiveMin`, `thirtyMin`, `hour`, `week`, `day`, `month`
         * **`buy`**: 

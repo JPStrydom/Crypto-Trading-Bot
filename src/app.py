@@ -29,6 +29,7 @@ def get_settings():
     settings_template = {
         "sound": False,
         "tradeParameters": {
+            "market": "MARKET",
             "tickerInterval": "TICKER_INTERVAL",
             "buy": {
                 "rsiThreshold": 0,
