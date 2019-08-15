@@ -40,6 +40,7 @@ class Messenger(object):
                 "orders": "Open order on {:<10}\t->"
                           "\t\tBreak Even Price: {:.8f} {}"
                           "\t\tDesired Profit Price: {:.8f} {} ({}%)"
+                          "\t\tSale Price: {:.8f} {}"
                           "\t\tCurrent Price: {:.8f} {}"
                           "\t\tCurrent Profit: {:.2f}%"
                           "\t\tURL: {}"
@@ -88,7 +89,9 @@ class Messenger(object):
                 order["DesiredProfitPercentagePricePerUnit"],
                 main_market,
                 desired_profit_percentage,
-                order["PricePerUnit"],
+                order["Limit"],
+                main_market,
+                order["CurrentPricePerUnit"],
                 main_market,
                 order["CurrentProfit"],
                 self.get_bittrex_url(order["Exchange"])

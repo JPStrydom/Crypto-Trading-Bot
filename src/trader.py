@@ -295,6 +295,25 @@ class Trader(object):
 
         return orders
 
+    def get_most_recent_closed_order(self, market=None):
+        """
+        Used to get the most recent closed order from Bittrex for a market.
+        If no market is provided fetch the most recent closed order.
+
+        :param market: String literal for the market (ie. BTC-LTC)
+        :type market: str
+
+        :return: Order
+        :rtype: dict
+        """
+
+        order_data = self.Bittrex.get_order_history(market)
+        order = {}
+        if order_data["success"]:
+            order = order_data["result"][0]
+
+        return order
+
     def analyse_open_orders(self):
         """
         Used to analyse the profitability of currently open orders
@@ -302,11 +321,12 @@ class Trader(object):
         """
         orders = self.get_open_orders()
         for order in orders:
-            order["PricePerUnit"] = self.get_current_price(order["Exchange"], "Bid")
-            order["BreakEvenPricePerUnit"] = order["Limit"] / (1 - 2 * bittrex_trade_commission)
+            order["CurrentPricePerUnit"] = self.get_current_price(order["Exchange"], "Bid")
+            order["PurchasePricePerUnit"] = self.get_most_recent_closed_order(order["Exchange"])["Limit"]
+            order["BreakEvenPricePerUnit"] = order["PurchasePricePerUnit"] / (1 - 2 * bittrex_trade_commission)
             order["CurrentProfit"] = 100 * (
-                    order["PricePerUnit"] - order["BreakEvenPricePerUnit"]
-            ) / order["PricePerUnit"]
+                    order["CurrentPricePerUnit"] - order["BreakEvenPricePerUnit"]
+            ) / order["CurrentPricePerUnit"]
             order["DesiredProfitPercentagePricePerUnit"] = order["BreakEvenPricePerUnit"] * (
                     1 + self.trade_params["sell"]["desiredProfitPercentage"] / 100
             )
