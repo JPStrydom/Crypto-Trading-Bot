@@ -17,6 +17,7 @@ except ImportError:
 try:
     from Crypto.Cipher import AES
     import getpass, ast
+
     encrypted = True
 except ImportError:
     encrypted = False
@@ -123,9 +124,11 @@ class Bittrex(object):
 
         request_url += urlencode(options)
 
-        apisign = hmac.new(self.api_secret.encode(),
-                           request_url.encode(),
-                           hashlib.sha512).hexdigest()
+        apisign = hmac.new(
+            self.api_secret.encode(),
+            request_url.encode(),
+            hashlib.sha512
+        ).hexdigest()
         return self.dispatch(request_url, apisign)
 
     def get_historical_data(self, market, period, unit):
@@ -142,14 +145,18 @@ class Bittrex(object):
         :return: List adapted from Bittrex JSON response
         :rtype: list
         """
-        request_url = "https://bittrex.com/Api/v2.0/pub/market/GetTicks?marketName={}&tickInterval={}".format(market,
-                                                                                                              unit)
+        request_url = "https://bittrex.com/Api/v2.0/pub/market/GetTicks?marketName={}&tickInterval={}".format(
+            market,
+            unit
+        )
 
         try:
-            historical_data = requests.get(request_url,
-                                           headers={"apisign": hmac.new(self.api_secret.encode(), request_url.encode(),
-                                                                        hashlib.sha512).hexdigest()}
-                                           ).json()
+            historical_data = requests.get(
+                request_url,
+                headers={
+                    "apisign": hmac.new(self.api_secret.encode(), request_url.encode(), hashlib.sha512).hexdigest()
+                }
+            ).json()
             return historical_data["result"][-period:]
         except (json.decoder.JSONDecodeError, TypeError) as exception:
             logger.exception(exception)
