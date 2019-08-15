@@ -48,7 +48,8 @@ class Trader(object):
         Analyse all the un-paused coin pairs for buy signals and apply buys
         """
         for coin_pair in self.Database.app_data["coinPairs"]:
-            self.buy_strategy(coin_pair)
+            if coin_pair not in self.Database.app_data["openOrderPairs"]:
+                self.buy_strategy(coin_pair)
 
     def buy_strategy(self, coin_pair):
         """
@@ -259,6 +260,56 @@ class Trader(object):
                 self.Bittrex.cancel(order_uuid)
 
         return order_data
+
+    def get_open_orders(self, market=None):
+        """
+        Used to get all open orders from Bittrex for a market. If no market is provided fetch all open orders
+
+        :param market: String literal for the market (ie. BTC-LTC)
+        :type market: str
+
+        :return: Orders list
+        :rtype: list
+        """
+        order_data = self.Bittrex.get_open_orders(market)
+        orders = []
+        if order_data["success"]:
+            orders = py_.map_(
+                order_data["result"],
+                lambda order: py_.omit(
+                    order,
+                    "Uuid",
+                    "OrderType",
+                    "Quantity",
+                    "CommissionPaid",
+                    "Price",
+                    "PricePerUnit",
+                    "CancelInitiated",
+                    "ImmediateOrCancel",
+                    "IsConditional",
+                    "Condition",
+                    "ConditionTarget",
+                    "Closed"
+                )
+            )
+
+        return orders
+
+    def analyse_open_orders(self):
+        """
+        Used to analyse the profitability of currently open orders
+
+        """
+        orders = self.get_open_orders()
+        for order in orders:
+            order["PricePerUnit"] = self.get_current_price(order["Exchange"], "Bid")
+            order["BreakEvenPricePerUnit"] = order["Limit"] / (1 - 2 * bittrex_trade_commission)
+            order["CurrentProfit"] = 100 * (
+                    order["PricePerUnit"] - order["BreakEvenPricePerUnit"]
+            ) / order["PricePerUnit"]
+
+        self.Database.store_open_orders(orders)
+        self.Messenger.print_orders(orders)
 
     def calculate_rsi(self, coin_pair, period, unit):
         """

@@ -51,6 +51,17 @@ class Database(object):
 
             write_json_to_file(self.app_data_file_string, self.app_data)
 
+        def store_open_orders(self, orders):
+            """
+            Used to store all the user's open orders
+
+            :param orders: List of all open orders
+            :type orders: list
+            """
+            self.app_data["openOrderPairs"] = py_.map_(orders, lambda order: order["Exchange"])
+
+            write_json_to_file(self.app_data_file_string, self.app_data)
+
         def check_resume(self, pause_time, pause_type):
             """
             Used to check if the pause type can be un-paused

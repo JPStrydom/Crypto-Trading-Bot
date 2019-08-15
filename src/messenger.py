@@ -35,6 +35,13 @@ class Messenger(object):
                            "\t\tBreak Even Price: {:.8f} {}"
                            "\t\tDesired Profit Price: {:.8f} {} ({}%)"
                            "\t\tURL: {}"
+            },
+            "sell": {
+                "orders": "Open order on {:<10}\t->"
+                          "\t\tBreak Even Price: {:.8f} {}"
+                          "\t\tCurrent Price: {:.8f} {}"
+                          "\t\tCurrent Profit: {:.2f}%"
+                          "\t\tURL: {}"
             }
         }
 
@@ -61,6 +68,26 @@ class Messenger(object):
         :type num_of_coin_pairs: int
         """
         cprint(self.header_str.format(num_of_coin_pairs), attrs=["bold", "underline"])
+
+    def print_orders(self, orders):
+        """
+        Used to print open order's info to the console
+
+        :param orders: List of all open orders
+        :type orders: list
+        """
+        for order in orders:
+            main_market, coin = order["Exchange"].split("-")
+            message = self.console_str["sell"]["orders"].format(
+                order["Exchange"],
+                order["BreakEvenPricePerUnit"],
+                main_market,
+                order["PricePerUnit"],
+                main_market,
+                order["CurrentProfit"],
+                self.get_bittrex_url(order["Exchange"])
+            )
+            cprint(message, "magenta", attrs=["bold"])
 
     def print_buy(
             self,
@@ -92,7 +119,8 @@ class Messenger(object):
         """
         main_market, coin = coin_pair.split("-")
         message = self.console_str["buy"]["message"].format(
-            coin_pair, ceil(rsi),
+            coin_pair,
+            ceil(rsi),
             floor(day_volume),
             main_market,
             current_buy_price,
