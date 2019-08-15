@@ -39,6 +39,7 @@ class Messenger(object):
             "sell": {
                 "orders": "Open order on {:<10}\t->"
                           "\t\tBreak Even Price: {:.8f} {}"
+                          "\t\tDesired Profit Price: {:.8f} {} ({}%)"
                           "\t\tCurrent Price: {:.8f} {}"
                           "\t\tCurrent Profit: {:.2f}%"
                           "\t\tURL: {}"
@@ -69,12 +70,14 @@ class Messenger(object):
         """
         cprint(self.header_str.format(num_of_coin_pairs), attrs=["bold", "underline"])
 
-    def print_orders(self, orders):
+    def print_orders(self, orders, desired_profit_percentage):
         """
         Used to print open order's info to the console
 
         :param orders: List of all open orders
-        :type orders: list
+        :type orders:
+        :param desired_profit_percentage: The desired profit percentage
+        :type desired_profit_percentage: float
         """
         for order in orders:
             main_market, coin = order["Exchange"].split("-")
@@ -82,6 +85,9 @@ class Messenger(object):
                 order["Exchange"],
                 order["BreakEvenPricePerUnit"],
                 main_market,
+                order["DesiredProfitPercentagePricePerUnit"],
+                main_market,
+                desired_profit_percentage,
                 order["PricePerUnit"],
                 main_market,
                 order["CurrentProfit"],

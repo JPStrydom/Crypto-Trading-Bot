@@ -307,9 +307,12 @@ class Trader(object):
             order["CurrentProfit"] = 100 * (
                     order["PricePerUnit"] - order["BreakEvenPricePerUnit"]
             ) / order["PricePerUnit"]
+            order["DesiredProfitPercentagePricePerUnit"] = order["BreakEvenPricePerUnit"] * (
+                    1 + self.trade_params["sell"]["desiredProfitPercentage"] / 100
+            )
 
         self.Database.store_open_orders(orders)
-        self.Messenger.print_orders(orders)
+        self.Messenger.print_orders(orders, self.trade_params["sell"]["desiredProfitPercentage"])
 
     def calculate_rsi(self, coin_pair, period, unit):
         """
