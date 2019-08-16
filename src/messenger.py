@@ -71,32 +71,31 @@ class Messenger(object):
         """
         cprint(self.header_str.format(num_of_coin_pairs), attrs=["bold", "underline"])
 
-    def print_orders(self, orders, desired_profit_percentage):
+    def print_order(self, order, desired_profit_percentage):
         """
-        Used to print open order's info to the console
+        Used to print an open order's info to the console
 
-        :param orders: List of all open orders
-        :type orders:
+        :param order: The order to print out
+        :type order: dict
         :param desired_profit_percentage: The desired profit percentage
         :type desired_profit_percentage: float
         """
-        for order in orders:
-            main_market, coin = order["Exchange"].split("-")
-            message = self.console_str["sell"]["orders"].format(
-                order["Exchange"],
-                order["BreakEvenPricePerUnit"],
-                main_market,
-                order["DesiredProfitPercentagePricePerUnit"],
-                main_market,
-                desired_profit_percentage,
-                order["Limit"],
-                main_market,
-                order["CurrentPricePerUnit"],
-                main_market,
-                order["CurrentProfit"],
-                self.get_bittrex_url(order["Exchange"])
-            )
-            cprint(message, "magenta", attrs=["bold"])
+        main_market, coin = order["Exchange"].split("-")
+        message = self.console_str["sell"]["orders"].format(
+            order["Exchange"],
+            order["BreakEvenPricePerUnit"],
+            main_market,
+            order["DesiredProfitPercentagePricePerUnit"],
+            main_market,
+            desired_profit_percentage,
+            order["Limit"],
+            main_market,
+            order["CurrentPricePerUnit"],
+            main_market,
+            order["CurrentProfit"],
+            self.get_bittrex_url(order["Exchange"])
+        )
+        cprint(message, "magenta", attrs=["bold"])
 
     def print_buy(
             self,

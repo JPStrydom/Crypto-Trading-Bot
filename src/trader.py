@@ -35,6 +35,27 @@ class Trader(object):
             logger.exception(exception)
             exit()
 
+    def analyse_open_orders(self):
+        """
+        Used to analyse the profitability of currently open orders
+
+        """
+        orders = self.get_open_orders()
+        for order in orders:
+            order["CurrentPricePerUnit"] = self.get_current_price(order["Exchange"], "Bid")
+            order["PurchasePricePerUnit"] = self.get_most_recent_closed_order(order["Exchange"])["Limit"]
+            order["BreakEvenPricePerUnit"] = order["PurchasePricePerUnit"] / (1 - 2 * bittrex_trade_commission)
+            order["CurrentProfit"] = 100 * (
+                    order["CurrentPricePerUnit"] - order["BreakEvenPricePerUnit"]
+            ) / order["CurrentPricePerUnit"]
+            order["DesiredProfitPercentagePricePerUnit"] = order["BreakEvenPricePerUnit"] * (
+                    1 + self.trade_params["sell"]["desiredProfitPercentage"] / 100
+            )
+            self.Messenger.print_order(order, self.trade_params["sell"]["desiredProfitPercentage"])
+
+        self.Database.store_open_orders(orders)
+        print()
+
     def analyse_pauses(self):
         """
         Checks all the paused buy pairs and the balance notification timer and reactivate the necessary ones
@@ -42,6 +63,7 @@ class Trader(object):
         if self.Database.check_resume(self.pause_params["buy"]["pauseTime"], "buy"):
             self.Database.store_coin_pairs(self.get_markets(self.trade_params["market"]))
             self.Messenger.print_resume_pause(len(self.Database.app_data["coinPairs"]))
+            print()
 
     def analyse_buys(self):
         """
@@ -50,6 +72,7 @@ class Trader(object):
         for coin_pair in self.Database.app_data["coinPairs"]:
             if coin_pair not in self.Database.app_data["openOrderPairs"]:
                 self.buy_strategy(coin_pair)
+        print()
 
     def buy_strategy(self, coin_pair):
         """
@@ -313,26 +336,6 @@ class Trader(object):
             order = order_data["result"][0]
 
         return order
-
-    def analyse_open_orders(self):
-        """
-        Used to analyse the profitability of currently open orders
-
-        """
-        orders = self.get_open_orders()
-        for order in orders:
-            order["CurrentPricePerUnit"] = self.get_current_price(order["Exchange"], "Bid")
-            order["PurchasePricePerUnit"] = self.get_most_recent_closed_order(order["Exchange"])["Limit"]
-            order["BreakEvenPricePerUnit"] = order["PurchasePricePerUnit"] / (1 - 2 * bittrex_trade_commission)
-            order["CurrentProfit"] = 100 * (
-                    order["CurrentPricePerUnit"] - order["BreakEvenPricePerUnit"]
-            ) / order["CurrentPricePerUnit"]
-            order["DesiredProfitPercentagePricePerUnit"] = order["BreakEvenPricePerUnit"] * (
-                    1 + self.trade_params["sell"]["desiredProfitPercentage"] / 100
-            )
-
-        self.Database.store_open_orders(orders)
-        self.Messenger.print_orders(orders, self.trade_params["sell"]["desiredProfitPercentage"])
 
     def calculate_rsi(self, coin_pair, period, unit):
         """

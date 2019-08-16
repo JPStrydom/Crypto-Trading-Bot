@@ -68,7 +68,6 @@ if __name__ == "__main__":
             Trader.analyse_pauses()
             Trader.analyse_buys()
             time.sleep(10)
-            print()
 
         except SSLError as exception:
             Messenger.print_error("SSL")
