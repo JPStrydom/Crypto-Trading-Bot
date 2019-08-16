@@ -24,9 +24,9 @@ except ImportError:
 from logger import logger
 from directory_utilities import write_json_to_file
 
-BUY_ORDERBOOK = "buy"
-SELL_ORDERBOOK = "sell"
-BOTH_ORDERBOOK = "both"
+BUY_ORDER_BOOK = "buy"
+SELL_ORDER_BOOK = "sell"
+BOTH_ORDER_BOOK = "both"
 
 BASE_URL = "https://bittrex.com/api/v1.1/{}/{}?"
 
@@ -61,10 +61,10 @@ def encrypt(api_key, api_secret, export=True, export_fn="../database/secrets.jso
     return api
 
 
-def using_requests(request_url, apisign):
+def using_requests(request_url, api_sign):
     return requests.get(
         request_url,
-        headers={"apisign": apisign}
+        headers={"api_sign": api_sign}
     ).json()
 
 
@@ -208,14 +208,14 @@ class Bittrex(object):
         """
         return self.api_query("getmarketsummary", {"market": market})
 
-    def get_orderbook(self, market, depth_type, depth=20):
+    def get_order_book(self, market, depth_type, depth=20):
         """
         Used to get retrieve the orderbook for a given market
 
         :param market: String literal for the market (ex: BTC-LTC)
         :type market: str
         :param depth_type: buy, sell or both to identify the type of orderbook to return.
-            Use constants BUY_ORDERBOOK, SELL_ORDERBOOK, BOTH_ORDERBOOK
+            Use constants BUY_ORDER_BOOK, SELL_ORDER_BOOK, BOTH_ORDER_BOOK
         :type depth_type: str
         :param depth: how deep of an order book to retrieve. Max is 100, default is 20
         :type depth: int

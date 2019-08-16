@@ -171,7 +171,7 @@ class Messenger(object):
         subject = self.email_str["buy"]["subject"].format(order["Exchange"])
         message = self.email_str["buy"]["message"].format(
             recipient_name, round(order["Quantity"], 4), coin, order["Exchange"], order["Price"], main_market,
-            ceil(stats["rsi"]), floor(stats["24HrVolume"]), main_market, self.get_bittrex_URL(order["Exchange"])
+            ceil(stats["rsi"]), floor(stats["24HrVolume"]), main_market, self.get_bittrex_url(order["Exchange"])
         )
         self.send_email(subject, message)
 
@@ -198,7 +198,7 @@ class Messenger(object):
         subject = self.email_str["sell"]["subject"].format(order["Exchange"])
         message = self.email_str["sell"]["message"].format(
             recipient_name, round(order["Quantity"], 4), coin, order["Exchange"], order["Price"], main_market,
-            floor(stats["rsi"]), type_str, abs(round(stats["profitMargin"], 2)), self.get_bittrex_URL(order["Exchange"])
+            floor(stats["rsi"]), type_str, abs(round(stats["profitMargin"], 2)), self.get_bittrex_url(order["Exchange"])
         )
         self.send_email(subject, message)
 
@@ -308,7 +308,7 @@ class Messenger(object):
         """
         main_market, coin = coin_pair.split("-")
         message = self.console_str["buy"]["message"].format(
-            coin_pair, ceil(rsi), floor(day_volume), main_market, current_buy_price, self.get_bittrex_URL(coin_pair)
+            coin_pair, ceil(rsi), floor(day_volume), main_market, current_buy_price, self.get_bittrex_url(coin_pair)
         )
         cprint(message, "blue", attrs=["bold"])
 
@@ -326,7 +326,7 @@ class Messenger(object):
         :type profit_margin: float
         """
         message = self.console_str["sell"]["message"].format(
-            coin_pair, floor(rsi), round(profit_margin, 2), current_sell_price, self.get_bittrex_URL(coin_pair)
+            coin_pair, floor(rsi), round(profit_margin, 2), current_sell_price, self.get_bittrex_url(coin_pair)
         )
         color = "green"
         if profit_margin <= 0:
@@ -375,7 +375,7 @@ class Messenger(object):
         """
         main_market, coin = coin_pair.split("-")
         print_str = "No " + self.console_str["buy"]["message"].format(
-            coin_pair, ceil(rsi), floor(day_volume), main_market, current_buy_price, self.get_bittrex_URL(coin_pair)
+            coin_pair, ceil(rsi), floor(day_volume), main_market, current_buy_price, self.get_bittrex_url(coin_pair)
         )
         cprint(print_str, "grey")
 
@@ -393,7 +393,7 @@ class Messenger(object):
         :type current_sell_price: float
         """
         print_str = "No " + self.console_str["sell"]["message"].format(
-            coin_pair, floor(rsi), round(profit_margin, 2), current_sell_price, self.get_bittrex_URL(coin_pair)
+            coin_pair, floor(rsi), round(profit_margin, 2), current_sell_price, self.get_bittrex_url(coin_pair)
         )
         if print_str != self.console_str["sell"]["previousMessage"]:
             color = "magenta"
@@ -442,7 +442,7 @@ class Messenger(object):
         elif error_type in ["sell", "buy"]:
             error_str = error_str.format(data[0], data[1])
         elif error_type == "order":
-            error_str = error_str.format(data[0], data[1], data[2], self.get_bittrex_URL(data[2]))
+            error_str = error_str.format(data[0], data[1], data[2], self.get_bittrex_url(data[2]))
 
         cprint("\n" + error_str + suffix, "red", attrs=["bold"])
         cprint(self.error_str["general"] + "\n", "grey", attrs=["bold"])
@@ -450,7 +450,7 @@ class Messenger(object):
 
         return error_str
 
-    def get_bittrex_URL(self, coin_pair):
+    def get_bittrex_url(self, coin_pair):
         """
         Generates the URL string for the coin pairs Bittrex page
         """

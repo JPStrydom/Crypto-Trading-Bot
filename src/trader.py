@@ -77,7 +77,7 @@ class Trader(object):
         if (len(self.Database.trades["trackedCoinPairs"]) >= self.trade_params["buy"]["maxOpenTrades"] or
                 coin_pair in self.Database.trades["trackedCoinPairs"]):
             return
-        rsi = self.calculate_RSI(coin_pair=coin_pair, period=14, unit=self.trade_params["tickerInterval"])
+        rsi = self.calculate_rsi(coin_pair=coin_pair, period=14, unit=self.trade_params["tickerInterval"])
         day_volume = self.get_current_24hr_volume(coin_pair)
         current_buy_price = self.get_current_price(coin_pair, "ask")
 
@@ -106,7 +106,7 @@ class Trader(object):
         if (coin_pair in self.Database.app_data["pausedTrackedCoinPairs"] or
                 coin_pair not in self.Database.trades["trackedCoinPairs"]):
             return
-        rsi = self.calculate_RSI(coin_pair=coin_pair, period=14, unit=self.trade_params["tickerInterval"])
+        rsi = self.calculate_rsi(coin_pair=coin_pair, period=14, unit=self.trade_params["tickerInterval"])
         current_sell_price = self.get_current_price(coin_pair, "bid")
         profit_margin = self.Database.get_profit_margin(coin_pair, current_sell_price)
 
@@ -340,7 +340,7 @@ class Trader(object):
 
         return order_data
 
-    def calculate_RSI(self, coin_pair, period, unit):
+    def calculate_rsi(self, coin_pair, period, unit):
         """
         Calculates the Relative Strength Index for a coin_pair
         If the returned value is above 75, it's overbought (SELL IT!)
