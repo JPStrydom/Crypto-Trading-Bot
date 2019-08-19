@@ -4,8 +4,10 @@
 
 ## Introduction
 
-Use Crypto Trading Bot to autonomously trade and monitor over 250 crypto currencies on Bittrex. Users can configure their
-own custom trading parameters which will control when the bot buys and sells.
+Use Crypto Trading Bot to autonomously trade and monitor over 250 crypto currencies on Bittrex. Users can configure their own 
+custom trading parameters which will control when the bot buys and sells. If you'd like to use only the trading indicators and 
+not the automated trading functionality, you can check out the 
+[`tracker`](https://github.com/JPStrydom/Crypto-Trading-Bot/tree/tracker) branch.
 
 #### Features:
 * Tracking for over 250 coins on Bittrex
