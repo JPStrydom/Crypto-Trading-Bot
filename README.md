@@ -14,8 +14,6 @@ which will control when the bot issues a buy signal.
 * Automated monitoring based on user configurations
 * Automated technical analysis (TA)
 * Trade analysis and tracking
-* Email alerts for trades and signals
-* Slack notifications for trades and signals
 * Informative console outputs for user monitoring
 * Logging to track and document errors on the Bittrex API
 * Well documented script
