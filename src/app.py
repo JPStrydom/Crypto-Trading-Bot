@@ -64,7 +64,7 @@ if __name__ == "__main__":
 
     while True:
         try:
-            Trader.analyse_open_orders()
+            Trader.analyse_open_sell_orders()
             Trader.analyse_pauses()
             Trader.analyse_buys()
             time.sleep(10)

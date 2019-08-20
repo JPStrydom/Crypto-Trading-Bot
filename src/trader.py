@@ -35,23 +35,24 @@ class Trader(object):
             logger.exception(exception)
             exit()
 
-    def analyse_open_orders(self):
+    def analyse_open_sell_orders(self):
         """
-        Used to analyse the profitability of currently open orders
+        Used to analyse the profitability of currently open sell orders
 
         """
         orders = self.get_open_orders()
         for order in orders:
-            order["CurrentPricePerUnit"] = self.get_current_price(order["Exchange"], "Bid")
-            order["PurchasePricePerUnit"] = self.get_most_recent_closed_order(order["Exchange"])["Limit"]
-            order["BreakEvenPricePerUnit"] = order["PurchasePricePerUnit"] / (1 - 2 * bittrex_trade_commission)
-            order["CurrentProfit"] = 100 * (
-                    order["CurrentPricePerUnit"] - order["BreakEvenPricePerUnit"]
-            ) / order["CurrentPricePerUnit"]
-            order["DesiredProfitPercentagePricePerUnit"] = order["BreakEvenPricePerUnit"] * (
-                    1 + self.trade_params["sell"]["desiredProfitPercentage"] / 100
-            )
-            self.Messenger.print_order(order, self.trade_params["sell"]["desiredProfitPercentage"])
+            if order["OrderType"] == "LIMIT_SELL":
+                order["CurrentPricePerUnit"] = self.get_current_price(order["Exchange"], "Bid")
+                order["PurchasePricePerUnit"] = self.get_most_recent_closed_order(order["Exchange"])["Limit"]
+                order["BreakEvenPricePerUnit"] = order["PurchasePricePerUnit"] / (1 - 2 * bittrex_trade_commission)
+                order["CurrentProfit"] = 100 * (
+                        order["CurrentPricePerUnit"] - order["BreakEvenPricePerUnit"]
+                ) / order["CurrentPricePerUnit"]
+                order["DesiredProfitPercentagePricePerUnit"] = order["BreakEvenPricePerUnit"] * (
+                        1 + self.trade_params["sell"]["desiredProfitPercentage"] / 100
+                )
+                self.Messenger.print_order(order, self.trade_params["sell"]["desiredProfitPercentage"])
 
         self.Database.store_open_orders(orders)
         print()
@@ -302,7 +303,6 @@ class Trader(object):
                 lambda order: py_.omit(
                     order,
                     "Uuid",
-                    "OrderType",
                     "Quantity",
                     "CommissionPaid",
                     "Price",
@@ -332,7 +332,7 @@ class Trader(object):
 
         order_data = self.Bittrex.get_order_history(market)
         order = {}
-        if order_data["success"]:
+        if order_data["success"] and len(order_data["result"]) > 0:
             order = order_data["result"][0]
 
         return order
