@@ -40,19 +40,18 @@ class Trader(object):
         Used to analyse the profitability of currently open sell orders
 
         """
-        orders = self.get_open_orders()
+        orders = self.get_open_orders(order_type="LIMIT_SELL")
         for order in orders:
-            if order["OrderType"] == "LIMIT_SELL":
-                order["CurrentPricePerUnit"] = self.get_current_price(order["Exchange"], "Bid")
-                order["PurchasePricePerUnit"] = self.get_most_recent_closed_order(order["Exchange"])["Limit"]
-                order["BreakEvenPricePerUnit"] = order["PurchasePricePerUnit"] / (1 - 2 * bittrex_trade_commission)
-                order["CurrentProfit"] = 100 * (
-                        order["CurrentPricePerUnit"] - order["BreakEvenPricePerUnit"]
-                ) / order["CurrentPricePerUnit"]
-                order["DesiredProfitPercentagePricePerUnit"] = order["BreakEvenPricePerUnit"] * (
-                        1 + self.trade_params["sell"]["desiredProfitPercentage"] / 100
-                )
-                self.Messenger.print_order(order, self.trade_params["sell"]["desiredProfitPercentage"])
+            order["CurrentPricePerUnit"] = self.get_current_price(order["Exchange"], "Bid")
+            order["PurchasePricePerUnit"] = self.get_most_recent_closed_order(order["Exchange"], "LIMIT_BUY")["Limit"]
+            order["BreakEvenPricePerUnit"] = order["PurchasePricePerUnit"] / (1 - 2 * bittrex_trade_commission)
+            order["CurrentProfit"] = 100 * (
+                    order["CurrentPricePerUnit"] - order["BreakEvenPricePerUnit"]
+            ) / order["CurrentPricePerUnit"]
+            order["DesiredProfitPercentagePricePerUnit"] = order["BreakEvenPricePerUnit"] * (
+                    1 + self.trade_params["sell"]["desiredProfitPercentage"] / 100
+            )
+            self.Messenger.print_order(order, self.trade_params["sell"]["desiredProfitPercentage"])
 
         self.Database.store_open_orders(orders)
         print()
@@ -285,12 +284,14 @@ class Trader(object):
 
         return order_data
 
-    def get_open_orders(self, market=None):
+    def get_open_orders(self, market=None, order_type=None):
         """
         Used to get all open orders from Bittrex for a market. If no market is provided fetch all open orders
 
         :param market: String literal for the market (ie. BTC-LTC)
         :type market: str
+        :param order_type: String literal for the order type (one of: 'LIMIT_BUY', 'LIMIT_SELL')
+        :type order_type: str
 
         :return: Orders list
         :rtype: list
@@ -298,6 +299,11 @@ class Trader(object):
         order_data = self.Bittrex.get_open_orders(market)
         orders = []
         if order_data["success"]:
+            if order_type:
+                order_data["result"] = py_.filter_(
+                    order_data["result"],
+                    lambda order_data_item: order_data_item["OrderType"] == order_type
+                )
             orders = py_.map_(
                 order_data["result"],
                 lambda order: py_.omit(
@@ -318,13 +324,15 @@ class Trader(object):
 
         return orders
 
-    def get_most_recent_closed_order(self, market=None):
+    def get_most_recent_closed_order(self, market=None, order_type=None):
         """
         Used to get the most recent closed order from Bittrex for a market.
         If no market is provided fetch the most recent closed order.
 
         :param market: String literal for the market (ie. BTC-LTC)
         :type market: str
+        :param order_type: String literal for the order type (one of: 'LIMIT_BUY', 'LIMIT_SELL')
+        :type order_type: str
 
         :return: Order
         :rtype: dict
@@ -332,8 +340,15 @@ class Trader(object):
 
         order_data = self.Bittrex.get_order_history(market)
         order = {}
+        # TODO: Add logic to find most recent BUY
         if order_data["success"] and len(order_data["result"]) > 0:
-            order = order_data["result"][0]
+            if order_type:
+                order = py_.find(
+                    order_data["result"],
+                    lambda order_data_item: order_data_item["OrderType"] == order_type
+                )
+            else:
+                order = order_data["result"][0]
 
         return order
 
