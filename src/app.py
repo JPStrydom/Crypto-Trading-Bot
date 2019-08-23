@@ -41,6 +41,7 @@ def get_settings():
             "buy": {
                 "rsiThreshold": 0,
                 "24HourVolumeThreshold": 0,
+                "minimumUnitPrice": 0,
                 "pauseTime": 0
             }
         }

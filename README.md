@@ -81,6 +81,8 @@ following:
         "pauseParameters": {
             "buy": {
                 "rsiThreshold": 0,
+                "24HourVolumeThreshold": 0,
+                "minimumUnitPrice": 0,
                 "pauseTime": 0
             }
         }
@@ -113,6 +115,8 @@ following:
             tracked for `pauseTime` minutes
             * `24HourVolumeThreshold` is the upper 24 hour volume pause threshold. Coin pairs with a 24 hour volume lower 
             than this will not be tracked for `pauseTime` minutes
+            * `minimumUnitPrice` is the upper unit price pause threshold. Coin pairs with a unit price lower than this 
+            will not be tracked for `pauseTime` minutes
             * `pauseTime` is the amount of minutes to pause coin pair tracking by
 
 

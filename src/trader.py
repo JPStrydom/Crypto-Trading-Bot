@@ -88,6 +88,7 @@ class Trader(object):
         pause_rsi = self.pause_params["buy"]["rsiThreshold"]
         pause_day_volume = self.pause_params["buy"]["24HourVolumeThreshold"]
         pause_time = self.pause_params["buy"]["pauseTime"]
+        pause_unit_price = self.pause_params["buy"]["minimumUnitPrice"]
 
         if rsi is None:
             return
@@ -108,7 +109,9 @@ class Trader(object):
                 desired_profit_percentage,
                 desired_profit_price
             )
-        elif "buy" in self.pause_params and (rsi >= pause_rsi > 0 or day_volume <= pause_day_volume):
+        elif "buy" in self.pause_params and (
+                rsi >= pause_rsi > 0 or day_volume <= pause_day_volume or current_buy_price <= pause_unit_price
+        ):
             self.Messenger.print_pause(coin_pair, [rsi, day_volume], pause_time)
             self.Database.pause_buy(coin_pair)
         else:
