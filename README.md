@@ -2,6 +2,16 @@
 
 ![](https://static01.nyt.com/images/2015/03/08/sunday-review/08ROBOT/08ROBOT-master1050.gif)
 
+## Deprecation Notice
+
+Firstly, I'd like to thank everyone who's shown an interest in this repo. I'd also like to apologize for my lack of support over 
+the last few years - I received no money from this repo and only did it as a hobby in my free time, something I haven't had a lot 
+of in recent years. I've decided to officially stop supporting this repo, but I'll still gladly look at PR's if anyone would like 
+to make updates or enhancements. There is some good news however, I've been working with a few very talented and dedicated people 
+to transform this repo into an easy to use web and mobile application. If you'd like easy access to all the functionality of this 
+repo and MUCH more, head over to [QuidPro](https://quidpro.co/) and check us out. If you use referral code **isq6vK09** when signing 
+up, you'll get a lot of free benefits, and you'll be supporting me directly. Happy trading everyone!
+
 ## Introduction
 
 Use Crypto Trading Bot to autonomously trade and monitor over 250 crypto currencies on Bittrex. Users can configure their own 
@@ -23,15 +33,12 @@ not the automated trading functionality, you can check out the
 Users can add their own algorithms and trading strategies based on technical analysis signals such as RSI, 24 Hour Volume,
 and Unit Price.
 
-#### Coming Soon:
-* Bollinger Bands
-* Moving Average
-
 #### Shoutouts:
 * Bittrex for an awesome API
 * Eric Somdahl for writing the Python wrapper for the Bittrex API
 * Abenezer Mamo for creating the [Crypto Signals](https://github.com/AbenezerMamo/crypto-signal) project which formed the
 foundation for this project
+* [QuidPro](https://quidpro.co/) for their awesome automated crypto trading tool
 
 ## How to setup
 1) This project requires Python 3.X.X, which can be be found [here](https://www.python.org/ftp/python/3.6.3/python-3.6.3.exe).
