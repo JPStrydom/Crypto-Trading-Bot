@@ -6,11 +6,13 @@
 
 Firstly, I'd like to thank everyone who's shown an interest in this repo. I'd also like to apologize for my lack of support over 
 the last few years - I received no money from this repo and only did it as a hobby in my free time, something I haven't had a lot 
-of in recent years. I've decided to officially stop supporting this repo, but I'll still gladly look at PR's if anyone would like 
-to make updates or enhancements. There is some good news however, I've been working with a few very talented and dedicated people 
-to transform this repo into an easy to use web and mobile application. If you'd like easy access to all the functionality of this 
-repo and MUCH more, head over to [QuidPro](https://quidpro.co/) and check us out. If you use referral code **isq6vK09** when signing 
-up, you'll get a lot of free benefits, and you'll be supporting me directly. Happy trading everyone!
+of in recent years. 
+
+I've decided to officially stop supporting this repo, but I'll still gladly look at PR's if anyone would like to make updates or 
+enhancements. There is some good news however, I've been working with a few very talented and dedicated people to transform this 
+repo into an easy to use web and mobile application. If you'd like easy access to all the functionality of this repo and MUCH more, 
+head over to [QuidPro](https://quidpro.co/) and check us out. If you use referral code **isq6vK09** when signing up, you'll get a 
+lot of free benefits, and you'll be supporting me directly. Happy trading everyone!
 
 ## Introduction
 
