@@ -9,7 +9,7 @@ idna==2.8
 ipaddress==1.0.22
 pycparser==2.19
 pydash==4.7.5
-PyJWT==1.7.1
+PyJWT==2.4.0
 pyOpenSSL==19.0.0
 pytz==2019.2
 requests==2.22.0
